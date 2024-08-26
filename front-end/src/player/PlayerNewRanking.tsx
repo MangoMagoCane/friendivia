@@ -6,44 +6,38 @@ import PlayerOver from "./PlayerOver";
 
 interface RankingProps {
   playerScores: Array<any>;
-  currentPlayerName: any;
+  playerName: any;
 }
 
-export default function PlayerNewRanking(props: RankingProps) {
-  const playerScores = props.playerScores;
+export default function PlayerNewRanking({ playerScores, playerName }: RankingProps) {
   playerScores.sort((p1, p2) => p2.score - p1.score);
-  const playerName = props.currentPlayerName;
-  var playerToBeat;
-  var pointDifference;
 
-  function getPlayerRankDisplay() {
-    var message = "";
-    for (var i = 0; i < playerScores.length; i++) {
-      if (playerScores[i].name === playerName && i != 0) {
-        playerToBeat = playerScores[i - 1].name;
-        pointDifference = playerScores[i - 1].score - playerScores[i].score;
-        if (pointDifference === 0) {
-          message = "You are tied with " + playerToBeat;
-        } else {
+  const getPlayerRankDisplay = () => {
+    let message = "";
+    if (playerScores[0].name === playerName) {
+      const pointDifference = playerScores[0].score - playerScores[1].score;
+      message = pointDifference === 0 ? `You are tied with ${playerScores[1].name}!` : "You are in first place!";
+    } else {
+      for (let i = 1; i < playerScores.length; i++) {
+        if (playerScores[i].name === playerName) {
+          const playerToBeat = playerScores[i - 1].name;
+          const pointDifference = playerScores[i - 1].score - playerScores[i].score;
           message =
-            "You are " + pointDifference + " points behind " + playerToBeat;
-        }
-      } else if (playerScores[i].name === playerName && i === 0) {
-        pointDifference = playerScores[i].score - playerScores[i + 1].score;
-        if (pointDifference === 0) {
-          message = "You are tied with " + playerScores[i + 1].name + "!";
-        } else {
-          message = "You are in first place!";
+            pointDifference === 0
+              ? `You are tied with ${playerToBeat}`
+              : `You are ${pointDifference} points behind ${playerToBeat}`;
+          break;
         }
       }
     }
+
     return (
       <div
         style={{
           display: "flex",
           justifyContent: "center",
           height: "90vh",
-          verticalAlign: "center",
+          verticalAlign: "center"
         }}
       >
         <p
@@ -57,18 +51,14 @@ export default function PlayerNewRanking(props: RankingProps) {
             marginLeft: "1em",
             marginRight: "1em",
             border: "2px solid black",
-            color: "white",
+            color: "white"
           }}
         >
           {message}
         </p>
       </div>
     );
-  }
+  };
 
-  return (
-    <>
-      <div>{playerScores.length > 1 ? getPlayerRankDisplay() : "What are you doing here?"}</div>
-    </>
-  );
+  return <div>{playerScores.length > 1 ? getPlayerRankDisplay() : "What are you doing here?"}</div>;
 }

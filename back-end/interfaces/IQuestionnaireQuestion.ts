@@ -11,9 +11,9 @@ export type PlayerQuestionnaireQuestion = {
   questionId: Schema.Types.ObjectId;
   subjectQuestion: boolean;
   answer: string;
-}
+};
 
 export type PlayerQuestionnaire = {
   playerId: string;
   questions: PlayerQuestionnaireQuestion[];
-}
+};

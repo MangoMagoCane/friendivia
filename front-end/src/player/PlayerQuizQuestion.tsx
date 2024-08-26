@@ -1,50 +1,43 @@
-import * as React from 'react';
-import '../style.css';
-import { Button } from '@mui/material';
-import { Socket } from 'socket.io-client';
-import PlayerQuizQuestionView from './PlayerQuizQuestionView';
-import IQuizOption from 'back-end/interfaces/IQuizOption';
+import * as React from "react";
+import "../style.css";
+import { Button } from "@mui/material";
+import { Socket } from "socket.io-client";
+import PlayerQuizQuestionView from "./PlayerQuizQuestionView";
+import IQuizOption from "back-end/interfaces/IQuizOption";
 
-interface IQuizQuestionProps {
-  optionsList: IQuizOption[],
-  socket: Socket,
-  playerState: string
+interface PlayerQuizQuestionProps {
+  optionsList: IQuizOption[];
+  socket: Socket;
+  playerState: string;
 }
 
-export default function PlayerQuizQuestion(props: IQuizQuestionProps) {
-  const { optionsList, socket, playerState } = props;
+export default function PlayerQuizQuestion({ optionsList, socket, playerState }: PlayerQuizQuestionProps) {
   const [quizQuestionPlayerState, setQuizQuestionPlayerState] = React.useState({
     state: playerState,
-    message: ''
+    message: ""
   });
 
   React.useEffect(() => {
     setQuizQuestionPlayerState({
-      state: playerState, 
-      message: ''
-    })
+      state: playerState,
+      message: ""
+    });
   }, [playerState]);
 
   React.useEffect(() => {
     function onAnswerQuestionSuccess() {
       setQuizQuestionPlayerState({
-        state: 'answered-quiz-question-waiting',
-        message: ''
+        state: "answered-quiz-question-waiting",
+        message: ""
       });
     }
-  
-    socket.on('player-answer-question-success', onAnswerQuestionSuccess);
+
+    socket.on("player-answer-question-success", onAnswerQuestionSuccess);
 
     return () => {
-      socket.off('player-answer-question-success', onAnswerQuestionSuccess);
-    }
+      socket.off("player-answer-question-success", onAnswerQuestionSuccess);
+    };
   }, []);
 
-  return (
-    <PlayerQuizQuestionView
-      optionsList={optionsList}
-      socket={socket}
-      playerState={quizQuestionPlayerState}
-    />
-  );
+  return <PlayerQuizQuestionView optionsList={optionsList} socket={socket} playerState={quizQuestionPlayerState} />;
 }

@@ -5,33 +5,30 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import { Socket } from "socket.io-client";
 import PlayerWait from "./PlayerJoinWait";
+import { IPlayerState, PlayerStates } from "back-end/interfaces/IPlayerState";
 
-interface IJoinFormProps {
+interface PlayerJoinFormProps {
   socket: Socket;
-  playerState: any;
+  playerState: IPlayerState;
 }
 
-export default function PlayerJoinForm(props: IJoinFormProps) {
+export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormProps) {
   const [name, setName] = React.useState("");
   const [gameId, setGameId] = React.useState<number>(0);
   const inMessage = `You're in! Please wait for the game to begin.`;
 
-  const { socket, playerState } = props;
-
-  function onSubmitJoin() {
-    var nameCheck = name.trim();
-    if (nameCheck === "") {
+  const onSubmitJoin = () => {
+    if (name.trim() === "") {
       alert("Please enter a name.");
       return;
     }
-
     socket.emit("player-submit-join", { name, gameId });
-  }
+  };
 
   const joinInputs = (
     <>
-      <br />
-      <br />
+      <br></br>
+      <br></br>
       <Stack
         className="joinForm"
         spacing={2}
@@ -45,7 +42,7 @@ export default function PlayerJoinForm(props: IJoinFormProps) {
           alignItems: "stretch",
           minHeight: "250px",
           boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-          position: "relative",
+          position: "relative"
         }}
       >
         <div style={{ marginBottom: "0px" }}>
@@ -62,12 +59,11 @@ export default function PlayerJoinForm(props: IJoinFormProps) {
               width: "100%",
               fontWeight: "bold",
               fontSize: "18px",
-              fontFamily: "Inter",
-              marginBottom: "0px",
+              fontFamily: "Inter"
             }}
           />
         </div>
-        <div style={{ marginBottom: "0px" }}>
+        <div>
           <TextField
             className="idInput form"
             id="game-id"
@@ -75,14 +71,13 @@ export default function PlayerJoinForm(props: IJoinFormProps) {
             size="medium"
             type="number"
             placeholder="Game ID"
-            value={gameId || ""}
+            value={gameId}
             onChange={(e) => setGameId(Number(e.target.value))}
             sx={{
               width: "100%",
               fontWeight: "bold",
               fontSize: "18px",
-              fontFamily: "Inter",
-              marginBottom: "0px",
+              fontFamily: "Inter"
             }}
           />
         </div>
@@ -111,7 +106,7 @@ export default function PlayerJoinForm(props: IJoinFormProps) {
             bottom: "-0.7vh",
             zIndex: -1,
             background: "var(--main-gradient-rev)",
-            borderRadius: "25px",
+            borderRadius: "25px"
           }}
         ></div>
       </Stack>
@@ -119,5 +114,5 @@ export default function PlayerJoinForm(props: IJoinFormProps) {
     </>
   );
 
-  return playerState.state === "joined-waiting" ? <PlayerWait /> : joinInputs;
+  return playerState.state === "joined-waiting" ? <PlayerWait></PlayerWait> : joinInputs;
 }

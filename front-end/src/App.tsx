@@ -4,7 +4,6 @@ import { socket } from "./socket";
 import PlayerApp from "./player/PlayerApp";
 import HostApp from "./host/HostApp";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Button from "@mui/material/Button";
 import AboutPage from "./AboutPage";
 import LoadingPage from "./LoadingPage";
 
@@ -33,7 +32,7 @@ export default function App() {
   const loadingElement = <LoadingPage msg={serverConnection} />;
   const isLoading = serverConnection !== "Connected!";
 
-  let page = (
+  return (
     <>
       <div className="fillScreen">
         <BrowserRouter>
@@ -46,6 +45,4 @@ export default function App() {
       </div>
     </>
   );
-
-  return page;
 }

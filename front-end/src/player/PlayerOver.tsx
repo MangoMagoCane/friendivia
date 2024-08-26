@@ -6,39 +6,37 @@ import rankone from "../assets/rankone.png";
 import ranktwo from "../assets/ranktwo.png";
 import rankthree from "../assets/rankthree.png";
 
-interface IOverProps {
+interface PlayerOverProps {
   rank: number;
 }
 
-export default function PlayerOver(props: IOverProps) {
+export default function PlayerOver({ rank }: PlayerOverProps) {
+  let isCorrectClass = true;
+  let imgSrc: string = "";
+  let innerText: string;
+  switch (rank) {
+    case 1:
+      imgSrc = rankone;
+      innerText = "You won!";
+      break;
+    case 2:
+      imgSrc = ranktwo;
+      innerText = "Second!";
+      break;
+    case 3:
+      imgSrc = rankthree;
+      innerText = "Third!";
+      break;
+    default:
+      innerText = "You lost!";
+      isCorrectClass = false;
+      break;
+  }
+
   return (
-    <>
-      <div
-        className={
-          props.rank === 1 || props.rank === 2 || props.rank === 3
-            ? "correct"
-            : "incorrect"
-        }
-      >
-        {props.rank === 1 ? (
-          <img className="correctImg" src={rankone} />
-        ) : props.rank === 2 ? (
-          <img className="correctImg" src={ranktwo} />
-        ) : props.rank === 3 ? (
-          <img className="correctImg" src={rankthree} />
-        ) : (
-          <img className="correctImg" src={incorrect} />
-        )}
-        {props.rank === 1 ? (
-          <p className="correctTxt">You won!</p>
-        ) : props.rank === 2 ? (
-          <p className="correctTxt">Second!</p>
-        ) : props.rank === 3 ? (
-          <p className="correctTxt">Third!</p>
-        ) : (
-          <p className="correctTxt">You lost!</p>
-        )}
-      </div>
-    </>
+    <div className={isCorrectClass ? "correct" : "incorrect"}>
+      <img className="correctImg" src={imgSrc} />
+      <p className="correctTxt">{innerText}</p>
+    </div>
   );
 }

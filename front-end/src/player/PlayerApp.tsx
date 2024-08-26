@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import PlayerJoin from "./PlayerJoin";
 import { Socket } from "socket.io-client";
 import PlayerQuestionnaire from "./PlayerQuestionnaire";
@@ -15,38 +15,32 @@ import { Button } from "../extra/FrdvButton";
 import PlayerNewRanking from "./PlayerNewRanking";
 import PlayerKicked from "./PlayerKicked";
 import IQuizOption from "back-end/interfaces/IQuizOption";
+import { PlayerStates } from "back-end/interfaces/IPlayerState";
 
 interface PlayerAppProps {
   socket: Socket;
 }
 
-export default function PlayerApp(props: PlayerAppProps) {
+export default function PlayerApp({ socket }: PlayerAppProps) {
   const playerIdFromStorage = localStorage.getItem("player-id") || "";
-  const [playerState, setPlayerState] = React.useState("");
+  const [playerState, setPlayerState] = React.useState<PlayerStates | "">("");
   const [playerName, setPlayerName] = React.useState("");
   const [playerScore, setPlayerScore] = React.useState(0);
   const [scoreDiff, setScoreDiff] = React.useState(0);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [allPlayerScores, setAllPlayerScores] = React.useState([]);
-  const [
-    questionnaireQuestionsText,
-    setQuestionnaireQuestionsText,
-  ] = React.useState<string[]>([]);
-  const [quizQuestionOptionsText, setQuizQuestionOptionsText] = React.useState<
-    IQuizOption[]
-  >([]);
+  const [questionnaireQuestionsText, setQuestionnaireQuestionsText] = React.useState<string[]>([]);
+  const [quizQuestionOptionsText, setQuizQuestionOptionsText] = React.useState<IQuizOption[]>([]);
   const [loaded, setLoaded] = React.useState<boolean>(false);
 
-  const { socket } = props;
-
-  var bottomButtons;
+  let bottomButtons: boolean;
 
   if (!loaded) {
     socket.emit("player-load", playerIdFromStorage);
   }
 
   React.useEffect(() => {
-    function onLoadSuccess(data: any) {
+    const onLoadSuccess = (data: any) => {
       setLoaded(true);
       setPlayerState(data.player.playerState.state);
       setPlayerName(data.player.name);
@@ -54,27 +48,25 @@ export default function PlayerApp(props: PlayerAppProps) {
       setScoreDiff(data.player.score - playerScore);
       setPlayerScore(data.player.score);
 
-      if (data && data.extraData && data.extraData.playerScores) {
+      if (data?.extraData?.playerScores) {
         setAllPlayerScores(data.extraData.playerScores);
       }
 
-      if (data && data.extraData && data.extraData.questionnaireQuestionsText) {
-        setQuestionnaireQuestionsText(
-          data.extraData.questionnaireQuestionsText
-        );
+      if (data?.extraData?.questionnaireQuestionsText) {
+        setQuestionnaireQuestionsText(data.extraData.questionnaireQuestionsText);
       }
 
-      if (data && data.extraData && data.extraData.quizQuestionOptionsText) {
+      if (data?.extraData?.quizQuestionOptionsText) {
         setQuizQuestionOptionsText(data.extraData.quizQuestionOptionsText);
       }
-    }
+    };
 
-    function onPlayerGameEnded() {
+    const onPlayerGameEnded = () => {
       localStorage.setItem("player-id", "");
       window.location.reload();
-    }
+    };
 
-    socket.on("player-game-ended", onPlayerGameEnded)
+    socket.on("player-game-ended", onPlayerGameEnded);
     socket.on("player-load-success", onLoadSuccess);
     socket.on("player-next", onLoadSuccess);
 
@@ -84,170 +76,130 @@ export default function PlayerApp(props: PlayerAppProps) {
     };
   }, [playerState, setPlayerState]);
 
-  function getElementForState() {
-    if (
-      playerState === "filling-questionnaire" ||
-      playerState === "submitted-questionnaire-waiting"
-    ) {
-      bottomButtons = false;
-      return (
-        <PlayerQuestionnaire
-          socket={socket}
-          playerState={playerState}
-          questionnaireQuestionsText={questionnaireQuestionsText}
-        />
-      );
-    } else if (
-      playerState === "seeing-question" ||
-      playerState === "answered-quiz-question-waiting" ||
-      playerState === "question-being-read"
-    ) {
-      bottomButtons = false;
-      return (
-        <PlayerQuizQuestion
-          socket={socket}
-          optionsList={quizQuestionOptionsText}
-          playerState={playerState}
-        />
-      );
-    } else if (playerState === "did-not-answer-question-waiting") {
-      bottomButtons = false;
-      return <PlayerRanOutOfTime />;
-    } else if (playerState === "question-about-me") {
-      bottomButtons = false;
-      return <PlayerIsSubject />;
-    } else if (playerState === "seeing-answer-correct") {
-      bottomButtons = false;
-      return <PlayerCorrect pts={scoreDiff} />;
-    } else if (playerState === "seeing-answer-incorrect") {
-      bottomButtons = false;
-      return <PlayerIncorrect consolationPts={scoreDiff} />;
-    } else if (playerState === "seeing-answer") {
-      bottomButtons = false;
-      return <PlayerIsSubject />;
-    } else if (playerState === "seeing-rank") {
-      bottomButtons = false;
-      return (
-        <PlayerNewRanking
-          playerScores={allPlayerScores}
-          currentPlayerName={playerName}
-        />
-      );
-    } else if (playerState === "pre-leader-board") {
-      bottomButtons = false;
-      return <PlayerWait message={`Calculating final scores...`} />;
-    } else if (playerState === "leader-board") {
-      bottomButtons = false;
-      return <PlayerOver rank={0} />;
-    } else if (playerState === "rank-one") {
-      bottomButtons = false;
-      return <PlayerOver rank={1} />;
-    } else if (playerState === "rank-two") {
-      bottomButtons = false;
-      return <PlayerOver rank={2} />;
-    } else if (playerState === "rank-three") {
-      bottomButtons = false;
-      return <PlayerOver rank={3} />;
-    } else if (playerState === "" || playerState === "init") {
-      bottomButtons = true;
-      return <PlayerJoin socket={socket} playerState={playerState} />;
-    } else if (playerState === "kicked") {
-      bottomButtons = true;
-      return <PlayerKicked socket={socket} />;
-    } else {
-      bottomButtons = false;
-      return <PlayerJoin socket={socket} playerState={playerState} />;
+  const getElementForState = () => {
+    bottomButtons = false;
+    switch (playerState) {
+      case "filling-questionnaire":
+      case "submitted-questionnaire-waiting":
+        return (
+          <PlayerQuestionnaire
+            socket={socket}
+            playerState={playerState}
+            questionnaireQuestionsText={questionnaireQuestionsText}
+          />
+        );
+      case "seeing-question":
+      case "answered-quiz-question-waiting":
+      case "question-being-read":
+        return <PlayerQuizQuestion socket={socket} optionsList={quizQuestionOptionsText} playerState={playerState} />;
+      case "did-not-answer-question-waiting":
+        return <PlayerRanOutOfTime />;
+      case "question-about-me":
+      case "seeing-answer":
+        return <PlayerIsSubject />;
+      case "seeing-answer-correct":
+        return <PlayerCorrect pts={scoreDiff} />;
+      case "seeing-answer-incorrect":
+        return <PlayerIncorrect consolationPts={scoreDiff} />;
+      case "seeing-rank":
+        return <PlayerNewRanking playerScores={allPlayerScores} playerName={playerName} />;
+      case "pre-leader-board":
+        return <PlayerWait message={`Calculating final scores...`} />;
+      case "leader-board":
+        return <PlayerOver rank={0} />;
+      case "rank-one":
+        return <PlayerOver rank={1} />;
+      case "rank-two":
+        return <PlayerOver rank={2} />;
+      case "rank-three":
+        return <PlayerOver rank={3} />;
+      case "":
+      case "init":
+        bottomButtons = true;
+        return <PlayerJoin socket={socket} playerState={playerState} />;
+      case "kicked":
+        bottomButtons = true;
+        return <PlayerKicked socket={socket} />;
+      default:
+        return <PlayerJoin socket={socket} playerState={playerState} />;
     }
-  }
+  };
 
-  function getButtonsForState() {
-    if (
-      playerState === "init" ||
-      playerState === null ||
-      playerState === "" ||
-      playerState === "kicked"
-    ) {
-      return (
-        <div className="bottomContainer" id="btmContainPlayerApp">
-          <p>
-            <Button
-              className="button"
-              id="HostPlayerApp"
-              variant="contained"
-              sx={{
-                m: 2,
-                position: "absolute",
-                bottom: "10px",
-                left: "10px",
-              }}
-              href="/host"
-            >
-              host
-            </Button>
-            <Button
-              className="button"
-              id="AboutPlayerApp"
-              variant="contained"
-              sx={{
-                m: 2,
-                position: "absolute",
-                bottom: "10px",
-                right: "10px",
-              }}
-              href="/about"
-            >
-              about
-            </Button>
-          </p>
-        </div>
+  const getButtonsForState = () => {
+    let node: ReactNode = undefined;
+    if (["init", "kicked", "", null].includes(playerState)) {
+      node = (
+        <p>
+          <Button
+            className="button"
+            id="HostPlayerApp"
+            variant="contained"
+            sx={{
+              m: 2,
+              position: "absolute",
+              bottom: "10px",
+              left: "10px"
+            }}
+            href="/host"
+          >
+            host
+          </Button>
+          <Button
+            className="button"
+            id="AboutPlayerApp"
+            variant="contained"
+            sx={{
+              m: 2,
+              position: "absolute",
+              bottom: "10px",
+              right: "10px"
+            }}
+            href="/about"
+          >
+            about
+          </Button>
+        </p>
       );
-    } else {
-      return <div className="bottomContainer" id="btmContainPlayerApp"></div>;
     }
-  }
+    return (
+      <div className="bottomContainer" id="btmContainPlayerApp">
+        {node}
+      </div>
+    );
+  };
 
-  function getScreenForState() {
-    if (
-      playerState === "init" ||
-      playerState === null ||
-      playerState === "" ||
-      playerState === "kicked"
-    ) {
-      return "element";
-    } else {
-      return "noBtnElement";
-    }
-  }
+  const getScreenForState = (): string => {
+    return ["init", "kicked", "", null].includes(playerState) ? "element" : "noBtnElement";
+  };
 
-  function playerQuit() {
+  const getID = (): string => {
+    return [
+      "question-about-me",
+      "answered-quiz-question-waiting",
+      "did-not-answer-question-waiting",
+      "seeing-answer",
+      "seeing-answer-correct",
+      "seeing-answer-incorrect"
+    ].includes(playerState)
+      ? "fixScreen"
+      : "";
+  };
+
+  const playerQuit = () => {
     if (confirm("Are you sure you want to quit?")) {
       localStorage.setItem("player-id", "");
       socket.emit("player-quit");
     }
-  }
+  };
 
   return (
-    <div
-      className={
-        playerState != "filling-questionnaire" ? "fillScreen" : "scroll"
-      }
-      id={
-        playerState === "question-about-me" ||
-        "answered-quiz-question-waiting" ||
-        "did-not-answer-question-waiting" ||
-        "seeing-answer" ||
-        "seeing-answer-correct" ||
-        "seeing-answer-incorrect"
-          ? "fixScreen"
-          : ""
-      }
-    >
+    <div className={playerState !== "filling-questionnaire" ? "fillScreen" : "scroll"} id={getID()}>
       <div className="player_join">
         <div
           className="banner"
           style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "center"
           }}
         >
           <Menu
@@ -256,7 +208,7 @@ export default function PlayerApp(props: PlayerAppProps) {
             anchorEl={document.querySelector("#player-chip")}
             onClose={() => setMenuOpen(false)}
             MenuListProps={{
-              'aria-labelledby': 'player-chip'
+              "aria-labelledby": "player-chip"
             }}
           >
             <MenuItem onClick={playerQuit}>Quit</MenuItem>
@@ -264,28 +216,25 @@ export default function PlayerApp(props: PlayerAppProps) {
 
           <Grid container spacing={0}>
             <Grid item xs={3}>
-              {playerState != "init" && playerState != "kicked" ? (
+              {/* {playerState != "init" && playerState != "kicked" ? ( */}
+              {!["init", "kicked"].includes(playerState) && (
                 <div className="align_center">
                   {/*if player name has not been inputted do not display username chip*/}
-                  {playerName != "" ? (
+                  {playerName !== "" && (
                     <Chip
                       style={{
                         backgroundColor: "white",
-                        marginTop: "1.8em",
+                        marginTop: "1.8em"
                       }}
                       onClick={() => setMenuOpen(!menuOpen)}
                       label={playerName}
                       id="player-chip"
-                      aria-controls={menuOpen ? 'player-menu' : undefined}
+                      aria-controls={menuOpen ? "player-menu" : undefined}
                       aria-haspopup="true"
-                      aria-expanded={menuOpen ? 'true' : undefined}
+                      aria-expanded={menuOpen ? "true" : undefined}
                     />
-                  ) : (
-                    ""
                   )}
                 </div>
-              ) : (
-                ""
               )}
             </Grid>
             <Grid item xs={6}>
@@ -293,27 +242,18 @@ export default function PlayerApp(props: PlayerAppProps) {
             </Grid>
             <Grid item xs={3}>
               {/*if player name has not been inputted do not display score chip*/}
-              {playerState != "init" ? (
+              {playerState !== "init" && (
                 <div className="align_center">
-                  {playerState != "filling-questionnaire" &&
-                  playerState != "kicked" ? (
-                    playerName != "" ? (
-                      <Chip
-                        style={{
-                          backgroundColor: "white",
-                          marginTop: "1.8em",
-                        }}
-                        label={playerScore}
-                      />
-                    ) : (
-                      ""
-                    )
-                  ) : (
-                    ""
+                  {!["filling-questionnaire", "kicked", ""].includes(playerState) && (
+                    <Chip
+                      style={{
+                        backgroundColor: "white",
+                        marginTop: "1.8em"
+                      }}
+                      label={playerScore}
+                    />
                   )}
                 </div>
-              ) : (
-                ""
               )}
             </Grid>
           </Grid>

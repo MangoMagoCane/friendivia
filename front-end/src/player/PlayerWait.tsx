@@ -6,12 +6,12 @@ interface IWaitProps {
   message: String;
 }
 
-export default function PlayerWait(props: IWaitProps) {
+export default function PlayerWait({ message }: IWaitProps) {
   return (
     <div className="wait">
       <img className="hourglass" src={hourglass} alt="Correct" />
       <p className="waitTxt" style={{ fontFamily: "Concert One" }}>
-        {props.message}
+        {message}
       </p>
     </div>
   );
