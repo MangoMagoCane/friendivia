@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import { Socket } from "socket.io-client";
 import PlayerWait from "./PlayerJoinWait";
-import { IPlayerState, PlayerStates } from "back-end/interfaces/IPlayerState";
+import { IPlayerState } from "back-end/interfaces/IPlayerState";
 
 interface PlayerJoinFormProps {
   socket: Socket;
@@ -71,7 +71,7 @@ export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormPr
             size="medium"
             type="number"
             placeholder="Game ID"
-            value={gameId}
+            value={gameId || ""}
             onChange={(e) => setGameId(Number(e.target.value))}
             sx={{
               width: "100%",

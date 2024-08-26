@@ -30,11 +30,11 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
     socket,
     gameId,
     quizLength,
-    handsFreeMode,
+    handsFreeMode
   } = props;
 
   const totalGuesses = playerGuesses.length - 1;
-  const correctPlayers = playerGuesses.filter(g => g && g.guess === correctAnswerIndex);
+  const correctPlayers = playerGuesses.filter((g) => g && g.guess === correctAnswerIndex);
   const numCorrect = correctPlayers.length;
   const pctCorrect = Math.floor(100 * (numCorrect / totalGuesses));
   const subjectBonus = Math.floor(300 * (numCorrect / totalGuesses));
@@ -57,12 +57,7 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
   function correctText() {
     var res = `The correct answer was "${options[correctAnswerIndex].answerText}".`;
     if (correctPlayers.length != 0) {
-      const encourage = pickOne([
-        "Nice guessing",
-        "Good job",
-        "Way to go",
-        "Congrats",
-      ]);
+      const encourage = pickOne(["Nice guessing", "Good job", "Way to go", "Congrats"]);
       res += `! ${encourage} `;
     } else {
       const sad = pickOne([
@@ -76,10 +71,7 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
 
     if (correctPlayers.length < 4) {
       correctPlayers.forEach((e) => {
-        if (
-          e.name === correctPlayers[correctPlayers.length - 1].name &&
-          e.name !== correctPlayers[0].name
-        ) {
+        if (e.name === correctPlayers[correctPlayers.length - 1].name && e.name !== correctPlayers[0].name) {
           res += "and " + e.name + ".";
         } else {
           res += e.name + ", ";
@@ -94,7 +86,7 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
 
   return (
     <>
-      <Speak text={correctText()} cloud={true} />
+      <Speak text={correctText()} />
       <div className="hostAnswerScroll">
         {interpolatePlayerNameInQuestionText()}
 
@@ -111,11 +103,16 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
             maxWidth: "600px"
           }}
         >
-          {numCorrect > 0 ?
-            <p style={{margin: 0, fontFamily: `"Concert One", sans-serif`}}>{pctCorrect}% correct = <span style={{fontWeight: "bold", color: "var(--main)"}}>{subjectBonus} points</span> for {playerName}!</p> :
-            <p style={{margin: 0, fontFamily: `"Concert One", sans-serif`}}>0% correct ☹ = consolation points based on speed</p>
-          }
-
+          {numCorrect > 0 ? (
+            <p style={{ margin: 0, fontFamily: `"Concert One", sans-serif` }}>
+              {pctCorrect}% correct ={" "}
+              <span style={{ fontWeight: "bold", color: "var(--main)" }}>{subjectBonus} points</span> for {playerName}!
+            </p>
+          ) : (
+            <p style={{ margin: 0, fontFamily: `"Concert One", sans-serif` }}>
+              0% correct ☹ = consolation points based on speed
+            </p>
+          )}
         </Paper>
         <div
           style={{
@@ -126,7 +123,7 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
             alignContent: "center",
             justifyContent: "center",
             justifyItems: "center",
-            alignItems: "center",
+            alignItems: "center"
           }}
         >
           {options.map((op: IQuizOption, i: number) => (
@@ -136,7 +133,7 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
                 width: "100%",
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                alignItems: "center"
               }}
             >
               <Paper
@@ -149,12 +146,9 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
                   alignItems: "center",
                   flexDirection: "column",
                   justifyContent: "center",
-                  background:
-                    i === correctAnswerIndex
-                      ? "var(--main-gradient-rev)"
-                      : "white",
+                  background: i === correctAnswerIndex ? "var(--main-gradient-rev)" : "white",
                   border: "2px solid purple",
-                  borderRadius: "20px",
+                  borderRadius: "20px"
                 }}
                 key={i}
               >
@@ -165,12 +159,16 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
                     fontSize: "2em",
                     paddingLeft: "0.5em",
                     paddingRight: "0.5em",
-                    textAlign: "center",
+                    textAlign: "center"
                   }}
                 >
                   {op.answerText}
                 </p>
-                {i !== correctAnswerIndex && <p>(from <b>{op.answerer}</b>)</p>}
+                {i !== correctAnswerIndex && (
+                  <p>
+                    (from <b>{op.answerer}</b>)
+                  </p>
+                )}
               </Paper>
               <Stack
                 sx={{
@@ -178,7 +176,7 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
                   flexDirection: "row",
                   flexWrap: "wrap",
                   justifyContent: "center",
-                  marginTop: "5px",
+                  marginTop: "5px"
                 }}
               >
                 {playerGuesses
@@ -201,7 +199,7 @@ export default function HostShowAnswer(props: IShowAnswerProps) {
               sx={{
                 m: 2,
                 margin: "auto",
-                marginTop: "2rem",
+                marginTop: "2rem"
               }}
               onClick={onNext}
             >

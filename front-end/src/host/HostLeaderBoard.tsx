@@ -17,41 +17,37 @@ export default function HostLeaderBoard(props: ILeaderBoardProps) {
 
   const [numPlayersToShow, setNumPlayersToShow] = React.useState<number>(5);
 
-  function onPlayAgain() {
+  const onPlayAgain = () => {
     socket.emit("play-again");
-  }
+  };
 
-  function onPlayAgainWithSamePlayers() {
+  const onPlayAgainWithSamePlayers = () => {
     socket.emit("play-again-with-same-players");
-  }
+  };
 
-  function winnerText() {
+  const winnerText = () => {
     const winnerScore = playerScores[0].score;
     const winnerName = playerScores[0].name;
     return `The winner is "${winnerName}" with a score of "${winnerScore}"! Great job!`;
-  }
+  };
 
-  function showAllPlayers() {
+  const showAllPlayers = () => {
     setNumPlayersToShow(playerScores.length);
-  }
+  };
 
   return (
     <>
-      <Speak text={winnerText()} cloud={true} />
+      <Speak text={winnerText()} />
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingBottom: "3rem", // Add space for the buttons at the bottom
+          paddingBottom: "3rem" // Add space for the buttons at the bottom
         }}
       >
         <h1 style={{ fontFamily: "var(--action-font)" }}>leaderboard</h1>
-        <img
-          src={crown}
-          alt="Crown"
-          style={{ width: "8vw", paddingBottom: "1vh", paddingTop: "1vh" }}
-        />
+        <img src={crown} alt="Crown" style={{ width: "8vw", paddingBottom: "1vh", paddingTop: "1vh" }} />
         <div className="leaderboard">
           {playerScores.slice(0, numPlayersToShow).map((ps, i) => (
             <div
@@ -61,19 +57,16 @@ export default function HostLeaderBoard(props: ILeaderBoardProps) {
                 alignItems: "center",
                 marginBottom: i < 9 ? "-15px" : "-20px",
                 width: "100%",
-                paddingBottom: "20px",
+                paddingBottom: "20px"
               }}
             >
               <Paper
                 elevation={3}
                 className="lobby_player"
                 sx={{
-                  background:
-                    i === 0
-                      ? "var(--main-gradient-rev)"
-                      : "white",
+                  background: i === 0 ? "var(--main-gradient-rev)" : "white",
                   borderRadius: "20px",
-                  marginRight: "10px",
+                  marginRight: "10px"
                 }}
               >
                 <p
@@ -83,7 +76,7 @@ export default function HostLeaderBoard(props: ILeaderBoardProps) {
                     color: i === 0 ? "white" : "black",
                     paddingTop: i === 0 ? "8px" : "3px",
                     paddingBottom: i === 0 ? "8px" : "3px",
-                    fontSize: i === 0 ? "1.3em" : "1em",
+                    fontSize: i === 0 ? "1.3em" : "1em"
                   }}
                 >
                   {ps.name}
@@ -98,10 +91,7 @@ export default function HostLeaderBoard(props: ILeaderBoardProps) {
                   padding: i === 0 ? "0.5em" : "3px",
                   fontWeight: i === 0 ? "bold" : "normal",
                   borderRadius: "15px",
-                  background:
-                    i === 0
-                      ? "var(--main-gradient-rev)"
-                      : "white",
+                  background: i === 0 ? "var(--main-gradient-rev)" : "white",
                   width: "40%",
                   color: i === 0 ? "white" : "black"
                 }}
@@ -111,7 +101,13 @@ export default function HostLeaderBoard(props: ILeaderBoardProps) {
             </div>
           ))}
         </div>
-        <Button onClick={showAllPlayers} variant="contained" sx={{display: numPlayersToShow < playerScores.length ? "block" : "none"}}>show all players</Button>
+        <Button
+          onClick={showAllPlayers}
+          variant="contained"
+          sx={{ display: numPlayersToShow < playerScores.length ? "block" : "none" }}
+        >
+          show all players
+        </Button>
       </div>
     </>
   );

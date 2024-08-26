@@ -2,32 +2,32 @@ import * as React from "react";
 import { ttsApiKey } from "./environment";
 import { AddAnnouncementContext } from "./host/HostAnnouncementQueue";
 
-function replaceFriendivia(text: string) {
-  return text.replace("friendivia", " friend divvy-uh ");
+interface SpeakProps {
+  text: string;
+  callback?: () => void;
 }
 
-export default function Speak(props) {
-  const textToSpeak = replaceFriendivia(props.text);
-  const callback = props.callback;
+export default function Speak({ text, callback = () => {} }: SpeakProps) {
+  const textToSpeak = text.replace("friendivia", " friend divvy-uh ");
   const textHasBeenSpoken = React.useRef(false);
   const addAnnouncement = React.useContext(AddAnnouncementContext);
 
-  function speakFromBrowser() {
+  const speakFromBrowser = () => {
     const msg = new SpeechSynthesisUtterance();
     msg.text = textToSpeak;
     msg.rate = 0.9;
     window.speechSynthesis.speak(msg);
-    callback();
-  }
+    callback?.();
+  };
 
-  async function createAnnouncementAudioTikTok() {
+  const createAnnouncementAudioTikTok = async () => {
     const url = `https://tiktok-tts.weilnet.workers.dev/api/generation`;
 
     const updatedText = `${textToSpeak}`.replace(/([0-9])\s/g, "$1, ");
     const body = {
-        text: updatedText,
-        voice: 'en_us_rocket'
-    }
+      text: updatedText,
+      voice: "en_us_rocket"
+    };
 
     try {
       const response = await fetch(url, {
@@ -47,7 +47,7 @@ export default function Speak(props) {
       console.error("Error fetching or playing TikTok audio:", error);
       speakFromBrowser();
     }
-  }
+  };
 
   async function createAnnouncementAudio() {
     const voiceId = "pNInz6obpgDQGcFmaJgB";
@@ -57,8 +57,8 @@ export default function Speak(props) {
       model_id: "eleven_monolingual_v1",
       voice_settings: {
         stability: 0.5,
-        similarity_boost: 0.5,
-      },
+        similarity_boost: 0.5
+      }
     };
 
     try {
@@ -67,9 +67,9 @@ export default function Speak(props) {
         headers: {
           "Content-Type": "application/json",
           accept: "audio/mpeg",
-          "xi-api-key": ttsApiKey,
+          "xi-api-key": ttsApiKey
         },
-        body: JSON.stringify(request),
+        body: JSON.stringify(request)
       });
 
       if (!response.ok) {

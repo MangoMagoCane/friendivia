@@ -2,7 +2,7 @@ import * as React from "react";
 import "../style.css";
 import { Socket } from "socket.io-client";
 import PlayerJoinForm from "./PlayerJoinForm";
-import { IPlayerState, PlayerStates } from "back-end/interfaces/IPlayerState";
+import { IPlayerState } from "back-end/interfaces/IPlayerState";
 
 interface PlayerJoinProps {
   socket: Socket;
@@ -15,7 +15,7 @@ export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {
   React.useEffect(() => {
     if (playerState === "joined-waiting") {
       setJoiningPlayerState({
-        state: PlayerStates.JoinedWaiting,
+        state: "joined-waiting",
         message: ""
       });
     }
@@ -25,14 +25,14 @@ export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {
     const onJoinSuccess = (playerId: string) => {
       localStorage.setItem("player-id", playerId);
       setJoiningPlayerState({
-        state: PlayerStates.JoinedWaiting,
+        state: "joined-waiting",
         message: ""
       });
     };
 
     const onJoinError = (errorMsg: string) => {
       setJoiningPlayerState({
-        state: PlayerStates.Init,
+        state: "init",
         message: errorMsg
       });
     };

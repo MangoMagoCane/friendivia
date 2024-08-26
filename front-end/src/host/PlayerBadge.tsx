@@ -1,34 +1,31 @@
 import * as React from "react";
-import { randomRange } from "../util";
-import { Paper, SxProps } from "@mui/material";
+import { Paper } from "@mui/material";
 
-export default function PlayerBadge(props): React.ReactElement {
-  const { name, onClick } = props;
+interface PlayerBadgeProps {
+  name: string;
+  onClick?: () => void;
+}
 
+export default function PlayerBadge({ name, onClick }: PlayerBadgeProps) {
   const badgeStyles = {
     "&:hover": {
       cursor: "pointer",
       boxShadow: 8,
-      textDecoration: "line-through",
+      textDecoration: "line-through"
     },
     background: "white",
     color: "black",
-    borderRadius: "20px",
+    borderRadius: "20px"
   };
 
   return (
-    <Paper
-      elevation={3}
-      className="lobby_player"
-      sx={badgeStyles}
-      onClick={onClick}
-    >
+    <Paper elevation={3} className="lobby_player" sx={badgeStyles} onClick={onClick}>
       <p
         style={{
           margin: 0,
           fontFamily: "var(--action-font)",
           paddingTop: "5px",
-          paddingBottom: "5px",
+          paddingBottom: "5px"
         }}
       >
         {name}

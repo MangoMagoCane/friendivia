@@ -15,7 +15,7 @@ import { Button } from "../extra/FrdvButton";
 import PlayerNewRanking from "./PlayerNewRanking";
 import PlayerKicked from "./PlayerKicked";
 import IQuizOption from "back-end/interfaces/IQuizOption";
-import { PlayerStates } from "back-end/interfaces/IPlayerState";
+import { PlayerState } from "back-end/interfaces/IPlayerState";
 
 interface PlayerAppProps {
   socket: Socket;
@@ -23,12 +23,12 @@ interface PlayerAppProps {
 
 export default function PlayerApp({ socket }: PlayerAppProps) {
   const playerIdFromStorage = localStorage.getItem("player-id") || "";
-  const [playerState, setPlayerState] = React.useState<PlayerStates | "">("");
-  const [playerName, setPlayerName] = React.useState("");
-  const [playerScore, setPlayerScore] = React.useState(0);
-  const [scoreDiff, setScoreDiff] = React.useState(0);
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [allPlayerScores, setAllPlayerScores] = React.useState([]);
+  const [playerState, setPlayerState] = React.useState<PlayerState | "">("");
+  const [playerName, setPlayerName] = React.useState<string>("");
+  const [playerScore, setPlayerScore] = React.useState<number>(0);
+  const [scoreDiff, setScoreDiff] = React.useState<number>(0);
+  const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
+  const [allPlayerScores, setAllPlayerScores] = React.useState<[]>([]); // should be given a proper type when I figure it out
   const [questionnaireQuestionsText, setQuestionnaireQuestionsText] = React.useState<string[]>([]);
   const [quizQuestionOptionsText, setQuizQuestionOptionsText] = React.useState<IQuizOption[]>([]);
   const [loaded, setLoaded] = React.useState<boolean>(false);

@@ -22,66 +22,44 @@ import PlayAudio from "../PlayAudio";
 import musicOn from "../assets/musicon.png";
 import musicOff from "../assets/musicoff.png";
 import { IQuestionnaireQuestion } from "back-end/interfaces/IQuestionnaireQuestion";
-import {
-  HostAnnouncementQueue,
-  AddAnnouncementContext,
-} from "./HostAnnouncementQueue";
-import "../style.css";
-import "./HostStyles.css";
+import { HostAnnouncementQueue, AddAnnouncementContext } from "./HostAnnouncementQueue";
+import { GameState } from "back-end/interfaces/IGameState";
 
-interface IHostProps {
+interface HostAppProps {
   socket: Socket;
 }
 
-export default function HostApp(props: IHostProps) {
+export default function HostApp({ socket }: HostAppProps) {
   const gameIdFromStorage = Number(localStorage.getItem("game-id")) || -1;
-  const settingsIdFromStorage =
-    String(localStorage.getItem("settings-id")) || "-1";
+  const settingsIdFromStorage = String(localStorage.getItem("settings-id")) || "-1";
   const [gameId, setGameId] = React.useState<number>(gameIdFromStorage);
-  const [preSettingsId, setPreSettingsId] = React.useState<string>(
-    settingsIdFromStorage
-  );
-  const [gameState, setGameState] = React.useState<string>("init");
+  const [preSettingsId, setPreSettingsId] = React.useState<string>(settingsIdFromStorage);
+  const [gameState, setGameState] = React.useState<GameState>("init");
   const [customMode, setCustomMode] = React.useState<string>("classic");
   const [settingsState, setSettingsState] = React.useState<boolean>(false);
   const [quizQuestions, setQuizQuestions] = React.useState<IQuizQuestion[]>([]);
-  const [
-    currentQuizQuestionIndex,
-    setCurrentQuizQuestionIndex,
-  ] = React.useState<number>(-1);
+  const [currentQuizQuestionIndex, setCurrentQuizQuestionIndex] = React.useState<number>(-1);
   const [quizQuestionGuesses, setQuizQuestionGuesses] = React.useState([]);
   const [playerScores, setPlayerScores] = React.useState([]);
   const [playersInGame, setPlayersInGame] = React.useState([]);
   const [timePerQuestion, setTimePerQuestion] = React.useState<number>(15);
-  const [
-    numQuestionnaireQuestions,
-    setNumQuestionnaireQuestions,
-  ] = React.useState<number>(5);
+  const [numQuestionnaireQuestions, setNumQuestionnaireQuestions] = React.useState<number>(5);
   const [numQuizQuestions, setNumQuizQuestions] = React.useState<number>(5);
   const [handsFreeMode, setHandsFreeMode] = React.useState<boolean>(false);
   const [timePerAnswer, setTimePerAnswer] = React.useState<number>(10);
   const [timePerLeaderboard, setTimePerLeaderboard] = React.useState<number>(5);
-  const [prioritizeCustomQs, setPrioritizeCustomQs] = React.useState<boolean>(
-    true
-  );
-  const [customQuestions, setCustomQuestions] = React.useState<
-    IQuestionnaireQuestion[]
-  >([]);
+  const [prioritizeCustomQs, setPrioritizeCustomQs] = React.useState<boolean>(true);
+  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestion[]>([]);
 
   const [loaded, setLoaded] = React.useState<boolean>(false);
   const [muted, setMuted] = React.useState<boolean>(false);
 
-  const [
-    announcementAudioObjects,
-    setAnnouncementAudioObjects,
-  ] = React.useState<any>([]);
+  const [announcementAudioObjects, setAnnouncementAudioObjects] = React.useState<any>([]);
   const addAnnouncement = (newAnnouncementAudio) => {
     setAnnouncementAudioObjects((arr) => [...arr, newAnnouncementAudio]);
   };
 
-  const { socket } = props;
-
-  function muteMusic(muted: boolean) {
+  const muteMusic = (muted: boolean) => {
     setMuted(!muted);
     localStorage.setItem("Music-Playing", muted.toString());
 
@@ -96,23 +74,21 @@ export default function HostApp(props: IHostProps) {
         audio.pause();
       }
     }
-  }
+  };
 
   if (!loaded) {
     socket.emit("host-load", gameIdFromStorage);
     socket.emit("settings-load", settingsIdFromStorage);
   }
 
-  function onEndGameClicked() {
+  const onEndGameClicked = () => {
     if (confirm("Are you sure you want to end this game?")) {
       socket.emit("host-end-game");
     }
-  }
+  };
 
   React.useEffect(() => {
-    function onLoadSuccess(
-      data: IGame & { quizQuestionGuesses; playerScores; playersInGame }
-    ) {
+    const onLoadSuccess = (data: IGame & { quizQuestionGuesses; playerScores; playersInGame }) => {
       setLoaded(true);
       setGameId(data.id);
       setGameState(data.gameState.state);
@@ -130,9 +106,9 @@ export default function HostApp(props: IHostProps) {
       setTimePerLeaderboard(data.settings.timePerLeaderboard);
       setPrioritizeCustomQs(data.settings.prioritizeCustomQs);
       setCustomQuestions(data.settings.customQuestions);
-    }
+    };
 
-    function onSettingsLoadSuccess(data: IPreGameSettings) {
+    const onSettingsLoadSuccess = (data: IPreGameSettings) => {
       setPreSettingsId(data.id);
       setSettingsState(data.settingsState);
       setTimePerQuestion(data.settings.timePerQuestion);
@@ -143,24 +119,24 @@ export default function HostApp(props: IHostProps) {
       setTimePerLeaderboard(data.settings.timePerLeaderboard);
       setPrioritizeCustomQs(data.settings.prioritizeCustomQs);
       setCustomQuestions(data.settings.customQuestions);
-    }
+    };
 
-    function onOpenSuccess(idFromServer: number) {
+    const onOpenSuccess = (idFromServer: number) => {
       setGameId(idFromServer);
       localStorage.setItem("game-id", `${idFromServer}`);
       setGameState("lobby");
-    }
+    };
 
-    function onPresettingsSuccess(idFromServer: string) {
+    const onPresettingsSuccess = (idFromServer: string) => {
       setPreSettingsId(idFromServer);
       localStorage.setItem("settings-id", `${idFromServer}`);
       setSettingsState(true);
-    }
+    };
 
-    function onHostGameEnded() {
+    const onHostGameEnded = () => {
       localStorage.setItem("game-id", "");
       window.location.reload();
-    }
+    };
 
     socket.on("host-open-success", onOpenSuccess);
     socket.on("host-load-success", onLoadSuccess);
@@ -181,117 +157,115 @@ export default function HostApp(props: IHostProps) {
     };
   }, [gameId, setGameId, gameState, setGameState]);
 
-  function getElementForState(state: string, settingsState: boolean) {
-    if (state === "pre-questionnaire") {
-      return (
-        <>
-          <Speak text="Get ready..." />
-          <p style={{ fontSize: "1.5em" }}>Get ready...</p>
-        </>
-      );
-    }
+  const getElementForState = (state: GameState, settingsState: boolean) => {
+    let currentQuizQuestion: IQuizQuestion;
+    let quizQuestionOptions: IQuizOption[];
+    let quizQuestionText: string;
+    let quizQuestionPlayerName: string;
+    const settingsValue = (
+      <HostSettings
+        socket={socket}
+        gameId={gameId}
+        preSettingsId={preSettingsId}
+        settingsState={settingsState}
+        playersInGame={playersInGame}
+        timePerQuestionSetting={timePerQuestion}
+        numQuestionnaireQuestionsSetting={numQuestionnaireQuestions}
+        numQuizQuestionsSetting={numQuizQuestions}
+        handsFreeModeSetting={handsFreeMode}
+        timePerAnswerSetting={timePerAnswer}
+        timePerLeaderboardSetting={timePerLeaderboard}
+        prioritizeCustomQsSetting={prioritizeCustomQs}
+        customQuestionsSetting={customQuestions}
+      />
+    );
 
-    if (state === "lobby") {
-      socket.emit("reload-players");
-      return <HostLobby socket={socket} gameId={gameId} classroomGame={customMode === "classroom"} />;
-    } else if (state === "questionnaire") {
-      return (
-        <HostQuestionnaire
-          socket={socket}
-          gameId={gameId}
-          playersInGame={playersInGame}
-        />
-      );
-    } else if (state === "pre-quiz") {
-      return <HostPreQuiz />;
-    } else if (state === "showing-question") {
-      const currentQuizQuestion: IQuizQuestion =
-        quizQuestions[currentQuizQuestionIndex];
-      const quizQuestionOptions: IQuizOption[] = currentQuizQuestion.optionsList;
-      const quizQuestionText = currentQuizQuestion.text;
-      const quizQuestionPlayerName = currentQuizQuestion.playerName;
+    switch (state) {
+      case "pre-questionnaire":
+        return (
+          <>
+            <Speak text="Get ready..." />
+            <p style={{ fontSize: "1.5em" }}>Get ready...</p>
+          </>
+        );
+      case "lobby":
+        socket.emit("reload-players");
+        return <HostLobby socket={socket} gameId={gameId} classroomGame={customMode === "classroom"} />;
+      case "questionnaire":
+        return <HostQuestionnaire socket={socket} gameId={gameId} playersInGame={playersInGame} />;
+      case "pre-quiz":
+        return <HostPreQuiz />;
+      case "showing-question":
+        currentQuizQuestion = quizQuestions[currentQuizQuestionIndex];
+        quizQuestionOptions = currentQuizQuestion.optionsList;
+        quizQuestionText = currentQuizQuestion.text;
+        quizQuestionPlayerName = currentQuizQuestion.playerName;
 
-      return (
-        <HostShowQuestion
-          options={quizQuestionOptions}
-          questionText={quizQuestionText}
-          playerName={quizQuestionPlayerName}
-          socket={socket}
-          gameId={gameId}
-          timePerQuestion={timePerQuestion}
-          handsFreeMode={handsFreeMode}
-        />
-      );
-    } else if (state === "pre-answer") {
-      return (
-        <>
-          <Speak text="The guesses are in!" />
-          <p style={{ fontSize: "1.5em" }}>The guesses are in...</p>
-        </>
-      );
-    } else if (state === "showing-answer") {
-      const currentQuizQuestion: IQuizQuestion =
-        quizQuestions[currentQuizQuestionIndex];
-      const quizQuestionOptions: IQuizOption[] = currentQuizQuestion.optionsList;
-      const quizQuestionText = currentQuizQuestion.text;
-      const quizQuestionPlayerName = currentQuizQuestion.playerName;
-      const correctAnswerIndex = currentQuizQuestion.correctAnswerIndex;
-      const quizQuestionsLength = quizQuestions.length;
-      return (
-        <HostShowAnswer
-          options={quizQuestionOptions}
-          questionText={quizQuestionText}
-          playerName={quizQuestionPlayerName}
-          correctAnswerIndex={correctAnswerIndex}
-          playerGuesses={quizQuestionGuesses}
-          socket={socket}
-          gameId={gameId}
-          quizLength={quizQuestionsLength}
-          handsFreeMode={handsFreeMode}
-        />
-      );
-    } else if (state === "intermediary-leaderboard") {
-      return (
-        <HostIntLeaderBoard
-          gameId={gameId}
-          socket={socket}
-          playerScores={playerScores}
-          handsFreeMode={handsFreeMode}
-        />
-      );
-    } else if (state === "pre-leader-board") {
-      return (
-        <>
-          <Speak text="Let's see who won" cloud={true} />
-          <p style={{ fontSize: "1.5em" }}>Let's see who won...</p>
-        </>
-      );
-    } else if (state === "leader-board") {
-      return <HostLeaderBoard playerScores={playerScores} socket={socket} />;
-    } else if (state === "settings" || settingsState === true) {
-      return (
-        <HostSettings
-          socket={socket}
-          gameId={gameId}
-          preSettingsId={preSettingsId}
-          settingsState={settingsState}
-          playersInGame={playersInGame}
-          timePerQuestionSetting={timePerQuestion}
-          numQuestionnaireQuestionsSetting={numQuestionnaireQuestions}
-          numQuizQuestionsSetting={numQuizQuestions}
-          handsFreeModeSetting={handsFreeMode}
-          timePerAnswerSetting={timePerAnswer}
-          timePerLeaderboardSetting={timePerLeaderboard}
-          prioritizeCustomQsSetting={prioritizeCustomQs}
-          customQuestionsSetting={customQuestions}
-        />
-      );
-    } else if (state == "tiebreaker") {
-      return <HostTiebreaker />;
-    } else {
-      return <HostOpen socket={socket} />;
+        return (
+          <HostShowQuestion
+            options={quizQuestionOptions}
+            questionText={quizQuestionText}
+            playerName={quizQuestionPlayerName}
+            socket={socket}
+            gameId={gameId}
+            timePerQuestion={timePerQuestion}
+            handsFreeMode={handsFreeMode}
+          />
+        );
+      case "pre-answer":
+        return (
+          <>
+            <Speak text="The guesses are in!" />
+            <p style={{ fontSize: "1.5em" }}>The guesses are in...</p>
+          </>
+        );
+      case "showing-answer":
+        currentQuizQuestion = quizQuestions[currentQuizQuestionIndex];
+        quizQuestionOptions = currentQuizQuestion.optionsList;
+        quizQuestionText = currentQuizQuestion.text;
+        quizQuestionPlayerName = currentQuizQuestion.playerName;
+        const correctAnswerIndex = currentQuizQuestion.correctAnswerIndex;
+        const quizQuestionsLength = quizQuestions.length;
+
+        return (
+          <HostShowAnswer
+            options={quizQuestionOptions}
+            questionText={quizQuestionText}
+            playerName={quizQuestionPlayerName}
+            correctAnswerIndex={correctAnswerIndex}
+            playerGuesses={quizQuestionGuesses}
+            socket={socket}
+            gameId={gameId}
+            quizLength={quizQuestionsLength}
+            handsFreeMode={handsFreeMode}
+          />
+        );
+      case "intermediary-leaderboard":
+        return (
+          <HostIntLeaderBoard
+            gameId={gameId}
+            socket={socket}
+            playerScores={playerScores}
+            handsFreeMode={handsFreeMode}
+          />
+        );
+      case "pre-leader-board":
+        return (
+          <>
+            <Speak text="Let's see who won" />
+            <p style={{ fontSize: "1.5em" }}>Let's see who won...</p>
+          </>
+        );
+      case "leader-board":
+        return <HostLeaderBoard playerScores={playerScores} socket={socket} />;
+      case "settings":
+        return settingsState;
+      case "tiebreaker":
+        return <HostTiebreaker />;
+      default:
+        return <HostOpen socket={socket} />;
     }
-  }
+  };
 
   return (
     <div className="scroll host-screen">
@@ -321,21 +295,15 @@ export default function HostApp(props: IHostProps) {
             </IconButton>
           </div>
           <div className="banner-text">friendivia</div>
-          <div className="bannerEdge">
-            {/* Empty to take up space on the right side of the header*/}
-          </div>
+          <div className="bannerEdge">{/* Empty to take up space on the right side of the header*/}</div>
         </div>
-        <div className="host-content">
-          {getElementForState(gameState, settingsState)}
-        </div>
+        <div className="host-content">{getElementForState(gameState, settingsState)}</div>
         <div className="host-footer">
-          {gameState !== "init" &&
-            <Button
-              variant="contained"
-              onClick={onEndGameClicked}
-            >
+          {gameState !== "init" && (
+            <Button variant="contained" onClick={onEndGameClicked}>
               end game
-            </Button>}
+            </Button>
+          )}
         </div>
       </AddAnnouncementContext.Provider>
     </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import "../style.css";
 import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
@@ -29,11 +29,9 @@ interface ILobbyViewProps {
 export default function HostLobbyView(props: ILobbyViewProps) {
   const { playerNames, gameId, socket } = props;
 
-  const [badgeSpots, setBadgeSpots] = React.useState<string[]>(
-    new Array(BOTTOM_BADGE_END).fill("")
-  );
+  const [badgeSpots, setBadgeSpots] = React.useState<string[]>(new Array(BOTTOM_BADGE_END).fill(""));
 
-  const getSliceOfBadges = (start, end) => {
+  const getSliceOfBadges = (start: number, end: number): ReactNode => {
     return badgeSpots.slice(start, end).map((name, i) => (
       <div className="badge-holding" key={i}>
         {name && <PlayerBadge name={name} onClick={() => onPlayerKick(name)} />}
@@ -41,14 +39,13 @@ export default function HostLobbyView(props: ILobbyViewProps) {
     ));
   };
 
-  const getOpenBadgeSpotIndices = () => {
+  const getOpenBadgeSpotIndices = (): number[] => {
     const openSpots: number[] = [];
     for (let i = 0; i < badgeSpots.length; i++) {
       if (badgeSpots[i] === "") {
         openSpots.push(i);
       }
     }
-
     return openSpots;
   };
 
@@ -82,10 +79,7 @@ export default function HostLobbyView(props: ILobbyViewProps) {
     .replace("http://", "")
     .replace("https://", "")
     .replace("www.", "");
-  const gameStr = gameId
-    .toString()
-    .split("")
-    .join(" ");
+  const gameStr = gameId.toString().split("").join(" ");
 
   async function onStart() {
     socket.emit("host-start", gameId);
@@ -99,21 +93,27 @@ export default function HostLobbyView(props: ILobbyViewProps) {
     socket.emit("host-settings", gameId);
   }
 
+  let playerCountText: string;
+  {
+    let verb: string;
+    let plural: string;
+    [verb, plural] = playerNames.length === 1 ? ["is", ""] : ["are", "s"];
+    playerCountText = `There ${verb} currently ${playerNames.length} player${plural} in the game.`;
+  }
+
   return (
     <div className="host-lobby">
       <Speak text={`Join at "${joinUrl}"!! Use game I.D.: ${gameStr}`} />
       <PlayAudio src={open} loop={false} />
       <div className="join-instructions">
-        <div className="join-instruction-edge">
-          {getSliceOfBadges(LEFT_BADGE_START, LEFT_BADGE_END)}
-        </div>
+        <div className="join-instruction-edge">{getSliceOfBadges(LEFT_BADGE_START, LEFT_BADGE_END)}</div>
         <div
           className="lobby-middle"
           style={{
             width: "30vw",
             display: "flex",
             flexDirection: "column",
-            height: "100%",
+            height: "100%"
           }}
         >
           <div className="above-instructions" style={{ height: "20vh" }}>
@@ -123,29 +123,26 @@ export default function HostLobbyView(props: ILobbyViewProps) {
             style={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
+              alignItems: "center"
             }}
           >
             <Paper
               sx={{
-                // width: "-32vw",
                 maxWidth: "350px",
                 height: "20vh",
                 maxHeight: "180px",
                 position: "relative",
                 zIndex: "1",
-                borderRadius: "20px",
+                borderRadius: "20px"
               }}
               style={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                alignItems: "center"
               }}
               elevation={3}
-              className=""
             >
               <p
-                className=""
                 style={{
                   fontFamily: "var(--action-font)",
                   fontSize: "8em",
@@ -154,7 +151,7 @@ export default function HostLobbyView(props: ILobbyViewProps) {
                   marginBottom: "-20px",
                   padding: 0,
                   paddingLeft: "2vw",
-                  paddingRight: "2vw",
+                  paddingRight: "2vw"
                 }}
               >
                 {gameId}
@@ -163,10 +160,10 @@ export default function HostLobbyView(props: ILobbyViewProps) {
                 style={{
                   fontSize: "1.4em",
                   fontWeight: "bold",
-                  margin: 0,
+                  margin: 0
                 }}
               >
-                Join at {joinUrl}
+                {`Join at ${joinUrl}`}
               </p>
               <br />
             </Paper>
@@ -179,25 +176,19 @@ export default function HostLobbyView(props: ILobbyViewProps) {
                 borderRadius: "20px",
                 maxWidth: "350px",
                 fontSize: "2em",
-                marginBottom: "10px",
+                marginBottom: "10px"
               }}
               onClick={onStart}
             >
               start
             </Button>
-            <p>
-              There {playerNames.length !== 1 ? "are" : "is"} currently{" "}
-              {playerNames.length} player{playerNames.length !== 1 && "s"} in
-              the game.
-            </p>
+            <p>{playerCountText}</p>
           </div>
           <div className="below-instructions" style={{ flexGrow: 1 }}>
             {getSliceOfBadges(RIGHT_BADGE_END, BOTTOM_BADGE_END)}
           </div>
         </div>
-        <div className="join-instruction-edge">
-          {getSliceOfBadges(TOP_BADGE_END, RIGHT_BADGE_END)}
-        </div>
+        <div className="join-instruction-edge">{getSliceOfBadges(TOP_BADGE_END, RIGHT_BADGE_END)}</div>
       </div>
     </div>
   );

@@ -1,12 +1,9 @@
+import IPlayer from "back-end/interfaces/IPlayer";
 import * as React from "react";
-import "../style.css";
-import { Button, Paper } from "@mui/material";
-import { Socket } from "socket.io-client";
-import PlayerOver from "./PlayerOver";
 
 interface RankingProps {
-  playerScores: Array<any>;
-  playerName: any;
+  playerScores: IPlayer[];
+  playerName: string;
 }
 
 export default function PlayerNewRanking({ playerScores, playerName }: RankingProps) {
