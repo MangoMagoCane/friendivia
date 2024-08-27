@@ -1,22 +1,22 @@
-import IGame from '../interfaces/IGame.ts';
-import IPreGameSettings from '../interfaces/IPreGameSettings.ts';
-import { GameStates } from '../interfaces/IGameState.ts';
-import Game from '../models/Game.ts';
-import PreGameSettings from '../models/PreGameSettings.ts';
-import * as utilDb from '../db/utils.ts';
-import IQuizQuestion from '../interfaces/IQuizQuestion.ts';
-import playerDb from '../db/player.ts';
-import * as uuid from 'uuid';
-import Player from '../models/Player.ts';
-import friendsQuestions from './friendsTriviaQuestions.ts';
-import IPlayer from '../interfaces/IPlayer.ts';
-import { PlayerQuestionnaire } from '../interfaces/IQuestionnaireQuestion.ts';
+import IGame from "../interfaces/IGame.ts";
+import IPreGameSettings from "../interfaces/IPreGameSettings.ts";
+import { GameState } from "../interfaces/IGameState.ts";
+import Game from "../models/Game.ts";
+import PreGameSettings from "../models/PreGameSettings.ts";
+import * as utilDb from "../db/utils.ts";
+import IQuizQuestion from "../interfaces/IQuizQuestion.ts";
+import playerDb from "../db/player.ts";
+import * as uuid from "uuid";
+import Player from "../models/Player.ts";
+import friendsQuestions from "./friendsTriviaQuestions.ts";
+import IPlayer from "../interfaces/IPlayer.ts";
+import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
 
 export default {
   getAllGameIds: async (): Promise<number[]> => {
     try {
       const allGames = await Game.find({});
-      return allGames.map(g => g.id);
+      return allGames.map((g) => g.id);
     } catch (e) {
       console.error(`Issue getting all game ids: ${e}`);
       return [];
@@ -25,7 +25,7 @@ export default {
 
   getPreSettingsData: async (preSettingsId: string): Promise<IPreGameSettings | null> => {
     try {
-      const settingsData: any = await PreGameSettings.findOne({id: preSettingsId});
+      const settingsData: any = await PreGameSettings.findOne({ id: preSettingsId });
       return settingsData?.toObject();
     } catch (e) {
       console.error(`Issue getting game data: ${e}`);
@@ -33,7 +33,7 @@ export default {
     }
   },
 
-  hostOpenGame: async function(socketId: string, customMode: string): Promise<number> {
+  hostOpenGame: async function (socketId: string, customMode: string): Promise<number> {
     try {
       const timePerQuestion = 15;
       const numQuestionnaireQuestions = 5;
@@ -47,7 +47,7 @@ export default {
       let newId = -1;
       while (true) {
         const testId = Math.floor(Math.random() * 9000 + 1000);
-        const gameExists = await Game.exists({id: testId});
+        const gameExists = await Game.exists({ id: testId });
         if (!gameExists) {
           newId = testId;
           break;
@@ -57,8 +57,8 @@ export default {
       const newGameObject: IGame = {
         id: newId,
         gameState: {
-          state: GameStates.Lobby,
-          message: ''
+          state: "lobby",
+          message: ""
         },
         hostSocketId: socketId,
         playerQuestionnaires: [],
@@ -89,7 +89,7 @@ export default {
 
   getGameData: async (gameId: number): Promise<IGame | null> => {
     try {
-      const gameData: any = await Game.findOne({id: gameId});
+      const gameData: any = await Game.findOne({ id: gameId });
       return gameData?.toObject();
     } catch (e) {
       console.error(`Issue getting game data: ${e}`);
@@ -99,7 +99,7 @@ export default {
 
   getGameDataFromSocketId: async (socketId: string): Promise<IGame | null> => {
     try {
-      const gameData: any = await Game.findOne({hostSocketId: socketId});
+      const gameData: any = await Game.findOne({ hostSocketId: socketId });
       return gameData?.toObject();
     } catch (e) {
       console.error(`Issue getting game data from Host SocketId ${socketId}: ${e}`);
@@ -107,17 +107,20 @@ export default {
     }
   },
 
-  setGameState: async (gameId: number, newState: GameStates): Promise<void> => {
+  setGameState: async (gameId: number, newState: GameState): Promise<void> => {
     try {
-      await Game.updateOne({id: gameId}, {
-        $set: { 'gameState.state': newState }
-      });
+      await Game.updateOne(
+        { id: gameId },
+        {
+          $set: { "gameState.state": newState }
+        }
+      );
     } catch (e) {
       console.error(`Issue setting game state: ${e}`);
     }
   },
 
-  moveGameToQuestionnaire: async function(gameId: number): Promise<PlayerQuestionnaire[]> {
+  moveGameToQuestionnaire: async function (gameId: number): Promise<PlayerQuestionnaire[]> {
     try {
       const players: IPlayer[] = await playerDb.getPlayers(gameId);
       const game: IGame | null = await this.getGameData(gameId);
@@ -125,12 +128,18 @@ export default {
         return [];
       }
 
-      const questionnaires: PlayerQuestionnaire[] = await utilDb.createQuestionnairesForPlayers(players, game.customMode);
-      await this.setGameState(gameId, GameStates.Questionnaire);
+      const questionnaires: PlayerQuestionnaire[] = await utilDb.createQuestionnairesForPlayers(
+        players,
+        game.customMode
+      );
+      await this.setGameState(gameId, "questionnaire");
 
-      await Game.updateOne({id: gameId}, {
-        $set: { 'playerQuestionnaires': questionnaires }
-      });
+      await Game.updateOne(
+        { id: gameId },
+        {
+          $set: { playerQuestionnaires: questionnaires }
+        }
+      );
 
       return questionnaires;
     } catch (e) {
@@ -139,7 +148,7 @@ export default {
     }
   },
 
-  getPlayerQuestionnaires: async function(gameId: number): Promise<PlayerQuestionnaire[]> {
+  getPlayerQuestionnaires: async function (gameId: number): Promise<PlayerQuestionnaire[]> {
     try {
       const game: IGame | null = await this.getGameData(gameId);
       if (!game) {
@@ -155,30 +164,36 @@ export default {
 
   buildQuiz: async (game: IGame): Promise<IQuizQuestion[]> => {
     const quizQuestions: IQuizQuestion[] = await utilDb.createQuiz(game.playerQuestionnaires, game.customMode);
-    await Game.updateOne({ id: game.id }, {
-      $set: { 'quizQuestions': quizQuestions }
-    });
+    await Game.updateOne(
+      { id: game.id },
+      {
+        $set: { quizQuestions: quizQuestions }
+      }
+    );
 
     return quizQuestions;
   },
 
-  questionsRemaining: function(game: IGame): boolean {
+  questionsRemaining: function (game: IGame): boolean {
     const currentQuestionIndex = game.currentQuestionIndex;
     const nextQuestionIndex = currentQuestionIndex + 1;
 
     return nextQuestionIndex < game.quizQuestions.length;
   },
 
-  nextQuestion: async function(gameId: number): Promise<boolean> {
+  nextQuestion: async function (gameId: number): Promise<boolean> {
     const currentGame: IGame | null = await this.getGameData(gameId);
     if (currentGame === null) {
       return false;
     }
 
     if (this.questionsRemaining(currentGame)) {
-      await Game.updateOne({ id: gameId }, {
-        $set: { 'currentQuestionIndex': currentGame.currentQuestionIndex + 1 }
-      });
+      await Game.updateOne(
+        { id: gameId },
+        {
+          $set: { currentQuestionIndex: currentGame.currentQuestionIndex + 1 }
+        }
+      );
 
       return true;
     }
@@ -206,23 +221,22 @@ export default {
 
   deleteOneSettings: async (preSettingsId): Promise<any> => {
     try {
-      await PreGameSettings.deleteOne({id: preSettingsId});
+      await PreGameSettings.deleteOne({ id: preSettingsId });
     } catch (e) {
       console.error(`Issue deleting all games: ${e}`);
     }
   },
 
-  deleteGame: async(gameId: number): Promise<any> => {
+  deleteGame: async (gameId: number): Promise<any> => {
     try {
-      await Game.deleteOne({id: gameId});
-    } catch(e) {
+      await Game.deleteOne({ id: gameId });
+    } catch (e) {
       console.error(`Issue deleting game: ${e}`);
     }
   },
 
-  updateSettings: async(gameId: number, settingsData: any): Promise<any> => {
+  updateSettings: async (gameId: number, settingsData: any): Promise<any> => {
     try {
-
       const timePerQuestion = settingsData.timePerQuestion;
       const numQuestionnaireQuestions = settingsData.numQuestionnaireQuestions;
       const numQuizQuestions = settingsData.numQuizQuestions;
@@ -231,31 +245,40 @@ export default {
       const timePerLeaderboard = settingsData.timePerLeaderboard;
       const prioritizeCustomQs = settingsData.prioritizeCustomQs;
       const customQuestions = settingsData.addedQuestions;
-      customQuestions.forEach(question => {
-        const somethingEmpty = question.text === "" || question.quizText === "" || question.fakeAnswers[0] === "" || question.fakeAnswers[1] === "" || question.fakeAnswers[2] === "" || question.fakeAnswers[3] === "";
+      customQuestions.forEach((question) => {
+        const somethingEmpty =
+          question.text === "" ||
+          question.quizText === "" ||
+          question.fakeAnswers[0] === "" ||
+          question.fakeAnswers[1] === "" ||
+          question.fakeAnswers[2] === "" ||
+          question.fakeAnswers[3] === "";
         if (somethingEmpty) {
           customQuestions.splice(customQuestions.indexOf(question), 1);
         }
       });
 
-      await Game.updateOne({id: gameId}, {
-        $set: {
-          'settings.timePerQuestion': timePerQuestion,
-          'settings.numQuestionnaireQuestions': numQuestionnaireQuestions,
-          'settings.numQuizQuestions': numQuizQuestions,
-          'settings.handsFreeMode': handsFreeMode,
-          'settings.timePerAnswer': timePerAnswer,
-          'settings.timePerLeaderboard': timePerLeaderboard,
-          'settings.prioritizeCustomQs': prioritizeCustomQs,
-          'settings.customQuestions': customQuestions
-        }});
-
+      await Game.updateOne(
+        { id: gameId },
+        {
+          $set: {
+            "settings.timePerQuestion": timePerQuestion,
+            "settings.numQuestionnaireQuestions": numQuestionnaireQuestions,
+            "settings.numQuizQuestions": numQuizQuestions,
+            "settings.handsFreeMode": handsFreeMode,
+            "settings.timePerAnswer": timePerAnswer,
+            "settings.timePerLeaderboard": timePerLeaderboard,
+            "settings.prioritizeCustomQs": prioritizeCustomQs,
+            "settings.customQuestions": customQuestions
+          }
+        }
+      );
     } catch (e) {
       console.error(`Issue updating settings: ${e}`);
     }
   },
 
-  hostOpenPreSettings: async function(socketId: string): Promise<string> {
+  hostOpenPreSettings: async function (socketId: string): Promise<string> {
     try {
       var newId = `preSettings_${uuid.v4()}`;
       const newPreSettingsObject: IPreGameSettings = {
@@ -280,11 +303,11 @@ export default {
       return newId;
     } catch (e) {
       console.error(`Issue creating new game: ${e}`);
-      return '-1';
+      return "-1";
     }
   },
 
-  hostClosePreSettings: async function(preSettingsId: string, settingsData: any): Promise<any> {
+  hostClosePreSettings: async function (preSettingsId: string, settingsData: any): Promise<any> {
     try {
       const timePerQuestion = settingsData.timePerQuestion;
       const numQuestionnaireQuestions = settingsData.numQuestionnaireQuestions;
@@ -294,27 +317,35 @@ export default {
       const timePerLeaderboard = settingsData.timePerLeaderboard;
       const prioritizeCustomQs = settingsData.prioritizeCustomQs;
       const customQuestions = settingsData.addedQuestions;
-      customQuestions.forEach(question => {
-        const somethingEmpty = question.text === "" || question.quizText === "" || question.fakeAnswers[0] === "" || question.fakeAnswers[1] === "" || question.fakeAnswers[2] === "" || question.fakeAnswers[3] === "";
+      customQuestions.forEach((question) => {
+        const somethingEmpty =
+          question.text === "" ||
+          question.quizText === "" ||
+          question.fakeAnswers[0] === "" ||
+          question.fakeAnswers[1] === "" ||
+          question.fakeAnswers[2] === "" ||
+          question.fakeAnswers[3] === "";
         if (somethingEmpty) {
           customQuestions.splice(customQuestions.indexOf(question), 1);
         }
       });
 
-      await PreGameSettings.updateOne({id: preSettingsId}, {
-        $set: { 
-          'settingsState': false,
-          'settings.timePerQuestion': timePerQuestion,
-          'settings.numQuestionnaireQuestions': numQuestionnaireQuestions,
-          'settings.numQuizQuestions': numQuizQuestions,
-          'settings.handsFreeMode': handsFreeMode,
-          'settings.timePerAnswer': timePerAnswer,
-          'settings.timePerLeaderboard': timePerLeaderboard,
-          'settings.prioritizeCustomQs': prioritizeCustomQs,
-          'settings.customQuestions': customQuestions
+      await PreGameSettings.updateOne(
+        { id: preSettingsId },
+        {
+          $set: {
+            settingsState: false,
+            "settings.timePerQuestion": timePerQuestion,
+            "settings.numQuestionnaireQuestions": numQuestionnaireQuestions,
+            "settings.numQuizQuestions": numQuizQuestions,
+            "settings.handsFreeMode": handsFreeMode,
+            "settings.timePerAnswer": timePerAnswer,
+            "settings.timePerLeaderboard": timePerLeaderboard,
+            "settings.prioritizeCustomQs": prioritizeCustomQs,
+            "settings.customQuestions": customQuestions
+          }
         }
-      });
-
+      );
     } catch (e) {
       console.error(`Issue updating pre-settings: ${e}`);
     }
@@ -322,23 +353,29 @@ export default {
 
   setSettingsState: async (preSettingsId: string, newState: boolean): Promise<void> => {
     try {
-      await PreGameSettings.updateOne({id: preSettingsId}, {
-        $set: { 'settingsState': newState }
-      });
+      await PreGameSettings.updateOne(
+        { id: preSettingsId },
+        {
+          $set: { settingsState: newState }
+        }
+      );
     } catch (e) {
       console.error(`Issue setting settings state: ${e}`);
     }
   },
 
   addTiebreakerQuestion: async (gameId: number): Promise<void> => {
-    const randomFriendsQuestion = friendsQuestions[Math.floor(Math.random()*friendsQuestions.length)];
+    const randomFriendsQuestion = friendsQuestions[Math.floor(Math.random() * friendsQuestions.length)];
 
     try {
-      await Game.updateOne({ id: gameId }, {
-        $push: { quizQuestions:  randomFriendsQuestion }
-      });
+      await Game.updateOne(
+        { id: gameId },
+        {
+          $push: { quizQuestions: randomFriendsQuestion }
+        }
+      );
     } catch (e) {
       console.error(`Issue adding tiebreaker question: ${e}`);
     }
   }
-}
+};

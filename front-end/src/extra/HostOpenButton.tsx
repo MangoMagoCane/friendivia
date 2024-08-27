@@ -6,14 +6,20 @@ interface IHostOpenButtonProps {
   description: string;
   onClick?: () => any;
   bgImage?: string;
-  disabled: boolean;
+  disabled?: boolean;
   size?: string;
 }
 
-export default function HostOpenButton(props: IHostOpenButtonProps): React.ReactElement {
-  const { symbol, title, description, onClick, bgImage, disabled, size } = props;
+export default function HostOpenButton({
+  symbol,
+  title,
+  description,
+  onClick,
+  bgImage,
+  disabled,
+  size
+}: IHostOpenButtonProps): React.ReactElement {
   const disabledBg = "radial-gradient(circle, var(--main-light), var(--main))";
-
   const topDisplayBig = (
     <>
       <p style={{ fontSize: "12em", margin: "0px", padding: "0px" }}>{symbol}</p>
@@ -22,7 +28,7 @@ export default function HostOpenButton(props: IHostOpenButtonProps): React.React
           color: "rgba(0,0,0,0.8)",
           fontSize: "3em",
           fontWeight: "bold",
-          fontFamily: "var(--action-font)",
+          fontFamily: "var(--action-font)"
         }}
       >
         {title}
@@ -37,10 +43,10 @@ export default function HostOpenButton(props: IHostOpenButtonProps): React.React
           color: "rgba(0,0,0,0.8)",
           fontSize: "3em",
           fontWeight: "bold",
-          fontFamily: "var(--action-font)",
+          fontFamily: "var(--action-font)"
         }}
       >
-        <span style={{fontSize: "1.2em"}}>{symbol}</span> {title}
+        <span style={{ fontSize: "1.2em" }}>{symbol}</span> {title}
       </h1>
     </>
   );
@@ -61,9 +67,9 @@ export default function HostOpenButton(props: IHostOpenButtonProps): React.React
         boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
         cursor: disabled ? "not-allowed" : "pointer",
         filter: disabled ? "grayscale(100%)" : "none",
-        pointerEvents: disabled ? "none" : "auto",
+        pointerEvents: disabled ? "none" : "auto"
       }}
-      onClick={!disabled ? onClick : () => {}}
+      onClick={onClick}
     >
       {size === "sm" ? topDisplaySmall : topDisplayBig}
       <h1
@@ -73,11 +79,11 @@ export default function HostOpenButton(props: IHostOpenButtonProps): React.React
           fontWeight: "normal",
           paddingLeft: "2vw",
           paddingRight: "2vw",
-          textAlign: "left",
+          textAlign: "left"
         }}
       >
         {description}
       </h1>
     </div>
-    );
+  );
 }

@@ -1,11 +1,11 @@
 import * as React from "react";
-import "../style.css";
 import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
 import { Socket } from "socket.io-client";
 import Speak from "../Speak";
 import { pickOne } from "../util";
 import IQuizOption from "back-end/interfaces/IQuizOption";
+import Timer from "./Timer";
 
 interface HostShowQuestionprops {
   playerName: string;
@@ -26,60 +26,43 @@ function HostShowQuestion({
   timePerQuestion,
   handsFreeMode
 }: HostShowQuestionprops) {
-
   const [timerStarted, setTimerStarted] = React.useState<boolean>(false);
+  const [part1, part2] = questionText.split("<PLAYER>");
+  const instructions = [
+    " Answer on your devices now.",
+    " Give it your best guess.",
+    " What do you think?",
+    " Go ahead and answer now."
+  ];
 
+  let quizText = `${part1} ${playerName} ${part2}"? is it `;
+  for (let i = 0; i < options.length - 1; i++) {
+    quizText += `"${options[i].answerText}", `;
+  }
+  quizText += `or "${options[options.length - 1].answerText}"?`;
+  quizText += pickOne(instructions);
 
-  const interpolatePlayerNameInQuestionText = () => {
-    const [part1, part2] = questionText.split("<PLAYER>");
-    return (
-      <p className="question">
-        {part1}
-        <b>{playerName}</b>
-        {part2}
-      </p>
-    );
-  };
-
-  const quizText = () => {
-    const [part1, part2] = questionText.split("<PLAYER>");
-    var res = "";
-    res += part1 + `${playerName}` + part2 + "? is it ";
-    for (var i = 0; i < options.length; i++) {
-      if (i == options.length - 1) {
-        res += `or "${options[i].answerText}"?`;
-      } else {
-        res += `"${options[i].answerText}", `;
-      }
-    }
-
-    const instructions = [
-      " Answer on your devices now.",
-      " Give it your best guess.",
-      " What do you think?",
-      " Go ahead and answer now."
-    ];
-
-    res += pickOne(instructions);
-    return res;
-  };
+  socket.on("start-timer-success", () => setTimerStarted(true));
 
   const startTimer = () => {
     setTimerStarted(true);
     socket.emit("host-start-quiz-timer", gameId);
   };
-
-  socket.on("start-timer-success", () => setTimerStarted(true));
-
   const onTimerSkipBtn = () => {
     socket.emit("timer-skip", gameId);
   };
 
   return (
     <>
-      <Speak text={quizText()} callback={startTimer} />
-      <Timer started={timerStarted} />
-      <p style={{ marginBottom: "30px", fontSize: "1.3em" }}>{interpolatePlayerNameInQuestionText()}</p>
+      <Speak text={quizText} callback={startTimer} />
+      <Timer started={timerStarted} timePerQuestion={timePerQuestion} />
+      <p style={{ marginBottom: "30px", fontSize: "1.3em" }}>
+        <p className="question">
+          {part1}
+          <b>{playerName}</b>
+          {part2}
+        </p>
+      </p>
 
       <div
         style={{
@@ -126,11 +109,11 @@ function HostShowQuestion({
       </div>
 
       <div>
-        {!handsFreeMode ? (
+        {!handsFreeMode && (
           <Button
             className="button"
             variant="contained"
-            disabled={timerStarted ? false : true}
+            disabled={!timerStarted}
             sx={{
               m: 2,
               margin: "auto",
@@ -140,8 +123,6 @@ function HostShowQuestion({
           >
             show answers
           </Button>
-        ) : (
-          ""
         )}
       </div>
     </>
@@ -149,23 +130,3 @@ function HostShowQuestion({
 }
 
 export default React.memo(HostShowQuestion);
-
-  interface TimerProps {
-    started: boolean
-  }
-  const Timer = (started): => {
-    const started = props.started;
-    const [counter, setCounter] = React.useState(timePerQuestion);
-    React.useEffect(() => {
-      if (started && counter > 0) {
-        setTimeout(() => setCounter(counter - 1), 1000);
-      }
-    }, [counter]);
-    return (
-      <div className="dot">
-        <div className="timer">
-          <div className="timeNumber">{started ? counter : "⌛"}</div>
-        </div>
-      </div>
-    );
-  };

@@ -20,23 +20,21 @@ interface IShowAnswerProps {
   handsFreeMode: boolean;
 }
 
-export default function HostShowAnswer(props: IShowAnswerProps) {
-  const {
-    options,
-    questionText,
-    playerName,
-    correctAnswerIndex,
-    playerGuesses,
-    socket,
-    gameId,
-    quizLength,
-    handsFreeMode
-  } = props;
-
+export default function HostShowAnswer({
+  options,
+  questionText,
+  playerName,
+  correctAnswerIndex,
+  playerGuesses,
+  socket,
+  gameId,
+  quizLength,
+  handsFreeMode
+}: IShowAnswerProps) {
   const totalGuesses = playerGuesses.length - 1;
-  const correctPlayers = playerGuesses.filter((g) => g && g.guess === correctAnswerIndex);
+  const correctPlayers = playerGuesses.filter((g) => g?.guess === correctAnswerIndex);
   const numCorrect = correctPlayers.length;
-  const pctCorrect = Math.floor(100 * (numCorrect / totalGuesses));
+  const pctCorrect = Math.floor(100 * (numCorrect / totalGuesses)); // could error if there are only one totalGuesses?
   const subjectBonus = Math.floor(300 * (numCorrect / totalGuesses));
 
   function interpolatePlayerNameInQuestionText() {

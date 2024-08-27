@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import Speak from "../Speak";
 
 export default function HostTiebreaker() {

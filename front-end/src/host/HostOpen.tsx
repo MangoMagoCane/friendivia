@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import { Button } from "../extra/FrdvButton";
 import { Socket } from "socket.io-client";
 import HostOpenButton from "../extra/HostOpenButton";
@@ -8,34 +7,34 @@ interface IOpenProps {
   socket: Socket;
 }
 
-export default function HostOpen(props: IOpenProps) {
-  const { socket } = props;
+export default function HostOpen({ socket }: IOpenProps) {
   const [showCustom, setShowCustom] = React.useState<boolean>(false);
 
-  async function onHost(customGame: string) {
+  const onHost = (customGame: string) => {
     socket.emit("host-open", customGame);
-  }
+  };
 
-  async function onPreSettings() {
+  const onPreSettings = () => {
     socket.emit("host-pre-settings");
-  }
+  };
 
-  async function onCustomGames() {
+  const onCustomGames = () => {
     setShowCustom(true);
-  }
+  };
 
-  async function backToMain() {
+  const backToMain = () => {
     setShowCustom(false);
-  }
+  };
 
-  async function onCustomSet() {
-    const mode = prompt("Enter the name of a question set to play:");
+  const onCustomSet = () => {
+    // no checking if a set is valid or not
+    const mode = prompt("Enter the name of a question set to play:")?.trim();
     if (mode) {
       onHost(mode);
     } else {
-      alert(":( ok");
+      alert(":( invalid set");
     }
-  }
+  };
 
   const openButtons = (
     <>
@@ -44,15 +43,15 @@ export default function HostOpen(props: IOpenProps) {
         title={"custom"}
         description={"Unique question sets for every occasion. Find the perfect game for you!"}
         onClick={onCustomGames}
-        disabled={false}
         bgImage={"radial-gradient(circle, var(--left-super-light), var(--left-light))"}
       />
       <HostOpenButton
         symbol={"⚡"}
         title={"classic"}
         description={"Classic fun Friendivia gameplay. Let's start the game!"}
-        onClick={() => { onHost("classic") }}
-        disabled={false}
+        onClick={() => {
+          onHost("classic");
+        }}
         bgImage={"radial-gradient(circle, var(--main-super-light), var(--main-light))"}
       />
       <HostOpenButton
@@ -70,27 +69,28 @@ export default function HostOpen(props: IOpenProps) {
       <HostOpenButton
         symbol={"🏫"}
         title={"classroom"}
-        description={"School is in session! This is the perfect question set to engage a younger audience in a classroom setting."}
+        description={
+          "School is in session! This is the perfect question set to engage a younger audience in a classroom setting."
+        }
         onClick={() => onHost("classroom")}
-        disabled={false}
         bgImage={"radial-gradient(circle, var(--left-super-light), var(--left-light))"}
       />
       <HostOpenButton
         symbol={"🏢"}
         title={"corporate"}
-        description={"Ready for some team building? This question set is designed for optimal use in corporate environments."}
+        description={
+          "Ready for some team building? This question set is designed for optimal use in corporate environments."
+        }
         onClick={() => onHost("corporate")}
-        disabled={false}
         bgImage={"radial-gradient(circle, var(--main-super-light), var(--main-light))"}
       />
-      <div style={{display: "flex", flexDirection: "column", height: "100%", gap: "40px", width: "30vw"}}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: "40px", width: "30vw" }}>
         <HostOpenButton
           size="sm"
           symbol={"🥳"}
           title={"party"}
           description={"Just wanna chill? This is the set for you."}
           onClick={() => onHost("fun")}
-          disabled={false}
           bgImage={"radial-gradient(circle, var(--right-super-light), var(--right-light))"}
         />
         <HostOpenButton
@@ -99,11 +99,9 @@ export default function HostOpen(props: IOpenProps) {
           title={"other"}
           description={"Is there another question set you'd like to try? Enter it here."}
           onClick={onCustomSet}
-          disabled={false}
           bgImage={"radial-gradient(circle, #FFF, #FFB)"}
         />
       </div>
-
     </>
   );
 
@@ -113,7 +111,7 @@ export default function HostOpen(props: IOpenProps) {
       className="about-button"
       href="/about"
       sx={{
-        marginTop: "3vh",
+        marginTop: "3vh"
       }}
     >
       about
@@ -126,12 +124,12 @@ export default function HostOpen(props: IOpenProps) {
       className="about-button"
       onClick={backToMain}
       sx={{
-        marginTop: "3vh",
+        marginTop: "3vh"
       }}
     >
       back
     </Button>
-  )
+  );
 
   return (
     <div
@@ -140,7 +138,7 @@ export default function HostOpen(props: IOpenProps) {
         justifyContent: "center",
         verticalAlign: "middle",
         margin: "0 10px",
-        width: "100vw",
+        width: "100vw"
       }}
     >
       <div
@@ -151,15 +149,12 @@ export default function HostOpen(props: IOpenProps) {
           margin: "5vh auto 2vh auto",
           maxWidth: "1400px",
           gap: "40px",
-          height: "65vh",
-
+          height: "65vh"
         }}
       >
         {showCustom ? customButtons : openButtons}
       </div>
-      <div>
-        {showCustom ? backButton : aboutButton}
-      </div>
+      <div>{showCustom ? backButton : aboutButton}</div>
     </div>
   );
 }

@@ -51,21 +51,13 @@ export default function HostApp({ socket }: HostAppProps) {
   const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestion[]>([]);
 
   const [loaded, setLoaded] = React.useState<boolean>(false);
-  const musicRef = React.useRef<HTMLAudioElement>(new Audio(lobbyMusic));
-  //   const [muted, setMuted] = React.useState<boolean>(!(navigator as any).userActivation.hasBeenActive); // Compilation error because "userActivation is not a property on 'navigator'" (it is)
   const [muted, setMuted] = React.useState<boolean>(true);
-  //   console.log(musicRef?.current?.muted);
   const [announcementAudioObjects, setAnnouncementAudioObjects] = React.useState<any>([]);
+
+  const musicRef = React.useRef<HTMLAudioElement>(new Audio(lobbyMusic));
 
   const addAnnouncement = (newAnnouncementAudio) => {
     setAnnouncementAudioObjects((arr) => [...arr, newAnnouncementAudio]);
-  };
-
-  const muteMusic = () => {
-    // if (musicRef.current) {
-    //   musicRef.current.muted = !musicRef?.current?.muted;
-    // }
-    setMuted(!muted);
   };
 
   if (!loaded) {
@@ -269,22 +261,23 @@ export default function HostApp({ socket }: HostAppProps) {
         />
         <audio
           autoPlay
-          loop
+          loop={!muted}
           ref={musicRef}
           src={lobbyMusic}
           muted={muted}
           onPlaying={() => {
-            console.log("currently playing!");
             setMuted(false);
+            console.log(`currently playing! `);
+            console.log(`muted: ${muted} loop: ${musicRef.current.loop}`);
           }}
         />
         <div id="host-banner">
           <div className="musicButton bannerEdge">
-            {/* <IconButton onClick={muteMusic}> */}
             <IconButton
               onClick={() => {
                 musicRef.current.play();
                 setMuted(!muted);
+                console.log(`muted: ${muted} loop: ${musicRef.current.loop}`);
               }}
             >
               <img className="musicIcon" src={muted ? musicOff : musicOn} />

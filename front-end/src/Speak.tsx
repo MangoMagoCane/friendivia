@@ -9,7 +9,7 @@ interface SpeakProps {
 
 export default function Speak({ text, callback = () => {} }: SpeakProps) {
   const textToSpeak = text.replace("friendivia", " friend divvy-uh ");
-  const textHasBeenSpoken = React.useRef(false);
+  const textHasBeenSpoken = React.useRef<boolean>(false);
   const addAnnouncement = React.useContext(AddAnnouncementContext);
 
   const speakFromBrowser = () => {
