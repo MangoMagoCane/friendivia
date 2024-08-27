@@ -145,23 +145,6 @@ export default function HostApp({ socket }: HostAppProps) {
     let quizQuestionOptions: IQuizOption[];
     let quizQuestionText: string;
     let quizQuestionPlayerName: string;
-    const settingsValue = (
-      <HostSettings
-        socket={socket}
-        gameId={gameId}
-        preSettingsId={preSettingsId}
-        settingsState={settingsState}
-        playersInGame={playersInGame}
-        timePerQuestionSetting={timePerQuestion}
-        numQuestionnaireQuestionsSetting={numQuestionnaireQuestions}
-        numQuizQuestionsSetting={numQuizQuestions}
-        handsFreeModeSetting={handsFreeMode}
-        timePerAnswerSetting={timePerAnswer}
-        timePerLeaderboardSetting={timePerLeaderboard}
-        prioritizeCustomQsSetting={prioritizeCustomQs}
-        customQuestionsSetting={customQuestions}
-      />
-    );
 
     switch (state) {
       case "pre-questionnaire":
@@ -183,14 +166,13 @@ export default function HostApp({ socket }: HostAppProps) {
         quizQuestionOptions = currentQuizQuestion.optionsList;
         quizQuestionText = currentQuizQuestion.text;
         quizQuestionPlayerName = currentQuizQuestion.playerName;
-
         return (
           <HostShowQuestion
+            socket={socket}
+            gameId={gameId}
             options={quizQuestionOptions}
             questionText={quizQuestionText}
             playerName={quizQuestionPlayerName}
-            socket={socket}
-            gameId={gameId}
             timePerQuestion={timePerQuestion}
             handsFreeMode={handsFreeMode}
           />
@@ -209,16 +191,15 @@ export default function HostApp({ socket }: HostAppProps) {
         quizQuestionPlayerName = currentQuizQuestion.playerName;
         const correctAnswerIndex = currentQuizQuestion.correctAnswerIndex;
         const quizQuestionsLength = quizQuestions.length;
-
         return (
           <HostShowAnswer
+            socket={socket}
+            gameId={gameId}
             options={quizQuestionOptions}
             questionText={quizQuestionText}
             playerName={quizQuestionPlayerName}
             correctAnswerIndex={correctAnswerIndex}
             playerGuesses={quizQuestionGuesses}
-            socket={socket}
-            gameId={gameId}
             quizLength={quizQuestionsLength}
             handsFreeMode={handsFreeMode}
           />
@@ -241,12 +222,29 @@ export default function HostApp({ socket }: HostAppProps) {
         );
       case "leader-board":
         return <HostLeaderBoard playerScores={playerScores} socket={socket} />;
-      case "settings":
-        return settingsState;
-      case "tiebreaker":
-        return <HostTiebreaker />;
-      default:
-        return <HostOpen socket={socket} />;
+    }
+    if (state === "settings" || settingsState === true) {
+      return (
+        <HostSettings
+          socket={socket}
+          gameId={gameId}
+          preSettingsId={preSettingsId}
+          settingsState={settingsState}
+          playersInGame={playersInGame}
+          timePerQuestionSetting={timePerQuestion}
+          numQuestionnaireQuestionsSetting={numQuestionnaireQuestions}
+          numQuizQuestionsSetting={numQuizQuestions}
+          handsFreeModeSetting={handsFreeMode}
+          timePerAnswerSetting={timePerAnswer}
+          timePerLeaderboardSetting={timePerLeaderboard}
+          prioritizeCustomQsSetting={prioritizeCustomQs}
+          customQuestionsSetting={customQuestions}
+        />
+      );
+    } else if (state === "tiebreaker") {
+      return <HostTiebreaker />;
+    } else {
+      return <HostOpen socket={socket} />;
     }
   };
 
@@ -267,8 +265,6 @@ export default function HostApp({ socket }: HostAppProps) {
           muted={muted}
           onPlaying={() => {
             setMuted(false);
-            console.log(`currently playing! `);
-            console.log(`muted: ${muted} loop: ${musicRef.current.loop}`);
           }}
         />
         <div id="host-banner">
@@ -277,7 +273,6 @@ export default function HostApp({ socket }: HostAppProps) {
               onClick={() => {
                 musicRef.current.play();
                 setMuted(!muted);
-                console.log(`muted: ${muted} loop: ${musicRef.current.loop}`);
               }}
             >
               <img className="musicIcon" src={muted ? musicOff : musicOn} />
