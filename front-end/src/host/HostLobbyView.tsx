@@ -1,11 +1,9 @@
 import React, { ReactNode } from "react";
-import "../style.css";
 import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
 import { Socket } from "socket.io-client";
 import Speak from "../Speak";
 import open from "../assets/audio/appopen.mp3";
-import PlayAudio from "../PlayAudio";
 import PlayerBadge from "./PlayerBadge";
 import { pickOne } from "../util";
 
@@ -104,7 +102,7 @@ export default function HostLobbyView(props: ILobbyViewProps) {
   return (
     <div className="host-lobby">
       <Speak text={`Join at "${joinUrl}"!! Use game I.D.: ${gameStr}`} />
-      <PlayAudio src={open} loop={false} />
+      <audio src={open} loop={false} />
       <div className="join-instructions">
         <div className="join-instruction-edge">{getSliceOfBadges(LEFT_BADGE_START, LEFT_BADGE_END)}</div>
         <div
