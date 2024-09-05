@@ -21,7 +21,7 @@ export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormPr
       alert("Please enter a name.");
       return;
     }
-    socket.emit("player-submit-join", { name, gameId });
+    socket.emit("player-submit-join", name, gameId);
   };
 
   const joinInputs = (
@@ -30,7 +30,7 @@ export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormPr
       <br></br>
       <Stack
         className="joinForm"
-        spacing={2}
+        spacing="2"
         style={{
           borderRadius: "20px",
           background: "white",
