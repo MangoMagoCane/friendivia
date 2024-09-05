@@ -1,12 +1,16 @@
-export function pickOne(arr) {
-  return arr[Math.floor(Math.random()*arr.length)];
+export function pickOne<T>(arr: Array<T>): T {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export function pickOneAndInterp(arr, pName) {
+export function pickOneAndInterp(arr: string[], pName: string): string {
   return pickOne(arr).replace("{{name}}", `"${pName}"`);
-
 }
 
-export function randomRange(min, max) {
-  return min + Math.random()*(max-min);
+export function randomRange(min: number, max: number): number {
+  return min + Math.random() * (max - min);
+}
+
+// Typing seems a bit weird but it seems to be safe
+export function valInArr<T extends string, K extends T>(val: T, arr: K[]): boolean {
+  return arr.includes(val as K);
 }

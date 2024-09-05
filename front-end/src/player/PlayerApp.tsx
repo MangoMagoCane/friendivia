@@ -16,6 +16,7 @@ import PlayerNewRanking from "./PlayerNewRanking";
 import PlayerKicked from "./PlayerKicked";
 import IQuizOption from "back-end/interfaces/IQuizOption";
 import { PlayerState } from "back-end/interfaces/IPlayerState";
+import { valInArr } from "../util";
 
 interface PlayerAppProps {
   socket: Socket;
@@ -76,7 +77,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
     };
   }, [playerState, setPlayerState]);
 
-  const getElementForState = () => {
+  const getElementForState = (): React.JSX.Element => {
     bottomButtons = false;
     switch (playerState) {
       case "filling-questionnaire":
@@ -113,15 +114,17 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
         return <PlayerOver rank={2} />;
       case "rank-three":
         return <PlayerOver rank={3} />;
-      case "":
-      case "init":
-        bottomButtons = true;
-        return <PlayerJoin socket={socket} playerState={playerState} />;
       case "kicked":
         bottomButtons = true;
         return <PlayerKicked socket={socket} />;
-      default:
+      case "":
+      case "init":
+      case "joined-waiting":
+        bottomButtons = true;
         return <PlayerJoin socket={socket} playerState={playerState} />;
+      default:
+        console.log(`ERR: invalid playerState: ${playerState}`);
+        return <></>;
     }
   };
 
@@ -192,6 +195,10 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
     }
   };
 
+  //   const displayPlayerChip: boolean = !(<PlayerState[]>).includes(playerState);
+  const displayPlayerChip: boolean = !valInArr(playerState, ["init", "kicked"]);
+  const displayScoreChip: boolean = !valInArr(playerState, ["filling-questionnaire", "kicked", ""]);
+
   return (
     <div className={playerState !== "filling-questionnaire" ? "fillScreen" : "scroll"} id={getID()}>
       <div className="player_join">
@@ -217,7 +224,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
           <Grid container spacing={0}>
             <Grid item xs={3}>
               {/* {playerState != "init" && playerState != "kicked" ? ( */}
-              {!["init", "kicked"].includes(playerState) && (
+              {displayPlayerChip && (
                 <div className="align_center">
                   {/*if player name has not been inputted do not display username chip*/}
                   {playerName !== "" && (
@@ -244,7 +251,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
               {/*if player name has not been inputted do not display score chip*/}
               {playerState !== "init" && (
                 <div className="align_center">
-                  {!["filling-questionnaire", "kicked", ""].includes(playerState) && (
+                  {displayScoreChip && (
                     <Chip
                       style={{
                         backgroundColor: "white",
