@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import hourglass from "../assets/ufo.gif";
 
 export default function PlayerJoinWait() {
@@ -9,11 +8,11 @@ export default function PlayerJoinWait() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "center"
       }}
     >
       <img
-        style={{ width: "100vw", height: "70vh", marginTop: "-10vh" }}
+        style={{ width: "100vw", height: "70vh", marginTop: "-10vh", imageRendering: "pixelated" }}
         src={hourglass}
         alt="Correct"
       />
@@ -21,7 +20,7 @@ export default function PlayerJoinWait() {
         style={{
           fontFamily: "Concert One",
           fontSize: "1.5em",
-          marginTop: "10vh",
+          marginTop: "10vh"
         }}
       >
         transporting to friendivia...

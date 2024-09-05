@@ -11,6 +11,7 @@ interface PlayerJoinProps {
 
 export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {
   const [joiningPlayerState, setJoiningPlayerState] = React.useState<IPlayerState>({} as IPlayerState);
+  console.log(`player state: ${playerState}`);
 
   React.useEffect(() => {
     if (playerState === "joined-waiting") {
@@ -22,7 +23,7 @@ export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {
   }, [playerState, setJoiningPlayerState]);
 
   React.useEffect(() => {
-    const onJoinSuccess = (playerId: string) => {
+    const onJoinSuccess = (playerId: string): void => {
       localStorage.setItem("player-id", playerId);
       setJoiningPlayerState({
         state: "joined-waiting",
@@ -30,7 +31,7 @@ export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {
       });
     };
 
-    const onJoinError = (errorMsg: string) => {
+    const onJoinError = (errorMsg: string): void => {
       setJoiningPlayerState({
         state: "init",
         message: errorMsg

@@ -130,7 +130,8 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
 
   const getButtonsForState = () => {
     let node: ReactNode = undefined;
-    if (["init", "kicked", "", null].includes(playerState)) {
+    // originally checked if playerState was also null which appears to be an error
+    if (valInArr(playerState, ["init", "kicked", ""])) {
       node = (
         <p>
           <Button
@@ -171,22 +172,19 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
     );
   };
 
-  const getScreenForState = (): string => {
-    return ["init", "kicked", "", null].includes(playerState) ? "element" : "noBtnElement";
-  };
+  // originally checked if playerState was also null which appears to be an error
+  const screenForState = valInArr(playerState, ["init", "kicked", ""]) ? "element" : "noBtnElement";
 
-  const getID = (): string => {
-    return [
-      "question-about-me",
-      "answered-quiz-question-waiting",
-      "did-not-answer-question-waiting",
-      "seeing-answer",
-      "seeing-answer-correct",
-      "seeing-answer-incorrect"
-    ].includes(playerState)
-      ? "fixScreen"
-      : "";
-  };
+  const id = valInArr(playerState, [
+    "question-about-me",
+    "answered-quiz-question-waiting",
+    "did-not-answer-question-waiting",
+    "seeing-answer",
+    "seeing-answer-correct",
+    "seeing-answer-incorrect"
+  ])
+    ? "fixScreen"
+    : "";
 
   const playerQuit = () => {
     if (confirm("Are you sure you want to quit?")) {
@@ -200,7 +198,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   const displayScoreChip: boolean = !valInArr(playerState, ["filling-questionnaire", "kicked", ""]);
 
   return (
-    <div className={playerState !== "filling-questionnaire" ? "fillScreen" : "scroll"} id={getID()}>
+    <div className={playerState !== "filling-questionnaire" ? "fillScreen" : "scroll"} id={id}>
       <div className="player_join">
         <div
           className="banner"
@@ -265,7 +263,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
             </Grid>
           </Grid>
         </div>
-        <div className={getScreenForState()}>{getElementForState()}</div>
+        <div className={screenForState}>{getElementForState()}</div>
         {getButtonsForState()}
       </div>
     </div>

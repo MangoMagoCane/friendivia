@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import { Button } from "../extra/FrdvButton";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
@@ -13,7 +12,7 @@ interface PlayerJoinFormProps {
 }
 
 export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormProps) {
-  const [name, setName] = React.useState("");
+  const [name, setName] = React.useState<string>("");
   const [gameId, setGameId] = React.useState<number>(0);
   const inMessage = `You're in! Please wait for the game to begin.`;
 
@@ -83,7 +82,7 @@ export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormPr
         </div>
         <Button
           className="form"
-          disabled={!name || !gameId}
+          disabled={!(name && gameId)}
           variant="contained"
           size="large"
           style={{
