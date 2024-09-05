@@ -10,12 +10,9 @@ import Player from "../models/Player.ts";
 import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
 
 export default (io: Server, socket: Socket) => {
-  const onPlayerSubmitJoin = async (data) => {
+  // data's type is inferred, may be incorrect
+  const onPlayerSubmitJoin = async (name: string, gameId: number) => {
     try {
-      const name = data.name.trim();
-      const gameId: number = data.gameId;
-      const allPlayersInGame = await playerDb.getPlayers(gameId);
-      const playerWithNameAlready = allPlayersInGame.find((p) => p.name === name);
       const allGames: IGame[] = await Game.find({});
       const foundGame = allGames.find((g) => g.id === gameId);
       const joinableGame = foundGame?.gameState.state === "lobby";
@@ -24,6 +21,9 @@ export default (io: Server, socket: Socket) => {
         socket.emit("join-error", "Invalid Game ID");
         return;
       }
+
+      const allPlayersInGame = await playerDb.getPlayers(gameId);
+      const playerWithNameAlready = allPlayersInGame.find((p) => p.name === name);
 
       if (playerWithNameAlready) {
         socket.emit("join-error", "A player with that name has already joined.");

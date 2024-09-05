@@ -7,6 +7,7 @@ import Game from "../models/Game.ts";
 import hostDb from "./host.ts";
 import { PlayerQuestionnaire, PlayerQuestionnaireQuestion } from "../interfaces/IQuestionnaireQuestion.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
+import IPlayerScore from "../interfaces/IPlayerScore.ts";
 
 type Score = { name: string; score: number };
 
@@ -273,11 +274,10 @@ export default {
 
   getPlayerScores: async function (gameId: number): Promise<Score[]> {
     const playersInGame = await this.getPlayers(gameId);
-    const playerScores = playersInGame.map((p) => ({
+    const playerScores: IPlayerScore[] = playersInGame.map((p) => ({
       name: p.name,
       score: p.score
     }));
-
     return playerScores;
   },
 
