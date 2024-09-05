@@ -2,7 +2,6 @@ import { Server, Socket } from "socket.io";
 import hostDb from "../db/host.ts";
 import playerDb from "../db/player.ts";
 import questionDb from "../db/question.ts";
-import { PlayerState } from "../interfaces/IPlayerState.ts";
 import IGame from "../interfaces/IGame.ts";
 import IPreGameSettings from "../interfaces/IPreGameSettings.ts";
 import Game from "../models/Game.ts";

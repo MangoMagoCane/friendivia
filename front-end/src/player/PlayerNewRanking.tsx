@@ -1,8 +1,8 @@
-import IPlayer from "back-end/interfaces/IPlayer";
+import IPlayerScore from "back-end/interfaces/IPlayerScore";
 import * as React from "react";
 
 interface RankingProps {
-  playerScores: IPlayer[];
+  playerScores: IPlayerScore[];
   playerName: string;
 }
 

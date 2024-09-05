@@ -17,6 +17,7 @@ import PlayerKicked from "./PlayerKicked";
 import IQuizOption from "back-end/interfaces/IQuizOption";
 import { PlayerState } from "back-end/interfaces/IPlayerState";
 import { valInArr } from "../util";
+import IPlayerScore from "back-end/interfaces/IPlayerScore";
 
 interface PlayerAppProps {
   socket: Socket;
@@ -29,7 +30,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   const [playerScore, setPlayerScore] = React.useState<number>(0);
   const [scoreDiff, setScoreDiff] = React.useState<number>(0);
   const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
-  const [allPlayerScores, setAllPlayerScores] = React.useState<[]>([]); // should be given a proper type when I figure it out
+  const [allPlayerScores, setAllPlayerScores] = React.useState<IPlayerScore[]>([]); // NOTE: Created new IPlayerScore interface which is probably correct
   const [questionnaireQuestionsText, setQuestionnaireQuestionsText] = React.useState<string[]>([]);
   const [quizQuestionOptionsText, setQuizQuestionOptionsText] = React.useState<IQuizOption[]>([]);
   const [loaded, setLoaded] = React.useState<boolean>(false);
