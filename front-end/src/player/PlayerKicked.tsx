@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import { Socket } from "socket.io-client";
 import PlayerJoinForm from "./PlayerJoinForm";
 

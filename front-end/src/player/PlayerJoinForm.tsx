@@ -14,15 +14,7 @@ interface PlayerJoinFormProps {
 export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormProps) {
   const [name, setName] = React.useState<string>("");
   const [gameId, setGameId] = React.useState<number>(0);
-  const inMessage = `You're in! Please wait for the game to begin.`;
-
-  const onSubmitJoin = () => {
-    if (name.trim() === "") {
-      alert("Please enter a name.");
-      return;
-    }
-    socket.emit("player-submit-join", name, gameId);
-  };
+  // const inMessage = `You're in! Please wait for the game to begin.`;
 
   const joinInputs = (
     <>
@@ -82,7 +74,7 @@ export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormPr
         </div>
         <Button
           className="form"
-          disabled={!(name && gameId)}
+          disabled={!(name.trim() && gameId)}
           variant="contained"
           size="large"
           style={{
@@ -91,7 +83,7 @@ export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormPr
             fontWeight: "light",
             fontSize: "1.29em"
           }}
-          onClick={onSubmitJoin}
+          onClick={() => socket.emit("player-submit-join", name, gameId)}
         >
           join game
         </Button>

@@ -18,6 +18,8 @@ import IQuizOption from "back-end/interfaces/IQuizOption";
 import { PlayerState } from "back-end/interfaces/IPlayerState";
 import { valInArr } from "../util";
 import IPlayerScore from "back-end/interfaces/IPlayerScore";
+import IPlayer from "back-end/interfaces/IPlayer";
+import { IPlayerLoadSuccess } from "back-end/interfaces/IExtraData";
 
 interface PlayerAppProps {
   socket: Socket;
@@ -35,31 +37,32 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   const [quizQuestionOptionsText, setQuizQuestionOptionsText] = React.useState<IQuizOption[]>([]);
   const [loaded, setLoaded] = React.useState<boolean>(false);
 
-  let bottomButtons: boolean;
+  // let bottomButtons: boolean;
+  console.log(`player state: "${playerState}"`);
 
   if (!loaded) {
     socket.emit("player-load", playerIdFromStorage);
   }
 
   React.useEffect(() => {
-    const onLoadSuccess = (data: any) => {
+    const onLoadSuccess = (player: IPlayer, extraData: IPlayerLoadSuccess) => {
       setLoaded(true);
-      setPlayerState(data.player.playerState.state);
-      setPlayerName(data.player.name);
+      setPlayerState(player.playerState.state);
+      setPlayerName(player.name);
 
-      setScoreDiff(data.player.score - playerScore);
-      setPlayerScore(data.player.score);
+      setScoreDiff(player.score - playerScore);
+      setPlayerScore(player.score);
 
-      if (data?.extraData?.playerScores) {
-        setAllPlayerScores(data.extraData.playerScores);
+      if (extraData?.playerScores) {
+        setAllPlayerScores(extraData.playerScores);
       }
 
-      if (data?.extraData?.questionnaireQuestionsText) {
-        setQuestionnaireQuestionsText(data.extraData.questionnaireQuestionsText);
+      if (extraData?.questionnaireQuestionsText) {
+        setQuestionnaireQuestionsText(extraData.questionnaireQuestionsText);
       }
 
-      if (data?.extraData?.quizQuestionOptionsText) {
-        setQuizQuestionOptionsText(data.extraData.quizQuestionOptionsText);
+      if (extraData?.quizQuestionOptionsText) {
+        setQuizQuestionOptionsText(extraData.quizQuestionOptionsText);
       }
     };
 
@@ -79,7 +82,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   }, [playerState, setPlayerState]);
 
   const getElementForState = (): React.JSX.Element => {
-    bottomButtons = false;
+    // bottomButtons = false;
     switch (playerState) {
       case "filling-questionnaire":
       case "submitted-questionnaire-waiting":
@@ -116,12 +119,12 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
       case "rank-three":
         return <PlayerOver rank={3} />;
       case "kicked":
-        bottomButtons = true;
+        // bottomButtons = true;
         return <PlayerKicked socket={socket} />;
       case "":
       case "init":
       case "joined-waiting":
-        bottomButtons = true;
+        // bottomButtons = true;
         return <PlayerJoin socket={socket} playerState={playerState} />;
       default:
         console.log(`ERR: invalid playerState: ${playerState}`);
@@ -130,45 +133,41 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   };
 
   const getButtonsForState = () => {
-    let node: ReactNode = undefined;
     // originally checked if playerState was also null which appears to be an error
-    if (valInArr(playerState, ["init", "kicked", ""])) {
-      node = (
-        <p>
-          <Button
-            className="button"
-            id="HostPlayerApp"
-            variant="contained"
-            sx={{
-              m: 2,
-              position: "absolute",
-              bottom: "10px",
-              left: "10px"
-            }}
-            href="/host"
-          >
-            host
-          </Button>
-          <Button
-            className="button"
-            id="AboutPlayerApp"
-            variant="contained"
-            sx={{
-              m: 2,
-              position: "absolute",
-              bottom: "10px",
-              right: "10px"
-            }}
-            href="/about"
-          >
-            about
-          </Button>
-        </p>
-      );
-    }
     return (
       <div className="bottomContainer" id="btmContainPlayerApp">
-        {node}
+        {valInArr(playerState, ["init", "kicked", ""]) && (
+          <p>
+            <Button
+              className="button"
+              id="HostPlayerApp"
+              variant="contained"
+              sx={{
+                m: 2,
+                position: "absolute",
+                bottom: "10px",
+                left: "10px"
+              }}
+              href="/host"
+            >
+              host
+            </Button>
+            <Button
+              className="button"
+              id="AboutPlayerApp"
+              variant="contained"
+              sx={{
+                m: 2,
+                position: "absolute",
+                bottom: "10px",
+                right: "10px"
+              }}
+              href="/about"
+            >
+              about
+            </Button>
+          </p>
+        )}
       </div>
     );
   };

@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import { Socket } from "socket.io-client";
 import PlayerJoinForm from "./PlayerJoinForm";
 import { IPlayerState } from "back-end/interfaces/IPlayerState";
@@ -11,7 +10,6 @@ interface PlayerJoinProps {
 
 export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {
   const [joiningPlayerState, setJoiningPlayerState] = React.useState<IPlayerState>({} as IPlayerState);
-  console.log(`player state: ${playerState}`);
 
   React.useEffect(() => {
     if (playerState === "joined-waiting") {
