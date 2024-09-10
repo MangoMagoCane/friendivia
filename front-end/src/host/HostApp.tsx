@@ -7,7 +7,6 @@ import HostPreQuiz from "./HostPreQuiz";
 import HostShowQuestion from "./HostShowQuestion";
 import IQuizQuestion from "back-end/interfaces/IQuizQuestion";
 import IQuizOption from "back-end/interfaces/IQuizOption";
-import IGame from "back-end/interfaces/IGame";
 import IPreGameSettings from "back-end/interfaces/IPreGameSettings";
 import HostShowAnswer from "./HostShowAnswer";
 import HostLeaderBoard from "./HostLeaderBoard";
@@ -23,6 +22,7 @@ import musicOff from "../assets/musicoff.png";
 import { IQuestionnaireQuestion } from "back-end/interfaces/IQuestionnaireQuestion";
 import { HostAnnouncementQueue, AddAnnouncementContext } from "./HostAnnouncementQueue";
 import { GameState } from "back-end/interfaces/IGameState";
+import IGameDB from "back-end/interfaces/IGameDB";
 
 interface HostAppProps {
   socket: Socket;
@@ -72,7 +72,7 @@ export default function HostApp({ socket }: HostAppProps) {
   };
 
   React.useEffect(() => {
-    const onLoadSuccess = (data: IGame & { quizQuestionGuesses; playerScores; playersInGame }) => {
+    const onLoadSuccess = (data: IGameDB & { quizQuestionGuesses; playerScores; playersInGame }) => {
       setLoaded(true);
       setGameId(data.id);
       setGameState(data.gameState.state);

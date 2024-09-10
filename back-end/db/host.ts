@@ -1,4 +1,4 @@
-import IGame from "../interfaces/IGameDB.ts";
+import IGameDB from "../interfaces/IGameDB.ts";
 import IPreGameSettings from "../interfaces/IPreGameSettings.ts";
 import { GameState } from "../interfaces/IGameState.ts";
 import Game from "../models/Game.ts";
@@ -9,7 +9,6 @@ import playerDb from "../db/player.ts";
 import * as uuid from "uuid";
 import Player from "../models/Player.ts";
 import friendsQuestions from "./friendsTriviaQuestions.ts";
-import IPlayer from "../interfaces/IPlayerDB.ts";
 import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
 import ISettings from "../interfaces/ISettings.ts";
 
@@ -59,7 +58,7 @@ export default {
         }
       }
 
-      const newGameObject: IGame = {
+      const newGameObject: IGameDB = {
         id: newId,
         gameState: {
           state: "lobby",
@@ -92,7 +91,7 @@ export default {
     }
   },
 
-  getGameData: async (gameId: number): Promise<IGame | null> => {
+  getGameData: async (gameId: number): Promise<IGameDB | null> => {
     try {
       const gameData = await Game.findOne({ id: gameId });
       const gameDataPOJO = gameData?.toObject();
@@ -106,7 +105,7 @@ export default {
     }
   },
 
-  getGameDataFromSocketId: async (socketId: string): Promise<IGame | null> => {
+  getGameDataFromSocketId: async (socketId: string): Promise<IGameDB | null> => {
     try {
       const gameData: any = await Game.findOne({ hostSocketId: socketId });
       return gameData?.toObject();
@@ -159,7 +158,7 @@ export default {
 
   getPlayerQuestionnaires: async function (gameId: number): Promise<PlayerQuestionnaire[]> {
     try {
-      const game: IGame | null = await this.getGameData(gameId);
+      const game: IGameDB | null = await this.getGameData(gameId);
       if (!game) {
         return [];
       }
@@ -171,7 +170,7 @@ export default {
     }
   },
 
-  buildQuiz: async (game: IGame): Promise<IQuizQuestion[]> => {
+  buildQuiz: async (game: IGameDB): Promise<IQuizQuestion[]> => {
     const quizQuestions: IQuizQuestion[] = await utilDb.createQuiz(game.playerQuestionnaires, game.customMode);
     await Game.updateOne(
       { id: game.id },
@@ -183,7 +182,7 @@ export default {
     return quizQuestions;
   },
 
-  questionsRemaining: function (game: IGame): boolean {
+  questionsRemaining: function (game: IGameDB): boolean {
     const currentQuestionIndex = game.currentQuestionIndex;
     const nextQuestionIndex = currentQuestionIndex + 1;
 

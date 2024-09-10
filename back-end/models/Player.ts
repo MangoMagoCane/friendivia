@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
-import IPlayer from "../interfaces/IPlayerDB";
+import IPlayerDB from "../interfaces/IPlayerDB";
 
-const playerSchema = new Schema<IPlayer>({
+const playerSchema = new Schema<IPlayerDB>({
   name: { type: String, required: true },
   id: { type: String, required: true },
   questionnaireAnswers: [{ type: String }],
@@ -12,5 +12,5 @@ const playerSchema = new Schema<IPlayer>({
   playerSocketId: { type: String, required: true }
 });
 
-const Player = model<IPlayer>("Player", playerSchema);
+const Player = model<IPlayerDB>("Player", playerSchema);
 export default Player;

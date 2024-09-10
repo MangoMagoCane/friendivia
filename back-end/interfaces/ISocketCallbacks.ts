@@ -1,4 +1,4 @@
-import IPlayer from "./IPlayerDB";
+import IPlayerDB from "./IPlayerDB";
 import IPlayerScore from "./IPlayerScore";
 import IQuizOption from "./IQuizOption";
 
@@ -10,5 +10,5 @@ export interface IPlayerLoadSuccess {
 
 export interface IPlayersObject {
   gameId: number;
-  players: IPlayer[];
+  players: IPlayerDB[];
 }

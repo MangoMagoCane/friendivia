@@ -2,8 +2,8 @@ import { Server, Socket } from "socket.io";
 import playerDb from "../db/player.ts";
 import hostDb from "../db/host.ts";
 import questionDb from "../db/question.ts";
-import IPlayer from "../interfaces/IPlayerDB.ts";
-import IGame from "../interfaces/IGameDB.ts";
+import IPlayerDB from "../interfaces/IPlayerDB.ts";
+import IGameDB from "../interfaces/IGameDB.ts";
 import Game from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
 import Player from "../models/Player.ts";
@@ -12,7 +12,7 @@ export default (io: Server, socket: Socket) => {
   // data's type is inferred, may be incorrect
   const onPlayerSubmitJoin = async (name: string, gameId: number) => {
     try {
-      const game: IGame | null = await Game.findOne({ id: gameId }).exec();
+      const game: IGameDB | null = await Game.findOne({ id: gameId }).exec();
       if (game?.gameState.state !== "lobby") {
         throw Error("Invalid Game ID");
       }
@@ -137,12 +137,12 @@ export default (io: Server, socket: Socket) => {
 
   const onHostKickPlayer = async (playerName: string) => {
     try {
-      const currentGameData: IGame | null = await hostDb.getGameDataFromSocketId(socket.id);
+      const currentGameData: IGameDB | null = await hostDb.getGameDataFromSocketId(socket.id);
       if (currentGameData === null) {
         return;
       }
       const gameId = currentGameData.id;
-      const player: IPlayer | null = await playerDb.getPlayerByName(playerName, gameId);
+      const player: IPlayerDB | null = await playerDb.getPlayerByName(playerName, gameId);
       if (player === null) {
         // ! TEMPORARYCHAGNE
         return;
@@ -163,13 +163,13 @@ export default (io: Server, socket: Socket) => {
   };
 
   const onPlayerQuit = async () => {
-    const player: IPlayer | null = await playerDb.getPlayerBySocketId(socket.id);
+    const player: IPlayerDB | null = await playerDb.getPlayerBySocketId(socket.id);
     if (!player) {
       socket.emit("player-game-ended");
       return;
     }
 
-    const game: IGame | null = await hostDb.getGameData(player.gameId);
+    const game: IGameDB | null = await hostDb.getGameData(player.gameId);
     if (!game) {
       return;
     }

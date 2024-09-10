@@ -1,4 +1,4 @@
-import IPlayer from "../interfaces/IPlayerDB.ts";
+import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import {
   IQuestionnaireQuestion,
   PlayerQuestionnaire,
@@ -14,7 +14,7 @@ function getNumberOfQuestions(players: any[]) {
 }
 
 export async function createQuestionnairesForPlayers(
-  players: IPlayer[],
+  players: IPlayerDB[],
   customMode: string
 ): Promise<PlayerQuestionnaire[]> {
   const totalQuestions = getNumberOfQuestions(players);
@@ -22,7 +22,7 @@ export async function createQuestionnairesForPlayers(
   const playerQuestionnaires: PlayerQuestionnaire[] = [];
 
   for (let i = 0; i < players.length; i++) {
-    const player: IPlayer = players[i];
+    const player: IPlayerDB = players[i];
     const questionIds: PlayerQuestionnaireQuestion[] = [];
 
     for (let j = 0; j < 4; j++) {
@@ -91,7 +91,7 @@ export async function createQuiz(playerQuestionnaires: PlayerQuestionnaire[], cu
         (q) => q.questionId.toString() === playerQuestion.questionId.toString()
       );
       if (optionPlayerQ && optionPlayerQ.answer) {
-        const optionPlayer: IPlayer | null = await playerDb.getPlayer(optionPlayerQp.playerId);
+        const optionPlayer: IPlayerDB | null = await playerDb.getPlayer(optionPlayerQp.playerId);
         if (!optionPlayer) {
           continue;
         }
@@ -193,7 +193,7 @@ export const shuffle = (array: any[]): void => {
 };
 
 export const generateQuiz = (
-  players: IPlayer[],
+  players: IPlayerDB[],
   questionnaireQs: IQuestionnaireQuestion[],
   numQuizQuestions: number
 ): IQuizQuestion[] => {

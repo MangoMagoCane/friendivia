@@ -1,12 +1,12 @@
 import playerDb from "../db/player.ts";
 import hostDb from "../db/host.ts";
 import questionDb from "../db/question.ts";
-import IGame from "../interfaces/IGameDB.ts";
+import IGameDB from "../interfaces/IGameDB.ts";
 import playerHelpers from "./playerHelpers.ts";
 import { Server } from "socket.io";
 import Player from "../models/Player.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
-import IPlayer from "../interfaces/IPlayerDB.ts";
+import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import IGuess from "../interfaces/IGuess.ts";
 import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
 
@@ -17,7 +17,7 @@ const PRE_QUESTIONNAIRE_MS = 3000;
 let nextQuestionTimer: NodeJS.Timeout;
 
 export const hostGoNext = async (gameId: number, io: Server): Promise<void> => {
-  const currentGameData: IGame | null = await hostDb.getGameData(gameId);
+  const currentGameData: IGameDB | null = await hostDb.getGameData(gameId);
   if (!currentGameData) {
     return;
   }
@@ -27,13 +27,13 @@ export const hostGoNext = async (gameId: number, io: Server): Promise<void> => {
 
 export const hostGoToQuestionnaire = async (gameId: number, io: Server): Promise<void> => {
   try {
-    const players: IPlayer[] = await playerDb.getPlayers(gameId);
+    const players: IPlayerDB[] = await playerDb.getPlayers(gameId);
 
     if (players.length >= 2) {
       const playerQuestionnaires: PlayerQuestionnaire[] = await hostDb.moveGameToQuestionnaire(gameId);
       await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": "filling-questionnaire" } });
       // await Player.updateMany({ gameId: gameId }, { $set: { playeState: { state: "filling-questionnaire" } } });
-      const currentGameData: IGame | null = await hostDb.getGameData(gameId);
+      const currentGameData: IGameDB | null = await hostDb.getGameData(gameId);
       if (!currentGameData) {
         return;
       }
@@ -43,7 +43,7 @@ export const hostGoToQuestionnaire = async (gameId: number, io: Server): Promise
 
       for (let i = 0; i < playerQuestionnaires.length; i++) {
         const playerQuestionnaire: PlayerQuestionnaire = playerQuestionnaires[i];
-        const player: IPlayer | null = await playerDb.getPlayer(playerQuestionnaire.playerId);
+        const player: IPlayerDB | null = await playerDb.getPlayer(playerQuestionnaire.playerId);
         if (!player) {
           continue;
         }
@@ -186,7 +186,7 @@ export const hostPreAnswer = async (gameId: number, io: Server): Promise<void> =
   setTimeout(hostShowAnswer, PRE_ANSWER_MS, gameId, io);
 };
 
-export const handleTiebreakerAnswers = async (allPlayers: IPlayer[], quizQIndex, correctQIndex): Promise<void> => {
+export const handleTiebreakerAnswers = async (allPlayers: IPlayerDB[], quizQIndex, correctQIndex): Promise<void> => {
   if (allPlayers.length < 1) {
     return;
   }
@@ -200,7 +200,7 @@ export const handleTiebreakerAnswers = async (allPlayers: IPlayer[], quizQIndex,
   }
 
   const bottomPlayersBySpeed = playerDb.getPlayersSortedByGuessSpeed(topPlayers, quizQIndex);
-  let bonusPlayer: IPlayer = bottomPlayersBySpeed[0];
+  let bonusPlayer: IPlayerDB = bottomPlayersBySpeed[0];
   for (let i = 1; i < bottomPlayersBySpeed.length; i++) {
     const currentPlayer = bottomPlayersBySpeed[i];
     const currentGuess = currentPlayer.quizGuesses[quizQIndex];
@@ -263,7 +263,7 @@ export const hostShowAnswer = async (gameId: number, io: Server): Promise<void> 
   }
 
   for (let i = 0; i < nonSubjectPlayers.length; i++) {
-    const currentPlayer: IPlayer = nonSubjectPlayers[i];
+    const currentPlayer: IPlayerDB = nonSubjectPlayers[i];
     const currentPlayerCurrentGuess: IGuess = currentPlayer.quizGuesses[currentQuestionIndex];
     const playerCorrect: boolean = currentPlayerCurrentGuess && currentPlayerCurrentGuess.guess === correctGuess;
     const currentPlayerNewState: PlayerState = playerCorrect ? "seeing-answer-correct" : "seeing-answer-incorrect";
@@ -327,7 +327,7 @@ export const onHostViewUpdate = async (gameId: number, io: Server) => {
   }
 };
 
-export const handlePlayerQuit = async (player: IPlayer, game: IGame, io: Server) => {
+export const handlePlayerQuit = async (player: IPlayerDB, game: IGameDB, io: Server) => {
   await playerDb.kickPlayer(player.name, game.id);
   const allPlayersInGame = await playerDb.getPlayers(game.id);
 

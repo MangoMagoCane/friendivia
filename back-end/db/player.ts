@@ -1,7 +1,7 @@
 import * as uuid from "uuid";
-import IPlayer from "../interfaces/IPlayerDB.ts";
+import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import Player from "../models/Player.ts";
-import IGame from "../interfaces/IGameDB.ts";
+import IGameDB from "../interfaces/IGameDB.ts";
 import IGuess from "../interfaces/IGuess.ts";
 import Game from "../models/Game.ts";
 import hostDb from "./host.ts";
@@ -12,7 +12,7 @@ import { Server } from "socket.io";
 import { IPlayerLoadSuccess } from "../interfaces/ISocketCallbacks.ts";
 
 export default {
-  getPlayers: async (gameId: number): Promise<IPlayer[]> => {
+  getPlayers: async (gameId: number): Promise<IPlayerDB[]> => {
     try {
       const players = await Player.find({ gameId: gameId });
       return players;
@@ -22,7 +22,7 @@ export default {
     }
   },
 
-  getPlayersWithQuestionnairesCompleted: async (gameId: number, qLength: number): Promise<IPlayer[]> => {
+  getPlayersWithQuestionnairesCompleted: async (gameId: number, qLength: number): Promise<IPlayerDB[]> => {
     try {
       const players = await Player.find({ gameId: gameId });
       return players.filter((p) => p.questionnaireAnswers.length === qLength);
@@ -35,7 +35,7 @@ export default {
   addPlayer: async (playerName: string, gameId: number, socketId: string): Promise<string> => {
     try {
       const playerId = `player_${uuid.v4()}`;
-      const newPlayerObject: IPlayer = {
+      const newPlayerObject: IPlayerDB = {
         name: playerName,
         id: playerId,
         questionnaireAnswers: [],
@@ -58,7 +58,7 @@ export default {
     }
   },
 
-  getPlayer: async (playerId: string): Promise<IPlayer | null> => {
+  getPlayer: async (playerId: string): Promise<IPlayerDB | null> => {
     try {
       const player = await Player.findOne({ id: playerId });
       return player;
@@ -68,7 +68,7 @@ export default {
     }
   },
 
-  getPlayerByName: async (playerName: string, gameId: number): Promise<IPlayer | null> => {
+  getPlayerByName: async (playerName: string, gameId: number): Promise<IPlayerDB | null> => {
     try {
       const player = await Player.findOne({ name: playerName, gameId: gameId });
       return player;
@@ -87,7 +87,7 @@ export default {
     }
   },
 
-  getPlayerBySocketId: async (socketId: string): Promise<IPlayer | null> => {
+  getPlayerBySocketId: async (socketId: string): Promise<IPlayerDB | null> => {
     try {
       const player = await Player.findOne({ playerSocketId: socketId });
       return player;
@@ -128,7 +128,7 @@ export default {
     }
   },
 
-  playerCompleteQuestionnaire: async (player: IPlayer, questionnaireAnswers: string[]): Promise<undefined> => {
+  playerCompleteQuestionnaire: async (player: IPlayerDB, questionnaireAnswers: string[]): Promise<undefined> => {
     try {
       const game = await hostDb.getGameData(player.gameId);
       if (game === null) {
@@ -182,15 +182,15 @@ export default {
     }
   },
 
-  getPlayersSortedByGuessSpeed: function (guessingPlayers: IPlayer[], quizQIndex: number): IPlayer[] {
+  getPlayersSortedByGuessSpeed: function (guessingPlayers: IPlayerDB[], quizQIndex: number): IPlayerDB[] {
     const guessTime = (p) => (p.quizGuesses[quizQIndex] ? p.quizGuesses[quizQIndex].timestamp : 0);
-    const timeBetweenPlayerGuesses = (a: IPlayer, b: IPlayer) => guessTime(b) - guessTime(a);
+    const timeBetweenPlayerGuesses = (a: IPlayerDB, b: IPlayerDB) => guessTime(b) - guessTime(a);
     guessingPlayers.sort(timeBetweenPlayerGuesses);
 
     return guessingPlayers;
   },
 
-  awardAllPlayersConsolationPoints: async function (guessingPlayers: IPlayer[], quizQIndex: number): Promise<any> {
+  awardAllPlayersConsolationPoints: async function (guessingPlayers: IPlayerDB[], quizQIndex: number): Promise<any> {
     const sortedPlayers = this.getPlayersSortedByGuessSpeed(guessingPlayers, quizQIndex);
 
     for (let i = 0; i < sortedPlayers.length; i++) {
@@ -201,7 +201,7 @@ export default {
 
   awardPlayerPoints: async (playerId: string, points: number): Promise<any> => {
     try {
-      const player: IPlayer | null = await Player.findOne({ id: playerId });
+      const player: IPlayerDB | null = await Player.findOne({ id: playerId });
 
       if (player === null) {
         throw `Player not found: ${playerId}`;
@@ -222,7 +222,7 @@ export default {
     }
   },
 
-  playerAnswerQuestion: async function (playerId: string, guess: number, gameData: IGame): Promise<void> {
+  playerAnswerQuestion: async function (playerId: string, guess: number, gameData: IGameDB): Promise<void> {
     try {
       const player = await Player.findOne({ id: playerId });
       if (player === null) {

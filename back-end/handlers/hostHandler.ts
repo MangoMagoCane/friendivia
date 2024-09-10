@@ -2,11 +2,11 @@ import { Server, Socket } from "socket.io";
 import hostDb from "../db/host.ts";
 import playerDb from "../db/player.ts";
 import questionDb from "../db/question.ts";
-import IGame from "../interfaces/IGameDB.ts";
+import IGameDB from "../interfaces/IGameDB.ts";
 import Game from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
 import Player from "../models/Player.ts";
-import IPlayer from "../interfaces/IPlayerDB.ts";
+import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import PreGameSettings from "../models/PreGameSettings.ts";
 import { valInArr } from "../../front-end/src/util.ts";
 import ISettings from "../interfaces/ISettings.ts";
@@ -112,7 +112,7 @@ export default (io: Server, socket: Socket) => {
       await hostDb.deleteGame(gameData.id);
       socket.emit("host-game-ended");
 
-      const allPlayersInGame: IPlayer[] = await playerDb.getPlayers(gameData.id);
+      const allPlayersInGame: IPlayerDB[] = await playerDb.getPlayers(gameData.id);
       for (const player of allPlayersInGame) {
         await playerDb.deletePlayer(player.id);
         io.to(player.playerSocketId).emit("player-game-ended");
@@ -245,12 +245,12 @@ export default (io: Server, socket: Socket) => {
 
   const onHostSkipQuestionnaire = async () => {
     try {
-      const gameData: IGame | null = await hostDb.getGameDataFromSocketId(socket.id);
+      const gameData: IGameDB | null = await hostDb.getGameDataFromSocketId(socket.id);
       if (gameData === null) {
         return;
       }
 
-      const playersInGame: IPlayer[] = await playerDb.getPlayers(gameData.id);
+      const playersInGame: IPlayerDB[] = await playerDb.getPlayers(gameData.id);
       if (playersInGame.some((p) => p.playerState.state === "submitted-questionnaire-waiting")) {
         await hostHelpers.hostStartQuiz(gameData.id, io);
       }
