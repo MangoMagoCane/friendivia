@@ -5,19 +5,15 @@ import Speak from "../Speak";
 import { Socket } from "socket.io-client";
 import IPlayer from "back-end/interfaces/IPlayer";
 import HostQuestionnaireView from "./HostQuestionnaireView";
+import { getPlayerNamesForState } from "../util";
+import { IPlayersObject } from "back-end/interfaces/ISocketCallbacks";
 
-interface IQuestionnaireProps {
+interface HostQuestionnaireProps {
   socket: Socket;
-  gameId: number;
   playersInGame: IPlayer[];
 }
 
-function getPlayerNamesForState(players: IPlayer[], state: string) {
-  return players.filter((p) => p.playerState.state === state).map((p) => p.name);
-}
-
-export default function HostQuestionnaire(props: IQuestionnaireProps) {
-  const { socket, gameId, playersInGame } = props;
+export default function HostQuestionnaire({ socket, playersInGame }: HostQuestionnaireProps) {
   const donePlayersStart = getPlayerNamesForState(playersInGame, "submitted-questionnaire-waiting");
   const waitingPlayersStart = getPlayerNamesForState(playersInGame, "filling-questionnaire");
 
@@ -25,19 +21,18 @@ export default function HostQuestionnaire(props: IQuestionnaireProps) {
   const [waitingPlayers, setWaitingPlayers] = React.useState<string[]>(waitingPlayersStart);
 
   React.useEffect(() => {
-    function onStatusReceived(playerStatusList: any) {
+    const onStatusReceived = (playerStatusList: string[][]) => {
       setDonePlayers(playerStatusList[0]);
       setWaitingPlayers(playerStatusList[1]);
-    }
+    };
 
-    socket.on("update-host-view", onStatusReceived);
-
-    function onPlayersUpdated(playersObject: any) {
+    const onPlayersUpdated = (playersObject: IPlayersObject) => {
       const updatedDonePlayers = getPlayerNamesForState(playersObject.players, "submitted-questionnaire-waiting");
       const updatedWaitingPlayers = getPlayerNamesForState(playersObject.players, "filling-questionnaire");
       onStatusReceived([updatedDonePlayers, updatedWaitingPlayers]);
-    }
+    };
 
+    socket.on("update-host-view", onStatusReceived);
     socket.on("players-updated", onPlayersUpdated);
 
     return () => {
@@ -49,12 +44,7 @@ export default function HostQuestionnaire(props: IQuestionnaireProps) {
     <>
       <Speak text={"Fill out your questionnaires on your devices now."} />
       <audio src={theme} loop={true} />
-      <HostQuestionnaireView
-        donePlayers={donePlayers}
-        waitingPlayers={waitingPlayers}
-        gameId={gameId}
-        socket={socket}
-      />
+      <HostQuestionnaireView donePlayers={donePlayers} waitingPlayers={waitingPlayers} socket={socket} />
     </>
   );
 }

@@ -8,8 +8,8 @@ import hostDb from "./host.ts";
 import { PlayerQuestionnaire, PlayerQuestionnaireQuestion } from "../interfaces/IQuestionnaireQuestion.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
 import IPlayerScore from "../interfaces/IPlayerScore.ts";
-
-type Score = { name: string; score: number };
+import { Server } from "socket.io";
+import { IPlayerLoadSuccess } from "../interfaces/ISocketCallbacks.ts";
 
 export default {
   getPlayers: async (gameId: number): Promise<IPlayer[]> => {
@@ -18,7 +18,7 @@ export default {
       return players;
     } catch (e) {
       console.error(`Issue getting player names: ${e}`);
-      return [];
+      throw Error("Failed to get players", { cause: e });
     }
   },
 
@@ -28,7 +28,7 @@ export default {
       return players.filter((p) => p.questionnaireAnswers.length === qLength);
     } catch (e) {
       console.error(`Issue getting players with completed questionnaires: ${e}`);
-      return [];
+      throw Error("Failed to get players with completed questionnaires", { cause: e });
     }
   },
 
@@ -54,7 +54,7 @@ export default {
       return playerId;
     } catch (e) {
       console.error(`Issue adding player: ${e}`);
-      return "";
+      throw Error("Failed to add new player", { cause: e });
     }
   },
 
@@ -64,66 +64,74 @@ export default {
       return player;
     } catch (e) {
       console.error(`Issue getting player state: ${e}`);
-      return null;
+      throw Error("Failed to get player", { cause: e });
     }
   },
 
-  getPlayerByName: async (playerName: string, gameId: number): Promise<any> => {
+  getPlayerByName: async (playerName: string, gameId: number): Promise<IPlayer | null> => {
     try {
       const player = await Player.findOne({ name: playerName, gameId: gameId });
       return player;
     } catch (e) {
       console.error(`Issue getting player state: ${e}`);
-      return null;
+      throw Error("Failed to get player by name", { cause: e });
     }
   },
 
-  kickPlayer: async (playerName: string, gameId: number): Promise<any> => {
+  kickPlayer: async (playerName: string, gameId: number): Promise<void> => {
     try {
       await Player.deleteOne({ name: playerName, gameId: gameId });
     } catch (e) {
       console.error(`Issue kicking player: ${e}`);
+      throw Error("Failed to kick player", { cause: e });
     }
   },
 
-  getPlayerBySocketId: async (socketId: string): Promise<any> => {
+  getPlayerBySocketId: async (socketId: string): Promise<IPlayer | null> => {
     try {
       const player = await Player.findOne({ playerSocketId: socketId });
       return player;
     } catch (e) {
       console.error(`Issue getting player state: ${e}`);
-      return null;
+      throw Error("Failed to get player by socked id", { cause: e });
     }
   },
 
-  updateAllPlayerStates: async (gameId: number, newState: PlayerState, io, extraData: object): Promise<any> => {
+  updateAllPlayerStates: async (
+    gameId: number,
+    newState: PlayerState,
+    io: Server,
+    extraData: IPlayerLoadSuccess
+  ): Promise<void> => {
     try {
       await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": newState } });
       const allPlayers = await Player.find({ gameId: gameId });
       for (const player of allPlayers) {
-        io.to(player.playerSocketId).emit("player-next", { player, extraData });
+        io.to(player.playerSocketId).emit("player-next", player, extraData);
       }
     } catch (e) {
       console.error(`Issue updating all player states: ${e}`);
+      throw Error("Failed to update all player states", { cause: e });
     }
   },
 
-  updatePlayerState: async (playerId: string, newState: PlayerState, io, extraData: object): Promise<any> => {
+  updatePlayerState: async (playerId: string, newState: PlayerState, io: Server, extraData: object): Promise<any> => {
     try {
       await Player.updateOne({ id: playerId }, { $set: { "playerState.state": newState } });
       const players = await Player.find({ id: playerId });
       for (const player of players) {
-        io.to(player.playerSocketId).emit("player-next", { player, extraData });
+        io.to(player.playerSocketId).emit("player-next", player, extraData);
       }
     } catch (e) {
       console.error(`Issue updating player state: ${e}`);
+      throw Error("Failed to update player state", { cause: e });
     }
   },
 
-  playerCompleteQuestionnaire: async (player: IPlayer, questionnaireAnswers: string[]): Promise<any> => {
+  playerCompleteQuestionnaire: async (player: IPlayer, questionnaireAnswers: string[]): Promise<undefined> => {
     try {
-      const game: IGame | null = await hostDb.getGameData(player.gameId);
-      if (!game) {
+      const game = await hostDb.getGameData(player.gameId);
+      if (game === null) {
         return;
       }
 
@@ -214,42 +222,44 @@ export default {
     }
   },
 
-  playerAnswerQuestion: async function (playerId: string, guess: number, gameData: IGame): Promise<any> {
+  playerAnswerQuestion: async function (playerId: string, guess: number, gameData: IGame): Promise<void> {
     try {
-      const player: IPlayer | null = await Player.findOne({ id: playerId });
-
+      const player = await Player.findOne({ id: playerId });
       if (player === null) {
-        throw `Player not found: ${playerId}`;
-      } else {
-        const newQuizGuesses = player.quizGuesses;
-        const correctGuess = guess === gameData.quizQuestions[gameData.currentQuestionIndex].correctAnswerIndex;
-        let scoreAdd = 0;
-        if (correctGuess) {
-          scoreAdd += 200;
-          const currentGuesses = await this.getPlayerGuessesForQuizQuestion(gameData.id, gameData.currentQuestionIndex);
-          const numGuesses = currentGuesses.filter((g) => !!g).length;
-          if (numGuesses < 3) {
-            scoreAdd += 75 - numGuesses * 25;
+        throw Error(`Player not found: ${playerId}`);
+      }
+
+      const newQuizGuesses = player.quizGuesses;
+      const correctGuess = guess === gameData.quizQuestions[gameData.currentQuestionIndex].correctAnswerIndex;
+      let scoreAdd = 0;
+
+      if (correctGuess) {
+        scoreAdd += 200;
+        const currentGuesses = await this.getPlayerGuessesForQuizQuestion(gameData.id, gameData.currentQuestionIndex);
+        const numGuesses = currentGuesses.filter((g) => g).length;
+        if (numGuesses < 3) {
+          scoreAdd += 75 - numGuesses * 25;
+        }
+      }
+
+      newQuizGuesses[gameData.currentQuestionIndex] = {
+        name: player.name,
+        guess: guess,
+        timestamp: Date.now()
+      };
+
+      await Player.updateOne(
+        {
+          id: playerId
+        },
+        {
+          $set: {
+            "playerState.state": "answered-quiz-question-waiting",
+            quizGuesses: newQuizGuesses,
+            score: player.score + scoreAdd
           }
         }
-        newQuizGuesses[gameData.currentQuestionIndex] = {
-          name: player.name,
-          guess: guess,
-          timestamp: Date.now()
-        };
-        await Player.updateOne(
-          {
-            id: playerId
-          },
-          {
-            $set: {
-              "playerState.state": "answered-quiz-question-waiting",
-              quizGuesses: newQuizGuesses,
-              score: player.score + scoreAdd
-            }
-          }
-        );
-      }
+      );
     } catch (e) {
       console.error(`Issue answering question: ${e}`);
     }
@@ -272,7 +282,7 @@ export default {
     return playersInGame.map((p) => p.quizGuesses[questionIndex]);
   },
 
-  getPlayerScores: async function (gameId: number): Promise<Score[]> {
+  getPlayerScores: async function (gameId: number): Promise<IPlayerScore[]> {
     const playersInGame = await this.getPlayers(gameId);
     const playerScores: IPlayerScore[] = playersInGame.map((p) => ({
       name: p.name,
@@ -297,15 +307,15 @@ export default {
     }
   },
 
-  deletePlayer: async function (playerId): Promise<any> {
+  deletePlayer: async function (playerId: string): Promise<void> {
     try {
-      await Player.deleteOne({ id: playerId });
+      await Player.deleteOne({ id: "foo" });
     } catch (e) {
       console.error(`Issue deleting player ${playerId}: ${e}`);
     }
   },
 
-  deleteAllPlayers: async (): Promise<any> => {
+  deleteAllPlayers: async (): Promise<void> => {
     try {
       await Player.deleteMany({});
     } catch (e) {
