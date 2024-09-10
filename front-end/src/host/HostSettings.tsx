@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import { Button } from "@mui/material";
 import { Socket } from "socket.io-client";
 import TextField from "@mui/material/TextField";
@@ -8,7 +7,7 @@ import Stack from "@mui/material/Stack";
 import { IQuestionnaireQuestion } from "back-end/interfaces/IQuestionnaireQuestion";
 import IPlayer from "back-end/interfaces/IPlayer";
 
-interface ISettingsProps {
+interface HostSettingsProps {
   socket: Socket;
   gameId: number;
   preSettingsId: string;
@@ -38,7 +37,7 @@ export default function HostSettings({
   timePerLeaderboardSetting,
   prioritizeCustomQsSetting,
   customQuestionsSetting
-}: ISettingsProps) {
+}: HostSettingsProps) {
   const [timePerQuestion, setTimePerQuestion] = React.useState<number>(timePerQuestionSetting || 15);
   const [timePerQuestionInput, setTimePerQuestionInput] = React.useState<number>(timePerQuestion);
   const [numQuestionnaireQuestions, setNumQuestionnaireQuestions] = React.useState<number>(
@@ -54,8 +53,8 @@ export default function HostSettings({
   const [timePerLeaderboard, setTimePerLeaderboard] = React.useState<number>(timePerLeaderboardSetting || 5);
   const [timePerLeaderboardInput, setTimePerLeaderboardInput] = React.useState<number>(timePerLeaderboard);
   const [prioritizeCustomQs, setPrioritizeCustomQs] = React.useState<boolean>(prioritizeCustomQsSetting);
-  const [addedQuestions, setAddedQuestions] = React.useState<IQuestionnaireQuestion[]>(customQuestionsSetting || []);
-  const [mappedQuestions, setMappedQuestions] = React.useState<IQuestionnaireQuestion[]>(addedQuestions || []);
+  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestion[]>(customQuestionsSetting || []);
+  const [mappedQuestions, setMappedQuestions] = React.useState<IQuestionnaireQuestion[]>(customQuestions || []);
   const [maxNumQuizQuestions, setMaxNumQuizQuestions] = React.useState<number>(
     numQuestionnaireQuestions * playersInGame.length || 5
   );
@@ -83,8 +82,8 @@ export default function HostSettings({
   }, [numQuizQuestions, setNumQuizQuestions]);
 
   React.useEffect(() => {
-    setMappedQuestions(addedQuestions);
-  }, [addedQuestions, setAddedQuestions]);
+    setMappedQuestions(customQuestions);
+  }, [customQuestions, setCustomQuestions]);
 
   React.useEffect(() => {
     if (timePerAnswer < 1) {
@@ -103,14 +102,14 @@ export default function HostSettings({
   }, [timePerLeaderboard, setTimePerLeaderboard]);
 
   const addCustomQuestion = () => {
-    setAddedQuestions((prevQuestions: IQuestionnaireQuestion[]) => [
+    setCustomQuestions((prevQuestions: IQuestionnaireQuestion[]) => [
       { id: "", text: "", quizText: "", fakeAnswers: [], tags: [] },
       ...prevQuestions
     ]);
   };
 
   const removeCustomQuestion = (index: number) => {
-    setAddedQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== index));
+    setCustomQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== index));
   };
 
   const onBack = async () => {
@@ -122,7 +121,7 @@ export default function HostSettings({
       timePerAnswer,
       timePerLeaderboard,
       prioritizeCustomQs,
-      addedQuestions
+      customQuestions: customQuestions
     });
   };
 
@@ -135,7 +134,7 @@ export default function HostSettings({
       timePerAnswer,
       timePerLeaderboard,
       prioritizeCustomQs,
-      addedQuestions
+      customQuestions: customQuestions
     });
   };
 
@@ -300,7 +299,7 @@ export default function HostSettings({
           Add Custom Question
         </Button>
         {mappedQuestions.map((question, index) => {
-          if (addedQuestions[index] === question) {
+          if (customQuestions[index] === question) {
             return (
               <div key={index} className="customQuestion">
                 <TextField
@@ -312,7 +311,7 @@ export default function HostSettings({
                   type="text"
                   defaultValue={question.text}
                   onChange={(e) => {
-                    const newQuestions = [...addedQuestions];
+                    const newQuestions = [...customQuestions];
                     newQuestions[index].text = e.target.value;
                     let newQuizText = e.target.value;
                     if (newQuizText.includes("you") || newQuizText.includes("your")) {
@@ -325,7 +324,7 @@ export default function HostSettings({
                       newQuizText = "According to <PLAYER>, " + newQuizText;
                     }
                     newQuestions[index].quizText = newQuizText;
-                    setAddedQuestions(newQuestions);
+                    setCustomQuestions(newQuestions);
                   }}
                 />
                 <TextField
@@ -337,9 +336,9 @@ export default function HostSettings({
                   type="text"
                   defaultValue={question.fakeAnswers[0]}
                   onChange={(e) => {
-                    const newQuestions = [...addedQuestions];
+                    const newQuestions = [...customQuestions];
                     newQuestions[index].fakeAnswers[0] = e.target.value;
-                    setAddedQuestions(newQuestions);
+                    setCustomQuestions(newQuestions);
                   }}
                 />
                 <TextField
@@ -351,9 +350,9 @@ export default function HostSettings({
                   type="text"
                   defaultValue={question.fakeAnswers[1]}
                   onChange={(e) => {
-                    const newQuestions = [...addedQuestions];
+                    const newQuestions = [...customQuestions];
                     newQuestions[index].fakeAnswers[1] = e.target.value;
-                    setAddedQuestions(newQuestions);
+                    setCustomQuestions(newQuestions);
                   }}
                 />
                 <TextField
@@ -365,9 +364,9 @@ export default function HostSettings({
                   type="text"
                   defaultValue={question.fakeAnswers[2]}
                   onChange={(e) => {
-                    const newQuestions = [...addedQuestions];
+                    const newQuestions = [...customQuestions];
                     newQuestions[index].fakeAnswers[2] = e.target.value;
-                    setAddedQuestions(newQuestions);
+                    setCustomQuestions(newQuestions);
                   }}
                 />
                 <TextField
@@ -379,9 +378,9 @@ export default function HostSettings({
                   type="text"
                   defaultValue={question.fakeAnswers[3]}
                   onChange={(e) => {
-                    const newQuestions = [...addedQuestions];
+                    const newQuestions = [...customQuestions];
                     newQuestions[index].fakeAnswers[3] = e.target.value;
-                    setAddedQuestions(newQuestions);
+                    setCustomQuestions(newQuestions);
                   }}
                 />
                 <Button
