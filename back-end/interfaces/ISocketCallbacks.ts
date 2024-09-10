@@ -1,4 +1,4 @@
-import IPlayer from "./IPlayer";
+import IPlayer from "./IPlayerDB";
 import IPlayerScore from "./IPlayerScore";
 import IQuizOption from "./IQuizOption";
 
