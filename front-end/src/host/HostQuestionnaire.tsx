@@ -1,16 +1,15 @@
 import * as React from "react";
-import "../style.css";
 import theme from "../assets/audio/theme.mp3";
 import Speak from "../Speak";
 import { Socket } from "socket.io-client";
-import IPlayer from "back-end/interfaces/IPlayer";
+import IPlayerDB from "back-end/interfaces/IPlayerDB";
 import HostQuestionnaireView from "./HostQuestionnaireView";
 import { getPlayerNamesForState } from "../util";
 import { IPlayersObject } from "back-end/interfaces/ISocketCallbacks";
 
 interface HostQuestionnaireProps {
   socket: Socket;
-  playersInGame: IPlayer[];
+  playersInGame: IPlayerDB[];
 }
 
 export default function HostQuestionnaire({ socket, playersInGame }: HostQuestionnaireProps) {

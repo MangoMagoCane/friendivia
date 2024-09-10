@@ -5,14 +5,14 @@ import TextField from "@mui/material/TextField";
 import Switch from "@mui/material/Switch";
 import Stack from "@mui/material/Stack";
 import { IQuestionnaireQuestion } from "back-end/interfaces/IQuestionnaireQuestion";
-import IPlayer from "back-end/interfaces/IPlayer";
+import IPlayerDB from "back-end/interfaces/IPlayerDB";
 
 interface HostSettingsProps {
   socket: Socket;
   gameId: number;
   preSettingsId: string;
   settingsState: boolean;
-  playersInGame: IPlayer[];
+  playersInGame: IPlayerDB[];
   timePerQuestionSetting: number;
   numQuestionnaireQuestionsSetting: number;
   numQuizQuestionsSetting: number;
