@@ -2,43 +2,36 @@ import { Server, Socket } from "socket.io";
 import playerDb from "../db/player.ts";
 import hostDb from "../db/host.ts";
 import questionDb from "../db/question.ts";
-import IPlayer from "../interfaces/IPlayer.ts";
-import IGame from "../interfaces/IGame.ts";
+import IPlayer from "../interfaces/IPlayerDB.ts";
+import IGame from "../interfaces/IGameDB.ts";
 import Game from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
 import Player from "../models/Player.ts";
-import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
 
 export default (io: Server, socket: Socket) => {
   // data's type is inferred, may be incorrect
   const onPlayerSubmitJoin = async (name: string, gameId: number) => {
     try {
-      const allGames: IGame[] = await Game.find({});
-      const foundGame = allGames.find((g) => g.id === gameId);
-      const joinableGame = foundGame?.gameState.state === "lobby";
-
-      if (!joinableGame) {
-        socket.emit("join-error", "Invalid Game ID");
-        return;
+      const game: IGame | null = await Game.findOne({ id: gameId }).exec();
+      if (game?.gameState.state !== "lobby") {
+        throw Error("Invalid Game ID");
       }
 
       const allPlayersInGame = await playerDb.getPlayers(gameId);
       const playerWithNameAlready = allPlayersInGame.find((p) => p.name === name);
-
-      if (playerWithNameAlready) {
-        socket.emit("join-error", "A player with that name has already joined.");
-        return;
+      if (playerWithNameAlready !== undefined) {
+        throw Error("A player with that name has already joined.");
       }
 
       const newPlayerId = await playerDb.addPlayer(name, gameId, socket.id);
       const currentGameData = await hostDb.getGameData(gameId);
       if (currentGameData === null) {
-        return;
+        throw Error("", { cause: "Could not find current game data" });
       }
 
       const updatedPlayer = await playerDb.getPlayer(newPlayerId);
-      if (!updatedPlayer) {
-        return;
+      if (updatedPlayer === null) {
+        throw Error("", { cause: "Could not find updated player" });
       }
 
       io.to(updatedPlayer.playerSocketId).emit("player-next", { player: updatedPlayer });
@@ -49,31 +42,28 @@ export default (io: Server, socket: Socket) => {
 
       socket.emit("join-success", newPlayerId);
     } catch (e) {
-      console.error("Failed to add player: " + e);
+      if (e.cause) {
+        console.error(`Failed to add player: ${e}`);
+      }
+      socket.emit("join-error", e.message || "An error occured");
     }
   };
 
-  const onPlayerLoad = async (playerId: string | undefined) => {
-    if (!playerId) {
-      return;
-    }
-
+  const onPlayerLoad = async (playerId: string) => {
     try {
-      const player: IPlayer | null = await playerDb.getPlayer(playerId);
-      if (!player) {
-        return;
+      const player = await playerDb.getPlayer(playerId);
+      if (player === null) {
+        throw Error("Could not find player");
       }
 
-      const gameData: IGame | null = await hostDb.getGameData(player.gameId);
+      const gameData = await hostDb.getGameData(player.gameId);
       if (gameData === null) {
-        return;
+        throw Error("", { cause: "Could not find game data" });
       }
 
-      const playerQuestionnaire: PlayerQuestionnaire | undefined = gameData.playerQuestionnaires.find(
-        (pq) => pq.playerId === playerId
-      );
-      let questionnaireText: Array<string> = ["Something went wrong..."];
-      if (playerQuestionnaire) {
+      const playerQuestionnaire = gameData.playerQuestionnaires.find((pq) => pq.playerId === playerId);
+      let questionnaireText: string[] = ["Something went wrong..."];
+      if (playerQuestionnaire !== undefined) {
         questionnaireText = await questionDb.getQuestionnaireQuestionsText(playerQuestionnaire);
       }
 
@@ -85,29 +75,31 @@ export default (io: Server, socket: Socket) => {
         playerScores: await playerDb.getPlayerScores(gameData.id)
       };
 
-      if (player) {
-        await Player.updateOne(
-          {
-            id: player.id
-          },
-          {
-            $set: {
-              playerSocketId: socket.id
-            }
+      await Player.updateOne(
+        {
+          id: player.id
+        },
+        {
+          $set: {
+            playerSocketId: socket.id
           }
-        );
-        socket.emit("player-load-success", { player, extraData });
-      } else {
-        socket.emit("player-load-error", "player not found");
-      }
+        }
+      );
+      socket.emit("player-load-success", player, extraData);
     } catch (e) {
-      socket.emit("player-load-error", e);
+      if (e.cause) {
+        console.error(`Failed to add player: ${e}`);
+      }
+      socket.emit("player-load-error", e.message || "An error occured");
     }
   };
 
   const onPlayerSubmitQuestionnaire = async (answers: string[]) => {
     try {
-      const player: IPlayer = await playerDb.getPlayerBySocketId(socket.id);
+      const player = await playerDb.getPlayerBySocketId(socket.id);
+      if (player === null) {
+        throw Error("Player could not be found");
+      }
       const gameId = player.gameId;
       await playerDb.playerCompleteQuestionnaire(player, answers);
       socket.emit("player-submit-questionnaire-success");
@@ -126,8 +118,12 @@ export default (io: Server, socket: Socket) => {
 
   const onPlayerAnswerQuestion = async (guess: number) => {
     try {
-      const player: IPlayer = await playerDb.getPlayerBySocketId(socket.id);
-      const gameData: IGame | null = await hostDb.getGameData(player.gameId);
+      const player = await playerDb.getPlayerBySocketId(socket.id);
+      if (player === null) {
+        throw Error("Player could not be found");
+      }
+
+      const gameData = await hostDb.getGameData(player.gameId);
       if (gameData === null) {
         throw `Game not found: ${player.gameId}`;
       }
@@ -145,9 +141,12 @@ export default (io: Server, socket: Socket) => {
       if (currentGameData === null) {
         return;
       }
-
       const gameId = currentGameData.id;
-      const player: IPlayer = await playerDb.getPlayerByName(playerName, gameId);
+      const player: IPlayer | null = await playerDb.getPlayerByName(playerName, gameId);
+      if (player === null) {
+        // ! TEMPORARYCHAGNE
+        return;
+      }
       await playerDb.updatePlayerState(player.id, "kicked", io, {});
       await playerDb.kickPlayer(playerName, gameId);
       const allPlayersInGame = await playerDb.getPlayers(gameId);

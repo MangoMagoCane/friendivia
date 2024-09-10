@@ -1,6 +1,4 @@
 import * as React from "react";
-import "../style.css";
-import IPlayer from "back-end/interfaces/IPlayer";
 import Paper from "@mui/material/Paper";
 import { Socket } from "socket.io-client";
 import Speak from "../Speak";
@@ -11,16 +9,10 @@ import { pickOneAndInterp, pickOne } from "../util";
 interface HostQuestionnaireViewProps {
   donePlayers: any;
   waitingPlayers: any;
-  gameId: number;
   socket: Socket;
 }
 
-export default function HostQuestionnaireView({
-  donePlayers,
-  waitingPlayers,
-  gameId,
-  socket
-}: HostQuestionnaireViewProps) {
+export default function HostQuestionnaireView({ donePlayers, waitingPlayers, socket }: HostQuestionnaireViewProps) {
   const onPlayerKick = async (name: string) => {
     if (waitingPlayers.length + donePlayers.length > 2) {
       socket.emit("host-kick-player", name);
@@ -57,7 +49,7 @@ export default function HostQuestionnaireView({
     "I'm waiting, {{name}}."
   ];
 
-  const [spokenWarnings, setSpokenWarnings] = React.useState([] as string[]);
+  const [spokenWarnings, setSpokenWarnings] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     const intervalId = setInterval(() => {

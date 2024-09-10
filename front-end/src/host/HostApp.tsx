@@ -158,7 +158,7 @@ export default function HostApp({ socket }: HostAppProps) {
         socket.emit("reload-players");
         return <HostLobby socket={socket} gameId={gameId} classroomGame={customMode === "classroom"} />;
       case "questionnaire":
-        return <HostQuestionnaire socket={socket} gameId={gameId} playersInGame={playersInGame} />;
+        return <HostQuestionnaire socket={socket} playersInGame={playersInGame} />;
       case "pre-quiz":
         return <HostPreQuiz />;
       case "showing-question":

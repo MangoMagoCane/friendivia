@@ -1,4 +1,4 @@
-import IGame from "../interfaces/IGame.ts";
+import IGame from "../interfaces/IGameDB.ts";
 import IPreGameSettings from "../interfaces/IPreGameSettings.ts";
 import { GameState } from "../interfaces/IGameState.ts";
 import Game from "../models/Game.ts";
@@ -9,8 +9,9 @@ import playerDb from "../db/player.ts";
 import * as uuid from "uuid";
 import Player from "../models/Player.ts";
 import friendsQuestions from "./friendsTriviaQuestions.ts";
-import IPlayer from "../interfaces/IPlayer.ts";
+import IPlayer from "../interfaces/IPlayerDB.ts";
 import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
+import ISettings from "../interfaces/ISettings.ts";
 
 export default {
   getAllGameIds: async (): Promise<number[]> => {
@@ -25,11 +26,15 @@ export default {
 
   getPreSettingsData: async (preSettingsId: string): Promise<IPreGameSettings | null> => {
     try {
-      const settingsData: any = await PreGameSettings.findOne({ id: preSettingsId });
-      return settingsData?.toObject();
+      const settingsData = await PreGameSettings.findOne({ id: preSettingsId });
+      const settingsDataPOJO = settingsData?.toObject();
+      if (settingsDataPOJO === undefined) {
+        throw Error("Couldn't convert settings data into POJO");
+      }
+      return settingsDataPOJO;
     } catch (e) {
-      console.error(`Issue getting game data: ${e}`);
-      return null;
+      console.error(`Issue getting settings data: ${e}`);
+      throw Error("Failed to get settings data", { cause: e });
     }
   },
 
@@ -48,7 +53,7 @@ export default {
       while (true) {
         const testId = Math.floor(Math.random() * 9000 + 1000);
         const gameExists = await Game.exists({ id: testId });
-        if (!gameExists) {
+        if (gameExists === null) {
           newId = testId;
           break;
         }
@@ -89,11 +94,15 @@ export default {
 
   getGameData: async (gameId: number): Promise<IGame | null> => {
     try {
-      const gameData: any = await Game.findOne({ id: gameId });
-      return gameData?.toObject();
+      const gameData = await Game.findOne({ id: gameId });
+      const gameDataPOJO = gameData?.toObject();
+      if (gameDataPOJO === undefined) {
+        throw Error("Couldn't convert game data into POJO");
+      }
+      return gameDataPOJO;
     } catch (e) {
       console.error(`Issue getting game data: ${e}`);
-      return null;
+      throw Error("Failed to get game data", { cause: e });
     }
   },
 
@@ -122,12 +131,12 @@ export default {
 
   moveGameToQuestionnaire: async function (gameId: number): Promise<PlayerQuestionnaire[]> {
     try {
-      const players: IPlayer[] = await playerDb.getPlayers(gameId);
-      const game: IGame | null = await this.getGameData(gameId);
-      if (!game) {
+      const game = await this.getGameData(gameId);
+      if (game === null) {
         return [];
       }
 
+      const players = await playerDb.getPlayers(gameId);
       const questionnaires: PlayerQuestionnaire[] = await utilDb.createQuestionnairesForPlayers(
         players,
         game.customMode
@@ -182,7 +191,7 @@ export default {
   },
 
   nextQuestion: async function (gameId: number): Promise<boolean> {
-    const currentGame: IGame | null = await this.getGameData(gameId);
+    const currentGame = await this.getGameData(gameId);
     if (currentGame === null) {
       return false;
     }
@@ -235,7 +244,7 @@ export default {
     }
   },
 
-  updateSettings: async (gameId: number, settingsData: any): Promise<any> => {
+  updateSettings: async (gameId: number, settingsData: ISettings): Promise<any> => {
     try {
       const timePerQuestion = settingsData.timePerQuestion;
       const numQuestionnaireQuestions = settingsData.numQuestionnaireQuestions;
@@ -244,7 +253,7 @@ export default {
       const timePerAnswer = settingsData.timePerAnswer;
       const timePerLeaderboard = settingsData.timePerLeaderboard;
       const prioritizeCustomQs = settingsData.prioritizeCustomQs;
-      const customQuestions = settingsData.addedQuestions;
+      const customQuestions = settingsData.customQuestions;
       customQuestions.forEach((question) => {
         const somethingEmpty =
           question.text === "" ||
@@ -307,7 +316,7 @@ export default {
     }
   },
 
-  hostClosePreSettings: async function (preSettingsId: string, settingsData: any): Promise<any> {
+  hostClosePreSettings: async function (preSettingsId: string, settingsData: ISettings): Promise<void> {
     try {
       const timePerQuestion = settingsData.timePerQuestion;
       const numQuestionnaireQuestions = settingsData.numQuestionnaireQuestions;
@@ -316,7 +325,7 @@ export default {
       const timePerAnswer = settingsData.timePerAnswer;
       const timePerLeaderboard = settingsData.timePerLeaderboard;
       const prioritizeCustomQs = settingsData.prioritizeCustomQs;
-      const customQuestions = settingsData.addedQuestions;
+      const customQuestions = settingsData.customQuestions;
       customQuestions.forEach((question) => {
         const somethingEmpty =
           question.text === "" ||

@@ -1,7 +1,7 @@
 import * as uuid from "uuid";
-import IPlayer from "../interfaces/IPlayer.ts";
+import IPlayer from "../interfaces/IPlayerDB.ts";
 import Player from "../models/Player.ts";
-import IGame from "../interfaces/IGame.ts";
+import IGame from "../interfaces/IGameDB.ts";
 import IGuess from "../interfaces/IGuess.ts";
 import Game from "../models/Game.ts";
 import hostDb from "./host.ts";

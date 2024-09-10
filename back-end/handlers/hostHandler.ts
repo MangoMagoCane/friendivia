@@ -2,16 +2,16 @@ import { Server, Socket } from "socket.io";
 import hostDb from "../db/host.ts";
 import playerDb from "../db/player.ts";
 import questionDb from "../db/question.ts";
-import IGame from "../interfaces/IGame.ts";
-import IPreGameSettings from "../interfaces/IPreGameSettings.ts";
+import IGame from "../interfaces/IGameDB.ts";
 import Game from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
 import Player from "../models/Player.ts";
-import IPlayer from "../interfaces/IPlayer.ts";
+import IPlayer from "../interfaces/IPlayerDB.ts";
 import PreGameSettings from "../models/PreGameSettings.ts";
 import { valInArr } from "../../front-end/src/util.ts";
+import ISettings from "../interfaces/ISettings.ts";
 
-let PreSettingsId;
+let PreSettingsId: string | null;
 export default (io: Server, socket: Socket) => {
   const onHostOpen = async (customMode: string) => {
     try {
@@ -62,21 +62,22 @@ export default (io: Server, socket: Socket) => {
     }
 
     try {
-      const dataForSettings: any = await hostDb.getPreSettingsData(preSettingsId);
-      if (dataForSettings) {
-        const data = dataForSettings;
-        await PreGameSettings.updateOne(
-          {
-            id: preSettingsId
-          },
-          {
-            $set: {
-              hostSocketId: socket.id
-            }
-          }
-        );
-        socket.emit("settings-load-success", data);
+      const dataForSettings = await hostDb.getPreSettingsData(preSettingsId);
+      if (dataForSettings === null) {
+        return;
       }
+
+      await PreGameSettings.updateOne(
+        {
+          id: preSettingsId
+        },
+        {
+          $set: {
+            hostSocketId: socket.id
+          }
+        }
+      );
+      socket.emit("settings-load-success", dataForSettings);
     } catch (e) {
       socket.emit("settings-load-error", e);
     }
@@ -93,7 +94,7 @@ export default (io: Server, socket: Socket) => {
     }
   };
 
-  const onHostStart = async (gameId) => {
+  const onHostStart = async (gameId: number) => {
     try {
       await hostHelpers.hostGoPreQuestionnaire(gameId, io);
     } catch (e) {
@@ -101,10 +102,10 @@ export default (io: Server, socket: Socket) => {
     }
   };
 
-  const onHostEndGame = async () => {
+  const onHostEndGame = async (): Promise<void> => {
     try {
-      const gameData: IGame | null = await hostDb.getGameDataFromSocketId(socket.id);
-      if (!gameData) {
+      const gameData = await hostDb.getGameDataFromSocketId(socket.id);
+      if (gameData === null) {
         return;
       }
 
@@ -122,12 +123,12 @@ export default (io: Server, socket: Socket) => {
   };
 
   const onNextFromQuizAnswer = async () => {
-    const gameData: IGame | null = await hostDb.getGameDataFromSocketId(socket.id);
-    if (!gameData) {
+    const gameData = await hostDb.getGameDataFromSocketId(socket.id);
+    if (gameData === null) {
       return;
     }
 
-    const questionsRemaining = await hostDb.questionsRemaining(gameData);
+    const questionsRemaining = hostDb.questionsRemaining(gameData);
 
     if (questionsRemaining) {
       await hostHelpers.hostShowIntLeaderboard(gameData.id, io);
@@ -136,7 +137,7 @@ export default (io: Server, socket: Socket) => {
     }
   };
 
-  const onNextQuestion = async (gameId) => {
+  const onNextQuestion = async (gameId: number) => {
     try {
       hostHelpers.hostNextQuestionOrLeaderboard(gameId, io);
     } catch (e) {
@@ -144,7 +145,7 @@ export default (io: Server, socket: Socket) => {
     }
   };
 
-  const onHostStartQuizTimer = async (gameId) => {
+  const onHostStartQuizTimer = async (gameId: number) => {
     try {
       socket.emit("start-timer-success");
       hostHelpers.hostStartQuizTimer(gameId, io);
@@ -153,7 +154,7 @@ export default (io: Server, socket: Socket) => {
     }
   };
 
-  const onTimerSkip = async (gameId) => {
+  const onTimerSkip = async (gameId: number) => {
     try {
       hostHelpers.hostSkipTimer(gameId, io);
     } catch (e) {
@@ -163,20 +164,27 @@ export default (io: Server, socket: Socket) => {
 
   const allPlayersAnsweredQuestion = async (guess: number) => {
     try {
-      const player: IPlayer = await playerDb.getPlayerBySocketId(socket.id);
-      const gameData: IGame | null = await hostDb.getGameData(player.gameId);
-      if (gameData === null) {
-        throw `Game not found: ${player.gameId}`;
+      const player = await playerDb.getPlayerBySocketId(socket.id);
+      if (player === null) {
+        throw Error(`Could not find player`);
       }
+
+      const gameData = await hostDb.getGameData(player.gameId);
+      if (gameData === null) {
+        throw Error(`Game not found: ${player.gameId}`);
+      }
+
       await playerDb.playerAnswerQuestion(player.id, guess, gameData);
       const allPlayersInGame = await Player.find({ gameId: gameData.id });
       let ContinueGame = true;
+
       for (const player of allPlayersInGame) {
         if (!valInArr(player.playerState.state, ["answered-quiz-question-waiting", "question-about-me"])) {
           ContinueGame = false;
           break;
         }
       }
+
       if (ContinueGame) {
         await hostHelpers.hostSkipTimer(gameData.id, io);
       }
@@ -185,29 +193,25 @@ export default (io: Server, socket: Socket) => {
     }
   };
 
-  const onHostSettings = async (gameId = null) => {
+  const onHostSettings = async (gameId: number) => {
     try {
-      if (gameId != null) {
-        await hostDb.setGameState(gameId, "settings");
-        const currentGameData: IGame | null = await hostDb.getGameData(gameId);
-        let playersInGame = await playerDb.getPlayers(gameId);
-        io.to(currentGameData?.hostSocketId ?? "").emit("host-next", { ...currentGameData, playersInGame });
-      } else {
-        console.error(`Failed to find game for Host Settings`);
-      }
+      await hostDb.setGameState(gameId, "settings");
+      const currentGameData = await hostDb.getGameData(gameId);
+      const playersInGame = await playerDb.getPlayers(gameId);
+      io.to(currentGameData?.hostSocketId ?? "").emit("host-next", { ...currentGameData, playersInGame });
     } catch (e) {
       console.error(`Failed to open host settings: ${e}`);
     }
   };
 
-  const onHostBack = async (gameId, settingsData) => {
+  const onHostBack = async (gameId: number, settingsData: ISettings) => {
     try {
       await hostDb.setGameState(gameId, "lobby");
       await hostDb.updateSettings(gameId, settingsData);
-      const currentGameData: IGame | null = await hostDb.getGameData(gameId);
-      await io.to(currentGameData?.hostSocketId ?? "").emit("host-next", currentGameData);
+      const currentGameData = await hostDb.getGameData(gameId);
+      io.to(currentGameData?.hostSocketId ?? "").emit("host-next", currentGameData);
       const allPlayersInGame = await playerDb.getPlayers(gameId);
-      await io.to(currentGameData?.hostSocketId ?? "").emit("players-updated", {
+      io.to(currentGameData?.hostSocketId ?? "").emit("players-updated", {
         gameId: gameId,
         players: allPlayersInGame
       });
@@ -229,10 +233,10 @@ export default (io: Server, socket: Socket) => {
     }
   };
 
-  const onHostPSBack = async (preSettingsId, preSettingsData) => {
+  const onHostPSBack = async (preSettingsId: string, preSettingsData: ISettings) => {
     try {
       await hostDb.hostClosePreSettings(preSettingsId, preSettingsData);
-      const currentSettingsData: IPreGameSettings | null = await hostDb.getPreSettingsData(preSettingsId);
+      const currentSettingsData = await hostDb.getPreSettingsData(preSettingsId);
       io.to(currentSettingsData?.hostSocketId ?? "").emit("presettings-close", currentSettingsData);
     } catch (e) {
       console.error(`Failed to go back: ${e}`);
@@ -247,11 +251,9 @@ export default (io: Server, socket: Socket) => {
       }
 
       const playersInGame: IPlayer[] = await playerDb.getPlayers(gameData.id);
-      if (!playersInGame.some((p) => p.playerState.state === "submitted-questionnaire-waiting")) {
-        return;
+      if (playersInGame.some((p) => p.playerState.state === "submitted-questionnaire-waiting")) {
+        await hostHelpers.hostStartQuiz(gameData.id, io);
       }
-
-      await hostHelpers.hostStartQuiz(gameData.id, io);
     } catch (e) {
       console.error(`Error skipping past questionnaire: ${e}`);
     }
