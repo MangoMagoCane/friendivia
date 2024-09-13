@@ -37,7 +37,9 @@ export default {
         return;
       }
 
-      io.to(updatedPlayer.playerSocketId).emit("player-next", updatedPlayer, quizQuestionOptionsText);
+      io.to(updatedPlayer.playerSocketId).emit("player-next", updatedPlayer, {
+        quizQuestionOptionsText: quizQuestionOptionsText
+      });
     }
   },
 

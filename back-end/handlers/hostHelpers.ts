@@ -49,7 +49,6 @@ export const hostGoToQuestionnaire = async (gameId: number, io: typedServer): Pr
         }
 
         const questionnaireQuestionsText = await questionDb.getQuestionnaireQuestionsText(playerQuestionnaire);
-        // io.to(player.playerSocketId).emit("player-next", player, questionnaireQuestionsText as IPlayerLoadSuccess); // original line, questionnaireQuestionsText has no effect as extra data
         io.to(player.playerSocketId).emit("player-next", player, {
           questionnaireQuestionsText: questionnaireQuestionsText
         });

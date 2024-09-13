@@ -14,7 +14,6 @@ export default function PlayerQuestionnaireForm({ socket, playerState, questions
   const [answers, setAnswers] = React.useState<string[]>(Array(questions.length).fill(""));
   const inMessage = `Submission accepted! Please wait for the other players to finish.`;
   const maxAnswer = 50;
-  console.log(questions);
 
   const onSubmitQuestionnaire = () => {
     for (let i = 0; i < answers.length; i++) {

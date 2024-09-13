@@ -1,12 +1,13 @@
 import * as React from "react";
-import { Socket } from "socket.io-client";
 import PlayerQuizQuestionView from "./PlayerQuizQuestionView";
 import IQuizOption from "back-end/interfaces/IQuizOption";
+import { SocketFrontend } from "../socket";
+import { PlayerState } from "back-end/interfaces/IPlayerState";
 
 interface PlayerQuizQuestionProps {
   optionsList: IQuizOption[];
-  socket: Socket;
-  playerState: string;
+  socket: SocketFrontend;
+  playerState: PlayerState;
 }
 
 export default function PlayerQuizQuestion({ optionsList, socket, playerState }: PlayerQuizQuestionProps) {

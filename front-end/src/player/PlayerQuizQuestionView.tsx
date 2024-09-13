@@ -1,36 +1,29 @@
 import * as React from "react";
-import "../style.css";
 import { Button } from "../extra/FrdvButton";
-import { Socket } from "socket.io-client";
 import PlayerWait from "./PlayerWait";
 import IQuizOption from "back-end/interfaces/IQuizOption";
+import { SocketFrontend } from "../socket";
+import { IPlayerState } from "back-end/interfaces/IPlayerState";
 
 interface IQuizQuestionViewProps {
   optionsList: IQuizOption[];
-  socket: Socket;
-  playerState: {
-    state: string;
-    message: string;
-  };
+  socket: SocketFrontend;
+  playerState: IPlayerState;
 }
 
-export default function PlayerQuizQuestionView(props: IQuizQuestionViewProps) {
-  const { optionsList, socket, playerState } = props;
-
+export default function PlayerQuizQuestionView({ optionsList, socket, playerState }: IQuizQuestionViewProps) {
   const guessReceivedMessage = `Guess received! Hang tight...`;
-
-  function goTo(answerIndex: number) {
+  console.log(optionsList);
+  const goTo = (answerIndex: number): void => {
     answerQuestion(answerIndex);
     allPlayersAnswerQuestion(answerIndex);
-  }
+  };
 
   const answerQuestion = async (answerIndex: number): Promise<void> => {
     socket.emit("player-answer-question", answerIndex);
   };
 
-  const allPlayersAnswerQuestion = async (
-    answerIndex: number
-  ): Promise<void> => {
+  const allPlayersAnswerQuestion = async (answerIndex: number): Promise<void> => {
     socket.emit("check-all-players-answered", answerIndex);
   };
 
@@ -47,7 +40,7 @@ export default function PlayerQuizQuestionView(props: IQuizQuestionViewProps) {
                 fontSize: "1.5em",
                 width: "90%",
                 height: "15vh",
-                border: "2px solid black",
+                border: "2px solid black"
               }}
               key={i}
               onClick={() => goTo(i)}
