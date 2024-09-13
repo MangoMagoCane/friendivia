@@ -10,6 +10,7 @@ import { PlayerState } from "../interfaces/IPlayerState.ts";
 import IPlayerScore from "../interfaces/IPlayerScore.ts";
 import { Server } from "socket.io";
 import { IPlayerLoadSuccess } from "../interfaces/ISocketCallbacks.ts";
+import { typedServer } from "../interfaces/IServer.ts";
 
 export default {
   getPlayers: async (gameId: number): Promise<IPlayerDB[]> => {
@@ -115,12 +116,12 @@ export default {
     }
   },
 
-  updatePlayerState: async (playerId: string, newState: PlayerState, io: Server, extraData: object): Promise<any> => {
+  updatePlayerState: async (playerId: string, newState: PlayerState, io: typedServer): Promise<any> => {
     try {
       await Player.updateOne({ id: playerId }, { $set: { "playerState.state": newState } });
       const players = await Player.find({ id: playerId });
       for (const player of players) {
-        io.to(player.playerSocketId).emit("player-next", player, extraData);
+        io.to(player.playerSocketId).emit("player-next", player);
       }
     } catch (e) {
       console.error(`Issue updating player state: ${e}`);

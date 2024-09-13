@@ -3,12 +3,12 @@ import hostDb from "../db/host.ts";
 import questionDb from "../db/question.ts";
 import IGameDB from "../interfaces/IGameDB.ts";
 import playerHelpers from "./playerHelpers.ts";
-import { Server } from "socket.io";
 import Player from "../models/Player.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
 import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import IGuess from "../interfaces/IGuess.ts";
 import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
+import { typedServer } from "../interfaces/IServer.ts";
 
 const PRE_QUIZ_MS = 5000;
 const PRE_ANSWER_MS = 3000;
@@ -16,7 +16,7 @@ const PRE_LEADER_BOARD_MS = 5000;
 const PRE_QUESTIONNAIRE_MS = 3000;
 let nextQuestionTimer: NodeJS.Timeout;
 
-export const hostGoNext = async (gameId: number, io: Server): Promise<void> => {
+export const hostGoNext = async (gameId: number, io: typedServer): Promise<void> => {
   const currentGameData: IGameDB | null = await hostDb.getGameData(gameId);
   if (!currentGameData) {
     return;
@@ -25,7 +25,7 @@ export const hostGoNext = async (gameId: number, io: Server): Promise<void> => {
   io.to(currentGameData.hostSocketId).emit("host-next", currentGameData);
 };
 
-export const hostGoToQuestionnaire = async (gameId: number, io: Server): Promise<void> => {
+export const hostGoToQuestionnaire = async (gameId: number, io: typedServer): Promise<void> => {
   try {
     const players: IPlayerDB[] = await playerDb.getPlayers(gameId);
 
@@ -44,14 +44,15 @@ export const hostGoToQuestionnaire = async (gameId: number, io: Server): Promise
       for (let i = 0; i < playerQuestionnaires.length; i++) {
         const playerQuestionnaire: PlayerQuestionnaire = playerQuestionnaires[i];
         const player: IPlayerDB | null = await playerDb.getPlayer(playerQuestionnaire.playerId);
-        if (!player) {
+        if (player === null) {
           continue;
         }
 
-        const questionnaireQuestionsText: Array<string> = await questionDb.getQuestionnaireQuestionsText(
-          playerQuestionnaire
-        );
-        io.to(player.playerSocketId).emit("player-next", { player, extraData: { questionnaireQuestionsText } });
+        // const questionnaireQuestionsText: string[] = await questionDb.getQuestionnaireQuestionsText(
+        //   playerQuestionnaire
+        // );
+        // io.to(player.playerSocketId).emit("player-next", player, questionnaireQuestionsText); // original line, questionnaireQuestionsText has no effect as extra data
+        io.to(player.playerSocketId).emit("player-next", player);
       }
     } else {
       console.error("tried to start a game with too few players");
@@ -61,14 +62,14 @@ export const hostGoToQuestionnaire = async (gameId: number, io: Server): Promise
   }
 };
 
-export const hostGoPreQuestionnaire = async (gameId: number, io: Server): Promise<void> => {
+export const hostGoPreQuestionnaire = async (gameId: number, io: typedServer): Promise<void> => {
   await hostDb.setGameState(gameId, "pre-questionnaire");
   await hostGoNext(gameId, io);
 
   setTimeout(hostGoToQuestionnaire, PRE_QUESTIONNAIRE_MS, gameId, io);
 };
 
-export const hostShowLeaderBoard = async (gameId: number, io: Server): Promise<void> => {
+export const hostShowLeaderBoard = async (gameId: number, io: typedServer): Promise<void> => {
   await hostDb.setGameState(gameId, "leader-board");
 
   const playerScores = await playerDb.getPlayerScores(gameId);
@@ -76,13 +77,13 @@ export const hostShowLeaderBoard = async (gameId: number, io: Server): Promise<v
   const players = await playerDb.getPlayers(gameId);
   for (let i = 0; i < players.length; i++) {
     if (players[i].score === playerScores[0].score) {
-      await playerDb.updatePlayerState(players[i].id, "rank-one", io, {});
+      await playerDb.updatePlayerState(players[i].id, "rank-one", io);
     } else if (players[i].score === playerScores[1].score) {
-      await playerDb.updatePlayerState(players[i].id, "rank-two", io, {});
+      await playerDb.updatePlayerState(players[i].id, "rank-two", io);
     } else if (players[i].score === playerScores[2].score) {
-      await playerDb.updatePlayerState(players[i].id, "rank-three", io, {});
+      await playerDb.updatePlayerState(players[i].id, "rank-three", io);
     } else {
-      await playerDb.updatePlayerState(players[i].id, "leader-board", io, {});
+      await playerDb.updatePlayerState(players[i].id, "leader-board", io);
     }
   }
 
@@ -94,7 +95,7 @@ export const hostShowLeaderBoard = async (gameId: number, io: Server): Promise<v
   io.to(gameData.hostSocketId).emit("host-next", { ...gameData, playerScores });
 };
 
-export const hostPreLeaderBoard = async (gameId: number, io: Server): Promise<void> => {
+export const hostPreLeaderBoard = async (gameId: number, io: typedServer): Promise<void> => {
   try {
     const playerScores = await playerDb.getPlayerScores(gameId);
     playerScores.sort((a, b) => b.score - a.score);
@@ -116,7 +117,7 @@ export const hostPreLeaderBoard = async (gameId: number, io: Server): Promise<vo
   }
 };
 
-export const hostStartQuizTimer = async (gameId: number, io: Server): Promise<void> => {
+export const hostStartQuizTimer = async (gameId: number, io: typedServer): Promise<void> => {
   const currentGameData = await hostDb.getGameData(gameId);
   let timePerQuestionMS: number;
   if (currentGameData?.settings.timePerQuestion === undefined) {
@@ -130,7 +131,7 @@ export const hostStartQuizTimer = async (gameId: number, io: Server): Promise<vo
   nextQuestionTimer = setTimeout(hostPreAnswer, timePerQuestionMS, gameId, io);
 };
 
-export const hostNextQuestionOrLeaderboard = async (gameId: number, io: Server): Promise<void> => {
+export const hostNextQuestionOrLeaderboard = async (gameId: number, io: typedServer): Promise<void> => {
   const shouldContinue = await hostDb.nextQuestion(gameId);
 
   if (shouldContinue) {
@@ -142,12 +143,12 @@ export const hostNextQuestionOrLeaderboard = async (gameId: number, io: Server):
   }
 };
 
-export const hostSkipTimer = async (gameId: number, io: Server): Promise<void> => {
+export const hostSkipTimer = async (gameId: number, io: typedServer): Promise<void> => {
   clearTimeout(nextQuestionTimer);
   hostPreAnswer(gameId, io);
 };
 
-export const hostStartQuiz = async (gameId: number, io: Server): Promise<void> => {
+export const hostStartQuiz = async (gameId: number, io: typedServer): Promise<void> => {
   await hostDb.setGameState(gameId, "pre-quiz");
   const game = await hostDb.getGameData(gameId);
   if (game === null) {
@@ -159,7 +160,7 @@ export const hostStartQuiz = async (gameId: number, io: Server): Promise<void> =
   setTimeout(hostNextQuestionOrLeaderboard, PRE_QUIZ_MS, gameId, io);
 };
 
-export const hostShowIntLeaderboard = async (gameId: number, io: Server): Promise<void> => {
+export const hostShowIntLeaderboard = async (gameId: number, io: typedServer): Promise<void> => {
   await hostDb.setGameState(gameId, "intermediary-leaderboard");
 
   const allPlayerScores = await playerDb.getPlayerScores(gameId);
@@ -178,7 +179,7 @@ export const hostShowIntLeaderboard = async (gameId: number, io: Server): Promis
   }
 };
 
-export const hostPreAnswer = async (gameId: number, io: Server): Promise<void> => {
+export const hostPreAnswer = async (gameId: number, io: typedServer): Promise<void> => {
   await hostDb.setGameState(gameId, "pre-answer");
   await hostGoNext(gameId, io);
   await playerHelpers.allPlayersTimesUp(gameId, io);
@@ -212,7 +213,7 @@ export const handleTiebreakerAnswers = async (allPlayers: IPlayerDB[], quizQInde
   await playerDb.awardPlayerPoints(bonusPlayer.id, 100);
 };
 
-export const hostShowAnswer = async (gameId: number, io: Server): Promise<void> => {
+export const hostShowAnswer = async (gameId: number, io: typedServer): Promise<void> => {
   await hostDb.setGameState(gameId, "showing-answer");
   const gameData = await hostDb.getGameData(gameId);
   if (!gameData) {
@@ -259,7 +260,7 @@ export const hostShowAnswer = async (gameId: number, io: Server): Promise<void> 
     );
 
     const newSubjectPlayerState: PlayerState = numCorrect === 0 ? "seeing-answer-incorrect" : "seeing-answer-correct";
-    playerDb.updatePlayerState(subjectPlayer.id, newSubjectPlayerState, io, {});
+    playerDb.updatePlayerState(subjectPlayer.id, newSubjectPlayerState, io);
   }
 
   for (let i = 0; i < nonSubjectPlayers.length; i++) {
@@ -268,7 +269,7 @@ export const hostShowAnswer = async (gameId: number, io: Server): Promise<void> 
     const playerCorrect: boolean = currentPlayerCurrentGuess && currentPlayerCurrentGuess.guess === correctGuess;
     const currentPlayerNewState: PlayerState = playerCorrect ? "seeing-answer-correct" : "seeing-answer-incorrect";
 
-    await playerDb.updatePlayerState(currentPlayer.id, currentPlayerNewState, io, {});
+    await playerDb.updatePlayerState(currentPlayer.id, currentPlayerNewState, io);
   }
 
   const playerScores = await playerDb.getPlayerScores(gameId);
@@ -308,7 +309,7 @@ export const getQuestionnaireStatus = async (gameId: number): Promise<string[][]
   return [donePlayerNames, waitingPlayerNames];
 };
 
-export const onHostViewUpdate = async (gameId: number, io: Server) => {
+export const onHostViewUpdate = async (gameId: number, io: typedServer) => {
   const gameData = await hostDb.getGameData(gameId);
   if (gameData === null) {
     throw Error("Error finding game data");
@@ -318,23 +319,20 @@ export const onHostViewUpdate = async (gameId: number, io: Server) => {
     const allPlayersDone = await playerDb.checkAllPlayersDoneWithQuestionnaire(gameId);
     if (!allPlayersDone) {
       const playerStatusLists = await getQuestionnaireStatus(gameId);
-      io.to(gameData.hostSocketId).emit("update-host-view", playerStatusLists);
+      io.to(gameData.hostSocketId).emit("host-view-update", playerStatusLists);
     } else if (gameData.gameState.state === "questionnaire") {
       await hostStartQuiz(gameId, io);
     }
   } catch (e) {
-    io.to(gameData.hostSocketId).emit("onHostViewUpdate-error", e);
+    io.to(gameData.hostSocketId).emit("host-view-update-error", e);
   }
 };
 
-export const handlePlayerQuit = async (player: IPlayerDB, game: IGameDB, io: Server) => {
+export const handlePlayerQuit = async (player: IPlayerDB, game: IGameDB, io: typedServer) => {
   await playerDb.kickPlayer(player.name, game.id);
   const allPlayersInGame = await playerDb.getPlayers(game.id);
 
-  io.to(game.hostSocketId).emit("players-updated", {
-    gameId: game.id,
-    players: allPlayersInGame
-  });
+  io.to(game.hostSocketId).emit("players-updated", game.id, allPlayersInGame);
 
   await onHostViewUpdate(game.id, io);
 };

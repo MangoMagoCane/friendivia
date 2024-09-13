@@ -1,4 +1,3 @@
-import { Server, Socket } from "socket.io";
 import playerDb from "../db/player.ts";
 import hostDb from "../db/host.ts";
 import questionDb from "../db/question.ts";
@@ -7,9 +6,9 @@ import IGameDB from "../interfaces/IGameDB.ts";
 import Game from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
 import Player from "../models/Player.ts";
+import { SocketBackend, typedServer } from "../interfaces/IServer.ts";
 
-export default (io: Server, socket: Socket) => {
-  // data's type is inferred, may be incorrect
+export default (io: typedServer, socket: SocketBackend) => {
   const onPlayerSubmitJoin = async (name: string, gameId: number) => {
     try {
       const game: IGameDB | null = await Game.findOne({ id: gameId }).exec();
@@ -34,11 +33,8 @@ export default (io: Server, socket: Socket) => {
         throw Error("", { cause: "Could not find updated player" });
       }
 
-      io.to(updatedPlayer.playerSocketId).emit("player-next", { player: updatedPlayer });
-      io.to(currentGameData.hostSocketId).emit("players-updated", {
-        gameId: gameId,
-        players: allPlayersInGame
-      });
+      io.to(updatedPlayer.playerSocketId).emit("player-next", updatedPlayer);
+      io.to(currentGameData.hostSocketId).emit("players-updated", gameId, allPlayersInGame);
 
       socket.emit("join-success", newPlayerId);
     } catch (e) {
@@ -147,14 +143,11 @@ export default (io: Server, socket: Socket) => {
         // ! TEMPORARYCHAGNE
         return;
       }
-      await playerDb.updatePlayerState(player.id, "kicked", io, {});
+      await playerDb.updatePlayerState(player.id, "kicked", io);
       await playerDb.kickPlayer(playerName, gameId);
       const allPlayersInGame = await playerDb.getPlayers(gameId);
 
-      io.to(currentGameData.hostSocketId).emit("players-updated", {
-        gameId: gameId,
-        players: allPlayersInGame
-      });
+      io.to(currentGameData.hostSocketId).emit("players-updated", gameId, allPlayersInGame);
 
       await hostHelpers.onHostViewUpdate(gameId, io);
     } catch (e) {
@@ -163,14 +156,14 @@ export default (io: Server, socket: Socket) => {
   };
 
   const onPlayerQuit = async () => {
-    const player: IPlayerDB | null = await playerDb.getPlayerBySocketId(socket.id);
-    if (!player) {
+    const player = await playerDb.getPlayerBySocketId(socket.id);
+    if (player === null) {
       socket.emit("player-game-ended");
       return;
     }
 
-    const game: IGameDB | null = await hostDb.getGameData(player.gameId);
-    if (!game) {
+    const game = await hostDb.getGameData(player.gameId);
+    if (game === null) {
       return;
     }
 
@@ -178,10 +171,10 @@ export default (io: Server, socket: Socket) => {
     socket.emit("player-game-ended");
   };
 
-  socket.on("host-kick-player", onHostKickPlayer);
   socket.on("player-submit-join", onPlayerSubmitJoin);
   socket.on("player-load", onPlayerLoad);
   socket.on("player-submit-questionnaire", onPlayerSubmitQuestionnaire);
   socket.on("player-answer-question", onPlayerAnswerQuestion);
+  socket.on("host-kick-player", onHostKickPlayer);
   socket.on("player-quit", onPlayerQuit);
 };

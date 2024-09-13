@@ -1,6 +1,4 @@
 import * as React from "react";
-import "../style.css";
-import { Button } from "@mui/material";
 import { Socket } from "socket.io-client";
 import PlayerQuizQuestionView from "./PlayerQuizQuestionView";
 import IQuizOption from "back-end/interfaces/IQuizOption";

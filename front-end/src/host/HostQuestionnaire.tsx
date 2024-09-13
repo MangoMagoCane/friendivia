@@ -25,17 +25,17 @@ export default function HostQuestionnaire({ socket, playersInGame }: HostQuestio
       setWaitingPlayers(playerStatusList[1]);
     };
 
-    const onPlayersUpdated = (playersObject: IPlayersObject) => {
-      const updatedDonePlayers = getPlayerNamesForState(playersObject.players, "submitted-questionnaire-waiting");
-      const updatedWaitingPlayers = getPlayerNamesForState(playersObject.players, "filling-questionnaire");
+    const onPlayersUpdated = (gameId: number, players: IPlayerDB[]) => {
+      const updatedDonePlayers = getPlayerNamesForState(players, "submitted-questionnaire-waiting");
+      const updatedWaitingPlayers = getPlayerNamesForState(players, "filling-questionnaire");
       onStatusReceived([updatedDonePlayers, updatedWaitingPlayers]);
     };
 
-    socket.on("update-host-view", onStatusReceived);
+    socket.on("host-view-update", onStatusReceived);
     socket.on("players-updated", onPlayersUpdated);
 
     return () => {
-      socket.off("update-host-view", onStatusReceived);
+      socket.off("host-view-update", onStatusReceived);
     };
   }, [socket]);
 

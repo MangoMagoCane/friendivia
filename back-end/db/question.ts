@@ -133,11 +133,10 @@ export default {
   getQuestionnaireQuestionsText: async (questionnaire: PlayerQuestionnaire): Promise<string[]> => {
     const questionnaireQuestionsText: string[] = [];
     for (const pqq of questionnaire.questions) {
-      const question: IQuestionnaireQuestion | null = await questionDb.getQuestionById(pqq.questionId);
+      const question = await questionDb.getQuestionById(pqq.questionId);
       if (question === null) {
         continue;
       }
-
       questionnaireQuestionsText.push(question.text);
     }
     return questionnaireQuestionsText;

@@ -1,4 +1,3 @@
-import { Server, Socket } from "socket.io";
 import hostDb from "../db/host.ts";
 import playerDb from "../db/player.ts";
 import questionDb from "../db/question.ts";
@@ -10,9 +9,10 @@ import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import PreGameSettings from "../models/PreGameSettings.ts";
 import { valInArr } from "../../front-end/src/util.ts";
 import ISettings from "../interfaces/ISettings.ts";
+import { typedServer, SocketBackend } from "../interfaces/IServer.ts";
 
 let PreSettingsId: string | null;
-export default (io: Server, socket: Socket) => {
+export default (io: typedServer, socket: SocketBackend) => {
   const onHostOpen = async (customMode: string) => {
     try {
       const newGameId = await hostDb.hostOpenGame(socket.id, customMode);
@@ -46,10 +46,7 @@ export default (io: Server, socket: Socket) => {
           }
         );
         socket.emit("host-load-success", { ...data, quizQuestionGuesses, playerScores, playersInGame });
-        socket.emit("players-updated", {
-          gameId: gameId,
-          players: playersInGame
-        });
+        socket.emit("players-updated", gameId, playersInGame);
       }
     } catch (e) {
       socket.emit("host-load-error", e);
@@ -197,6 +194,9 @@ export default (io: Server, socket: Socket) => {
     try {
       await hostDb.setGameState(gameId, "settings");
       const currentGameData = await hostDb.getGameData(gameId);
+      if (currentGameData === null) {
+        return; // WILLNEEDTO IMRPOVe ERROR HANDLING!!!
+      }
       const playersInGame = await playerDb.getPlayers(gameId);
       io.to(currentGameData?.hostSocketId ?? "").emit("host-next", { ...currentGameData, playersInGame });
     } catch (e) {
@@ -209,12 +209,12 @@ export default (io: Server, socket: Socket) => {
       await hostDb.setGameState(gameId, "lobby");
       await hostDb.updateSettings(gameId, settingsData);
       const currentGameData = await hostDb.getGameData(gameId);
+      if (currentGameData === null) {
+        return; // WILLNEEDTO IMRPOVe ERROR HANDLING!!!
+      }
       io.to(currentGameData?.hostSocketId ?? "").emit("host-next", currentGameData);
       const allPlayersInGame = await playerDb.getPlayers(gameId);
-      io.to(currentGameData?.hostSocketId ?? "").emit("players-updated", {
-        gameId: gameId,
-        players: allPlayersInGame
-      });
+      io.to(currentGameData?.hostSocketId ?? "").emit("players-updated", gameId, allPlayersInGame);
     } catch (e) {
       console.error(`Failed to go back: ${e}`);
     }
@@ -237,6 +237,9 @@ export default (io: Server, socket: Socket) => {
     try {
       await hostDb.hostClosePreSettings(preSettingsId, preSettingsData);
       const currentSettingsData = await hostDb.getPreSettingsData(preSettingsId);
+      if (currentSettingsData === null) {
+        return; // needs better handling
+      }
       io.to(currentSettingsData?.hostSocketId ?? "").emit("presettings-close", currentSettingsData);
     } catch (e) {
       console.error(`Failed to go back: ${e}`);

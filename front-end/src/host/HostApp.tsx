@@ -1,6 +1,5 @@
 import React from "react";
 import HostLobby from "./HostLobby";
-import { Socket } from "socket.io-client";
 import HostOpen from "./HostOpen";
 import HostQuestionnaire from "./HostQuestionnaire";
 import HostPreQuiz from "./HostPreQuiz";
@@ -23,9 +22,10 @@ import { IQuestionnaireQuestion } from "back-end/interfaces/IQuestionnaireQuesti
 import { HostAnnouncementQueue, AddAnnouncementContext } from "./HostAnnouncementQueue";
 import { GameState } from "back-end/interfaces/IGameState";
 import IGameDB from "back-end/interfaces/IGameDB";
+import { SocketFrontend } from "../socket";
 
 interface HostAppProps {
-  socket: Socket;
+  socket: SocketFrontend;
 }
 
 export default function HostApp({ socket }: HostAppProps) {
@@ -105,7 +105,7 @@ export default function HostApp({ socket }: HostAppProps) {
       setCustomQuestions(data.settings.customQuestions);
     };
 
-    const onOpenSuccess = (idFromServer: number) => {
+    const onOpenSuccess = (idFromServer: number): void => {
       setGameId(idFromServer);
       localStorage.setItem("game-id", `${idFromServer}`);
       setGameState("lobby");

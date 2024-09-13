@@ -1,12 +1,12 @@
 import * as React from "react";
-import "../style.css";
-import { Socket } from "socket.io-client";
 import HostLobbyView from "./HostLobbyView";
 import Speak from "../Speak";
 import { pickOneAndInterp } from "../util";
+import IPlayerDB from "back-end/interfaces/IPlayerDB";
+import { SocketFrontend } from "../socket";
 
 interface HostLobbyProps {
-  socket: Socket;
+  socket: SocketFrontend;
   gameId: number;
   classroomGame: boolean;
 }
@@ -15,9 +15,9 @@ export default function HostLobby({ socket, gameId, classroomGame }: HostLobbyPr
   const [playerNames, setPlayerNames] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    const onPlayersUpdated = (playersObject: any) => {
-      if (gameId !== -1 && playersObject.gameId === gameId) {
-        setPlayerNames(playersObject.players.map((p) => p.name));
+    const onPlayersUpdated = (gameId: number, players: IPlayerDB[]): void => {
+      if (gameId !== -1 && gameId === gameId) {
+        setPlayerNames(players.map((p) => p.name));
       }
     };
 

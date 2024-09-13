@@ -3,7 +3,6 @@ import hostDb from "../db/host.ts";
 import Player from "../models/Player.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
 import { Server } from "socket.io";
-import IQuizOption from "../interfaces/IQuizOption.ts";
 import { valInArr } from "../../front-end/src/util.ts";
 
 export default {

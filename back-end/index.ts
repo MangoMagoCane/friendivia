@@ -3,10 +3,11 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { createServer } from "http";
-import { Server, Socket } from "socket.io";
 import registerPlayerHandlers from "./handlers/playerHandler.ts";
 import registerHostHandlers from "./handlers/hostHandler.ts";
 import hostDb from "./db/host.ts";
+import { typedServer } from "./interfaces/IServer.ts";
+import { Server } from "socket.io";
 
 dotenv.config();
 const frontEndUrl = process.env["FRONT_END_URL"] || "http://localhost:3001";
@@ -19,9 +20,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-const http = createServer(app);
-const io: Server = new Server(http, {
+const httpServer = createServer(app);
+const io: typedServer = new Server(httpServer, {
   cors: {
     origin: frontEndUrl
   }
@@ -47,14 +47,12 @@ mongoose
   })
   .catch((err) => console.error(err));
 
-const onSocketConnect = (socket: Socket) => {
+io.on("connection", (socket) => {
   registerPlayerHandlers(io, socket);
   registerHostHandlers(io, socket);
-};
+});
 
-io.on("connection", onSocketConnect);
-
-http.listen(4001, () => {
+httpServer.listen(4001, () => {
   console.log(`Server listening on 4001`);
 });
 

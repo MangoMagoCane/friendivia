@@ -45,7 +45,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   }
 
   React.useEffect(() => {
-    const onLoadSuccess = (player: IPlayerDB, extraData: IPlayerLoadSuccess) => {
+    const onLoadSuccess = (player: IPlayerDB, extraData: IPlayerLoadSuccess | undefined): void => {
       setLoaded(true);
       setPlayerState(player.playerState.state);
       setPlayerName(player.name);
