@@ -18,6 +18,7 @@ export default {
       return [];
     }
   },
+
   getQuestionById: async (questionId: ObjectId): Promise<IQuestionnaireQuestion | null> => {
     try {
       const question: IQuestionnaireQuestion | null = await Question.findById(questionId);
@@ -27,6 +28,7 @@ export default {
       return null;
     }
   },
+
   addQuestion: async (question: IQuestionnaireQuestion): Promise<any> => {
     try {
       const newQuestion = new Question(question);
@@ -49,6 +51,7 @@ export default {
       return null;
     }
   },
+
   getRandomCustomQuestions: async (numQuestions: number, customQuestions: IQuestionnaireQuestion[]): Promise<any> => {
     try {
       var questions: IQuestionnaireQuestion[] = [];
@@ -63,12 +66,13 @@ export default {
       return [];
     }
   },
+
   getQuestionsForQuiz: async (
     numQuestions: number,
     customMode: string
   ): Promise<Array<PlayerQuestionnaireQuestion & { _id: Schema.Types.ObjectId }>> => {
     let questions: Array<PlayerQuestionnaireQuestion & { _id: Schema.Types.ObjectId }> = [];
-    if (customMode) {
+    if (customMode !== "") {
       questions = await Question.find({ tags: customMode });
       if (questions.length < numQuestions) {
         questions = await Question.find();
@@ -80,6 +84,7 @@ export default {
     shuffle(questions);
     return questions.slice(0, numQuestions);
   },
+
   getRandomQuestions: async (
     numQuestions: number,
     customQuestions: IQuestionnaireQuestion[],
@@ -123,6 +128,7 @@ export default {
       return [];
     }
   },
+
   deleteAllQuestions: async (): Promise<any> => {
     try {
       await Question.deleteMany({});
@@ -130,6 +136,7 @@ export default {
       console.error(`Issue deleting all games: ${e}`);
     }
   },
+
   getQuestionnaireQuestionsText: async (questionnaire: PlayerQuestionnaire): Promise<string[]> => {
     const questionnaireQuestionsText: string[] = [];
     for (const pqq of questionnaire.questions) {

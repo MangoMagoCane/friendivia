@@ -8,6 +8,8 @@ import registerHostHandlers from "./handlers/hostHandler.ts";
 import hostDb from "./db/host.ts";
 import { typedServer } from "./interfaces/IServer.ts";
 import { Server } from "socket.io";
+import basequestions from "./db/basequestions.ts";
+import questionDb from "./db/question.ts";
 
 dotenv.config();
 const frontEndUrl = process.env["FRONT_END_URL"] || "http://localhost:3001";
@@ -51,6 +53,11 @@ io.on("connection", (socket) => {
   registerPlayerHandlers(io, socket);
   registerHostHandlers(io, socket);
 });
+
+// hack to add all questions into mongo questions collection
+for (const question of basequestions) {
+  questionDb.addQuestion(question);
+}
 
 httpServer.listen(4001, () => {
   console.log(`Server listening on 4001`);

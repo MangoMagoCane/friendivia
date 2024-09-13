@@ -136,10 +136,8 @@ export default {
       }
 
       const players = await playerDb.getPlayers(gameId);
-      const questionnaires: PlayerQuestionnaire[] = await utilDb.createQuestionnairesForPlayers(
-        players,
-        game.customMode
-      );
+      console.log(game);
+      const questionnaires = await utilDb.createQuestionnairesForPlayers(players, game.customMode);
       await this.setGameState(gameId, "questionnaire");
 
       await Game.updateOne(

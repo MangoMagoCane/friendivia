@@ -1,10 +1,9 @@
 import * as React from "react";
-import "../style.css";
-import { Socket } from "socket.io-client";
 import PlayerQuestionnaireForm from "./PlayerQuestionnaireForm";
+import { SocketFrontend } from "../socket";
 
 interface PlayerQuestionnaireProps {
-  socket: Socket;
+  socket: SocketFrontend;
   playerState: string;
   questionnaireQuestionsText: string[];
 }
@@ -20,19 +19,19 @@ export default function PlayerQuestionnaire({
   });
 
   React.useEffect(() => {
-    function onSubmitQuestionnaireSuccess() {
+    const onSubmitQuestionnaireSuccess = () => {
       setQuestionnairePlayerState({
         state: "submitted-questionnaire-waiting",
         message: ""
       });
-    }
+    };
 
-    function onSubmitQuestionnaireError(errorMsg: string) {
+    const onSubmitQuestionnaireError = (errorMsg: string) => {
       setQuestionnairePlayerState({
         state: "filling-questionnaire",
         message: errorMsg.toString()
       });
-    }
+    };
 
     socket.on("player-submit-questionnaire-success", onSubmitQuestionnaireSuccess);
     socket.on("player-submit-questionnaire-error", onSubmitQuestionnaireError);

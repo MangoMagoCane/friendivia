@@ -25,7 +25,6 @@ interface ILobbyViewProps {
 }
 
 export default function HostLobbyView({ playerNames, gameId, socket }: ILobbyViewProps) {
-  console.log(`HostLobbyView Ran! playerCount: ${playerNames.length}`);
   const [badgeSpots, setBadgeSpots] = React.useState<string[]>(new Array(BOTTOM_BADGE_END).fill(""));
 
   const getSliceOfBadges = (start: number, end: number): ReactNode => {

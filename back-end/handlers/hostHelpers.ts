@@ -1,24 +1,24 @@
 import playerDb from "../db/player.ts";
-import hostDb from "../db/host.ts";
 import questionDb from "../db/question.ts";
+import hostDb from "../db/host.ts";
 import IGameDB from "../interfaces/IGameDB.ts";
 import playerHelpers from "./playerHelpers.ts";
 import Player from "../models/Player.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
 import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import IGuess from "../interfaces/IGuess.ts";
-import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
 import { typedServer } from "../interfaces/IServer.ts";
 
 const PRE_QUIZ_MS = 5000;
 const PRE_ANSWER_MS = 3000;
 const PRE_LEADER_BOARD_MS = 5000;
-const PRE_QUESTIONNAIRE_MS = 3000;
+// const PRE_QUESTIONNAIRE_MS = 3000;
+const PRE_QUESTIONNAIRE_MS = 500;
 let nextQuestionTimer: NodeJS.Timeout;
 
 export const hostGoNext = async (gameId: number, io: typedServer): Promise<void> => {
-  const currentGameData: IGameDB | null = await hostDb.getGameData(gameId);
-  if (!currentGameData) {
+  const currentGameData = await hostDb.getGameData(gameId);
+  if (currentGameData === null) {
     return;
   }
 
@@ -27,32 +27,32 @@ export const hostGoNext = async (gameId: number, io: typedServer): Promise<void>
 
 export const hostGoToQuestionnaire = async (gameId: number, io: typedServer): Promise<void> => {
   try {
-    const players: IPlayerDB[] = await playerDb.getPlayers(gameId);
+    const players = await playerDb.getPlayers(gameId);
 
     if (players.length >= 2) {
-      const playerQuestionnaires: PlayerQuestionnaire[] = await hostDb.moveGameToQuestionnaire(gameId);
+      const playerQuestionnaires = await hostDb.moveGameToQuestionnaire(gameId);
       await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": "filling-questionnaire" } });
       // await Player.updateMany({ gameId: gameId }, { $set: { playeState: { state: "filling-questionnaire" } } });
-      const currentGameData: IGameDB | null = await hostDb.getGameData(gameId);
-      if (!currentGameData) {
+      const currentGameData = await hostDb.getGameData(gameId);
+      if (currentGameData === null) {
         return;
       }
 
       const playersInGame = await playerDb.getPlayers(gameId);
-      io.to(currentGameData.hostSocketId).emit("host-next", { ...currentGameData, playersInGame });
+      io.to(currentGameData.hostSocketId).emit("host-next", { ...currentGameData, playersInGame }); // playersInGame makes no sense
 
       for (let i = 0; i < playerQuestionnaires.length; i++) {
-        const playerQuestionnaire: PlayerQuestionnaire = playerQuestionnaires[i];
-        const player: IPlayerDB | null = await playerDb.getPlayer(playerQuestionnaire.playerId);
+        const playerQuestionnaire = playerQuestionnaires[i];
+        const player = await playerDb.getPlayer(playerQuestionnaire.playerId);
         if (player === null) {
           continue;
         }
 
-        // const questionnaireQuestionsText: string[] = await questionDb.getQuestionnaireQuestionsText(
-        //   playerQuestionnaire
-        // );
-        // io.to(player.playerSocketId).emit("player-next", player, questionnaireQuestionsText); // original line, questionnaireQuestionsText has no effect as extra data
-        io.to(player.playerSocketId).emit("player-next", player);
+        const questionnaireQuestionsText = await questionDb.getQuestionnaireQuestionsText(playerQuestionnaire);
+        // io.to(player.playerSocketId).emit("player-next", player, questionnaireQuestionsText as IPlayerLoadSuccess); // original line, questionnaireQuestionsText has no effect as extra data
+        io.to(player.playerSocketId).emit("player-next", player, {
+          questionnaireQuestionsText: questionnaireQuestionsText
+        });
       }
     } else {
       console.error("tried to start a game with too few players");
@@ -216,7 +216,7 @@ export const handleTiebreakerAnswers = async (allPlayers: IPlayerDB[], quizQInde
 export const hostShowAnswer = async (gameId: number, io: typedServer): Promise<void> => {
   await hostDb.setGameState(gameId, "showing-answer");
   const gameData = await hostDb.getGameData(gameId);
-  if (!gameData) {
+  if (gameData === null) {
     return;
   }
 

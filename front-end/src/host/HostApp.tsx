@@ -71,6 +71,7 @@ export default function HostApp({ socket }: HostAppProps) {
     }
   };
 
+  console.log(`HostApp state: "${gameState}"`);
   React.useEffect(() => {
     const onLoadSuccess = (data: IGameDB & { quizQuestionGuesses; playerScores; playersInGame }) => {
       setLoaded(true);

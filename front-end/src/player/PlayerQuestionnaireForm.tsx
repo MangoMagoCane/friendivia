@@ -1,12 +1,11 @@
 import * as React from "react";
-import "../style.css";
 import { Button } from "../extra/FrdvButton";
 import TextField from "@mui/material/TextField";
-import { Socket } from "socket.io-client";
 import PlayerWait from "./PlayerJoinWait";
+import { SocketFrontend } from "../socket";
 
 interface PlayerQuestionnaireFormProps {
-  socket: Socket;
+  socket: SocketFrontend;
   playerState: any;
   questions: string[];
 }
@@ -15,6 +14,7 @@ export default function PlayerQuestionnaireForm({ socket, playerState, questions
   const [answers, setAnswers] = React.useState<string[]>(Array(questions.length).fill(""));
   const inMessage = `Submission accepted! Please wait for the other players to finish.`;
   const maxAnswer = 50;
+  console.log(questions);
 
   const onSubmitQuestionnaire = () => {
     for (let i = 0; i < answers.length; i++) {

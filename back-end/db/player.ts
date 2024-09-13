@@ -5,7 +5,6 @@ import IGameDB from "../interfaces/IGameDB.ts";
 import IGuess from "../interfaces/IGuess.ts";
 import Game from "../models/Game.ts";
 import hostDb from "./host.ts";
-import { PlayerQuestionnaire, PlayerQuestionnaireQuestion } from "../interfaces/IQuestionnaireQuestion.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
 import IPlayerScore from "../interfaces/IPlayerScore.ts";
 import { Server } from "socket.io";
@@ -136,15 +135,13 @@ export default {
         return;
       }
 
-      const questionnaireForPlayer: PlayerQuestionnaire | undefined = game.playerQuestionnaires.find(
-        (pq) => pq.playerId === player.id
-      );
-      if (!questionnaireForPlayer) {
+      const questionnaireForPlayer = game.playerQuestionnaires.find((pq) => pq.playerId === player.id);
+      if (questionnaireForPlayer === undefined) {
         return;
       }
 
       for (let i = 0; i < questionnaireForPlayer.questions.length; i++) {
-        const pqq: PlayerQuestionnaireQuestion = questionnaireForPlayer.questions[i];
+        const pqq = questionnaireForPlayer.questions[i];
         pqq.answer = questionnaireAnswers[i];
       }
 

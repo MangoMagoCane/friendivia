@@ -177,10 +177,10 @@ const selectRandomQuizOptions = (mainList: IQuizOption[], newList: IQuizOption[]
   return mainListCopy;
 };
 
-export const shuffle = (array: any[]): void => {
+export function shuffle<T>(array: T[]): void {
   let currentIndex = array.length;
-  let temporaryValue;
-  let randomIndex;
+  let temporaryValue: T;
+  let randomIndex: number;
 
   while (0 !== currentIndex) {
     randomIndex = Math.floor(Math.random() * currentIndex);
@@ -190,14 +190,14 @@ export const shuffle = (array: any[]): void => {
     array[currentIndex] = array[randomIndex];
     array[randomIndex] = temporaryValue;
   }
-};
+}
 
 export const generateQuiz = (
   players: IPlayerDB[],
   questionnaireQs: IQuestionnaireQuestion[],
   numQuizQuestions: number
 ): IQuizQuestion[] => {
-  var numQuestions = numQuizQuestions;
+  let numQuestions = numQuizQuestions;
   if (questionnaireQs.length === 1) {
     numQuestions = 1;
   } else if (questionnaireQs.length * players.length < numQuestions) {
