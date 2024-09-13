@@ -2,12 +2,12 @@ import * as React from "react";
 import { Button } from "../extra/FrdvButton";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
-import { Socket } from "socket.io-client";
 import PlayerWait from "./PlayerJoinWait";
 import { IPlayerState } from "back-end/interfaces/IPlayerState";
+import { SocketFrontend } from "../socket";
 
 interface PlayerJoinFormProps {
-  socket: Socket;
+  socket: SocketFrontend;
   playerState: IPlayerState;
 }
 

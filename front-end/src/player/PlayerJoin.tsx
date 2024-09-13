@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Socket } from "socket.io-client";
 import PlayerJoinForm from "./PlayerJoinForm";
 import { IPlayerState } from "back-end/interfaces/IPlayerState";
+import { SocketFrontend } from "../socket";
 
 interface PlayerJoinProps {
-  socket: Socket;
+  socket: SocketFrontend;
   playerState: string;
 }
 

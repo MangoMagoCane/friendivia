@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Button } from "../extra/FrdvButton";
-import { Socket } from "socket.io-client";
 import HostOpenButton from "../extra/HostOpenButton";
+import { SocketFrontend } from "../socket";
 
 interface IOpenProps {
-  socket: Socket;
+  socket: SocketFrontend;
 }
 
 export default function HostOpen({ socket }: IOpenProps) {

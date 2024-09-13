@@ -20,9 +20,10 @@ import { valInArr } from "../util";
 import IPlayerScore from "back-end/interfaces/IPlayerScore";
 import IPlayerDB from "back-end/interfaces/IPlayerDB";
 import { IPlayerLoadSuccess } from "back-end/interfaces/ISocketCallbacks";
+import { SocketFrontend } from "../socket";
 
 interface PlayerAppProps {
-  socket: Socket;
+  socket: SocketFrontend;
 }
 
 export default function PlayerApp({ socket }: PlayerAppProps) {

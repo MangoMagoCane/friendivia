@@ -52,7 +52,8 @@ export interface ClientToServerEvents {
   "check-all-players-answered": (guess: number) => Promise<void>;
   "host-settings": (gameId: number) => Promise<void>;
   "host-back": (gameId: number, settingsData: ISettings) => Promise<void>;
-  "host-pre-settings": (gameId: number, settingsData: ISettings) => Promise<void>;
+  //Originally which appears to be incorrect "host-pre-settings": (gameId: number, settingsData: ISettings) => Promise<void>;
+  "host-pre-settings": () => Promise<void>;
   "host-ps-back": (preSettingsId: string, preSettingsData: ISettings) => Promise<void>;
   //OTHERHOST
   // "host-game-ended": () => void;

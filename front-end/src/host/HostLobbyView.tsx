@@ -24,9 +24,8 @@ interface ILobbyViewProps {
   socket: Socket;
 }
 
-export default function HostLobbyView(props: ILobbyViewProps) {
-  const { playerNames, gameId, socket } = props;
-
+export default function HostLobbyView({ playerNames, gameId, socket }: ILobbyViewProps) {
+  console.log(`HostLobbyView Ran! playerCount: ${playerNames.length}`);
   const [badgeSpots, setBadgeSpots] = React.useState<string[]>(new Array(BOTTOM_BADGE_END).fill(""));
 
   const getSliceOfBadges = (start: number, end: number): ReactNode => {
@@ -69,7 +68,7 @@ export default function HostLobbyView(props: ILobbyViewProps) {
       }
     }
 
-    setBadgeSpots(() => updatedBadgeSpots);
+    setBadgeSpots(updatedBadgeSpots);
   }, [playerNames]);
 
   const joinUrl = window.location.href
@@ -79,25 +78,20 @@ export default function HostLobbyView(props: ILobbyViewProps) {
     .replace("www.", "");
   const gameStr = gameId.toString().split("").join(" ");
 
-  async function onStart() {
+  const onStart = async () => {
     socket.emit("host-start", gameId);
-  }
+  };
 
-  async function onPlayerKick(name: string) {
+  const onPlayerKick = async (name: string) => {
     socket.emit("host-kick-player", name);
-  }
+  };
 
-  function onSettings() {
+  const onSettings = () => {
     socket.emit("host-settings", gameId);
-  }
+  };
 
-  let playerCountText: string;
-  {
-    let verb: string;
-    let plural: string;
-    [verb, plural] = playerNames.length === 1 ? ["is", ""] : ["are", "s"];
-    playerCountText = `There ${verb} currently ${playerNames.length} player${plural} in the game.`;
-  }
+  const [verb, plural] = playerNames.length === 1 ? ["is", ""] : ["are", "s"];
+  const playerCountText = `There ${verb} currently ${playerNames.length} player${plural} in the game.`;
 
   return (
     <div className="host-lobby">

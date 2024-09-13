@@ -244,6 +244,7 @@ export default function HostApp({ socket }: HostAppProps) {
     } else if (state === "tiebreaker") {
       return <HostTiebreaker />;
     } else {
+      // state === "init" and potentially some other state
       return <HostOpen socket={socket} />;
     }
   };

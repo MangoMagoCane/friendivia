@@ -34,6 +34,7 @@ export default (io: typedServer, socket: SocketBackend) => {
       }
 
       io.to(updatedPlayer.playerSocketId).emit("player-next", updatedPlayer);
+      allPlayersInGame.push(updatedPlayer); // necessary otherwise allPlayersInGame only contains the players before the new one is added
       io.to(currentGameData.hostSocketId).emit("players-updated", gameId, allPlayersInGame);
 
       socket.emit("join-success", newPlayerId);
