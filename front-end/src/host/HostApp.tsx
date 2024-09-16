@@ -18,7 +18,7 @@ import Speak from "../Speak";
 import lobbyMusic from "../assets/audio/theme.mp3";
 import musicOn from "../assets/musicon.png";
 import musicOff from "../assets/musicoff.png";
-import { IQuestionnaireQuestion } from "back-end/interfaces/IQuestionnaireQuestion";
+import { IQuestionnaireQuestionDB } from "back-end/interfaces/IQuestionnaireQuestionDB";
 import { HostAnnouncementQueue, AddAnnouncementContext } from "./HostAnnouncementQueue";
 import { GameState } from "back-end/interfaces/IGameState";
 import IGameDB from "back-end/interfaces/IGameDB";
@@ -51,7 +51,7 @@ export default function HostApp({ socket }: HostAppProps) {
   const [timePerAnswer, setTimePerAnswer] = React.useState<number>(10);
   const [timePerLeaderboard, setTimePerLeaderboard] = React.useState<number>(5);
   const [prioritizeCustomQs, setPrioritizeCustomQs] = React.useState<boolean>(true);
-  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestion[]>([]);
+  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestionDB[]>([]);
 
   const [loaded, setLoaded] = React.useState<boolean>(false);
   const [muted, setMuted] = React.useState<boolean>(true);

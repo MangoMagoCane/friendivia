@@ -1,13 +1,14 @@
 import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import {
-  IQuestionnaireQuestion,
+  IQuestionnaireQuestionDB,
   PlayerQuestionnaire,
   PlayerQuestionnaireQuestion
-} from "../interfaces/IQuestionnaireQuestion";
+} from "../interfaces/IQuestionnaireQuestionDB.ts";
 import IQuizQuestion from "../interfaces/IQuizQuestion";
 import questionDb from "../db/question.ts";
 import playerDb from "../db/player.ts";
 import IQuizOption from "../interfaces/IQuizOption.ts";
+import { Schema } from "mongoose";
 
 function getNumberOfQuestions(players: any[]) {
   return Math.max(4, players.length);
@@ -15,20 +16,26 @@ function getNumberOfQuestions(players: any[]) {
 
 export async function createQuestionnairesForPlayers(
   players: IPlayerDB[],
+  previouslyUsedQuestionQuizText: string[],
   customMode: string
-): Promise<PlayerQuestionnaire[]> {
+): Promise<[PlayerQuestionnaire[], string[]]> {
   const totalQuestions = getNumberOfQuestions(players);
-  const allQuestionsForQuiz = await questionDb.getQuestionsForQuiz(totalQuestions, customMode);
+  const allQuestionsForQuiz = await questionDb.getQuestionsForQuiz(
+    totalQuestions,
+    previouslyUsedQuestionQuizText,
+    customMode
+  );
+  console.log(allQuestionsForQuiz);
   const playerQuestionnaires: PlayerQuestionnaire[] = [];
 
   for (let i = 0; i < players.length; i++) {
-    const player: IPlayerDB = players[i];
+    const player = players[i];
     const questionIds: PlayerQuestionnaireQuestion[] = [];
 
     for (let j = 0; j < 4; j++) {
       const questionForPlayer = allQuestionsForQuiz[(i + j) % totalQuestions];
       questionIds.push({
-        questionId: questionForPlayer._id,
+        questionId: questionForPlayer._id as Schema.Types.ObjectId,
         subjectQuestion: j === 0,
         answer: ""
       });
@@ -41,7 +48,8 @@ export async function createQuestionnairesForPlayers(
     });
   }
 
-  return playerQuestionnaires;
+  const newQuestionQuizText = allQuestionsForQuiz.map((q) => q.quizText);
+  return [playerQuestionnaires, newQuestionQuizText];
 }
 
 export async function createQuiz(playerQuestionnaires: PlayerQuestionnaire[], customMode): Promise<IQuizQuestion[]> {
@@ -66,7 +74,7 @@ export async function createQuiz(playerQuestionnaires: PlayerQuestionnaire[], cu
       continue;
     }
 
-    const questionnaireQuestion: IQuestionnaireQuestion | null = await questionDb.getQuestionById(
+    const questionnaireQuestion: IQuestionnaireQuestionDB | null = await questionDb.getQuestionById(
       playerQuestion.questionId
     );
     if (!questionnaireQuestion) {
@@ -132,7 +140,7 @@ export const createQuestionnaireQuestionsWithOptions = async (
   prioritizeCustomQs,
   number?,
   customQuestions?
-): Promise<IQuestionnaireQuestion[]> => {
+): Promise<IQuestionnaireQuestionDB[]> => {
   if (number) {
     const questions = await questionDb.getRandomQuestions(number, customQuestions, prioritizeCustomQs);
     return questions;
@@ -194,7 +202,7 @@ export function shuffle<T>(array: T[]): void {
 
 export const generateQuiz = (
   players: IPlayerDB[],
-  questionnaireQs: IQuestionnaireQuestion[],
+  questionnaireQs: IQuestionnaireQuestionDB[],
   numQuizQuestions: number
 ): IQuizQuestion[] => {
   let numQuestions = numQuizQuestions;
@@ -210,12 +218,12 @@ export const generateQuiz = (
     playerIds.push(players[i % players.length].id);
   }
 
-  const revisedQuestionList: IQuestionnaireQuestion[] = [];
+  const revisedQuestionList: IQuestionnaireQuestionDB[] = [];
   for (let i = 0; i < numQuestions; i++) {
     revisedQuestionList.push(questionnaireQs[i % questionnaireQs.length]);
   }
 
-  const selectableQuestionList: IQuestionnaireQuestion[] = [];
+  const selectableQuestionList: IQuestionnaireQuestionDB[] = [];
   for (let i = 0; i < numQuestions; i++) {
     selectableQuestionList.push(questionnaireQs[i % questionnaireQs.length]);
   }
@@ -228,7 +236,7 @@ export const generateQuiz = (
       continue;
     }
 
-    const currentQuestionnaireQ: IQuestionnaireQuestion = chooseRandomFromList(selectableQuestionList);
+    const currentQuestionnaireQ: IQuestionnaireQuestionDB = chooseRandomFromList(selectableQuestionList);
     const text: string = currentQuestionnaireQ.quizText;
     const Qindex: number = revisedQuestionList.indexOf(currentQuestionnaireQ);
     const correctAnswer: string = currentPlayer.questionnaireAnswers[Qindex % questionnaireQs.length];

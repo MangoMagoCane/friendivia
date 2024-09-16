@@ -1,6 +1,7 @@
 import { Schema } from "mongoose";
 
-export interface IQuestionnaireQuestion {
+export interface IQuestionnaireQuestionDB {
+  _id?: Schema.Types.ObjectId;
   text: string;
   quizText: string;
   tags: string[];

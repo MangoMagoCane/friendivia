@@ -4,7 +4,7 @@ import { Socket } from "socket.io-client";
 import TextField from "@mui/material/TextField";
 import Switch from "@mui/material/Switch";
 import Stack from "@mui/material/Stack";
-import { IQuestionnaireQuestion } from "back-end/interfaces/IQuestionnaireQuestion";
+import { IQuestionnaireQuestionDB } from "back-end/interfaces/IQuestionnaireQuestionDB";
 import IPlayerDB from "back-end/interfaces/IPlayerDB";
 
 interface HostSettingsProps {
@@ -20,7 +20,7 @@ interface HostSettingsProps {
   timePerAnswerSetting: number;
   timePerLeaderboardSetting: number;
   prioritizeCustomQsSetting: boolean;
-  customQuestionsSetting: IQuestionnaireQuestion[];
+  customQuestionsSetting: IQuestionnaireQuestionDB[];
 }
 
 export default function HostSettings({
@@ -53,8 +53,10 @@ export default function HostSettings({
   const [timePerLeaderboard, setTimePerLeaderboard] = React.useState<number>(timePerLeaderboardSetting || 5);
   const [timePerLeaderboardInput, setTimePerLeaderboardInput] = React.useState<number>(timePerLeaderboard);
   const [prioritizeCustomQs, setPrioritizeCustomQs] = React.useState<boolean>(prioritizeCustomQsSetting);
-  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestion[]>(customQuestionsSetting || []);
-  const [mappedQuestions, setMappedQuestions] = React.useState<IQuestionnaireQuestion[]>(customQuestions || []);
+  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestionDB[]>(
+    customQuestionsSetting || []
+  );
+  const [mappedQuestions, setMappedQuestions] = React.useState<IQuestionnaireQuestionDB[]>(customQuestions || []);
   const [maxNumQuizQuestions, setMaxNumQuizQuestions] = React.useState<number>(
     numQuestionnaireQuestions * playersInGame.length || 5
   );
@@ -102,7 +104,7 @@ export default function HostSettings({
   }, [timePerLeaderboard, setTimePerLeaderboard]);
 
   const addCustomQuestion = () => {
-    setCustomQuestions((prevQuestions: IQuestionnaireQuestion[]) => [
+    setCustomQuestions((prevQuestions: IQuestionnaireQuestionDB[]) => [
       { id: "", text: "", quizText: "", fakeAnswers: [], tags: [] },
       ...prevQuestions
     ]);

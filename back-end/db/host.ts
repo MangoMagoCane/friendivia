@@ -9,7 +9,7 @@ import playerDb from "../db/player.ts";
 import * as uuid from "uuid";
 import Player from "../models/Player.ts";
 import friendsQuestions from "./friendsTriviaQuestions.ts";
-import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestion.ts";
+import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestionDB.ts";
 import ISettings from "../interfaces/ISettings.ts";
 
 export default {
@@ -73,6 +73,7 @@ export default {
         hostSocketId: socketId,
         playerQuestionnaires: [],
         quizQuestions: [],
+        previouslyUsedQuestionQuizText: [],
         currentQuestionIndex: -1,
         settings: {
           timePerQuestion: timePerQuestion,
@@ -136,20 +137,26 @@ export default {
 
   moveGameToQuestionnaire: async function (gameId: number): Promise<PlayerQuestionnaire[]> {
     try {
-      const game = await this.getGameData(gameId);
-      if (game === null) {
+      const gameData = await this.getGameData(gameId);
+      if (gameData === null) {
         return [];
       }
 
       const players = await playerDb.getPlayers(gameId);
-      console.log(game);
-      const questionnaires = await utilDb.createQuestionnairesForPlayers(players, game.customMode);
+      const [questionnaires, newQuizText] = await utilDb.createQuestionnairesForPlayers(
+        players,
+        gameData.previouslyUsedQuestionQuizText,
+        gameData.customMode
+      );
       await this.setGameState(gameId, "questionnaire");
 
       await Game.updateOne(
         { id: gameId },
         {
-          $set: { playerQuestionnaires: questionnaires }
+          $set: {
+            playerQuestionnaires: questionnaires,
+            previouslyUsedQuestionQuizText: [...gameData.previouslyUsedQuestionQuizText, ...newQuizText]
+          }
         }
       );
 

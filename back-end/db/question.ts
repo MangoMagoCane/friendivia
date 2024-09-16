@@ -1,12 +1,8 @@
 import Question from "../models/Question.ts";
-import {
-  IQuestionnaireQuestion,
-  PlayerQuestionnaire,
-  PlayerQuestionnaireQuestion
-} from "../interfaces/IQuestionnaireQuestion";
+import { IQuestionnaireQuestionDB, PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestionDB.ts";
 import questionDb from "../db/question.ts";
 import { shuffle } from "./utils.ts";
-import { ObjectId, Schema } from "mongoose";
+import { ObjectId } from "mongoose";
 
 export default {
   getQuestions: async (): Promise<any> => {
@@ -19,9 +15,9 @@ export default {
     }
   },
 
-  getQuestionById: async (questionId: ObjectId): Promise<IQuestionnaireQuestion | null> => {
+  getQuestionById: async (questionId: ObjectId): Promise<IQuestionnaireQuestionDB | null> => {
     try {
-      const question: IQuestionnaireQuestion | null = await Question.findById(questionId);
+      const question: IQuestionnaireQuestionDB | null = await Question.findById(questionId);
       return question;
     } catch (e) {
       console.error(`Issue getting question: ${e}`);
@@ -29,7 +25,7 @@ export default {
     }
   },
 
-  addQuestion: async (question: IQuestionnaireQuestion): Promise<any> => {
+  addQuestion: async (question: IQuestionnaireQuestionDB): Promise<any> => {
     try {
       const newQuestion = new Question(question);
       const questionExists =
@@ -52,9 +48,9 @@ export default {
     }
   },
 
-  getRandomCustomQuestions: async (numQuestions: number, customQuestions: IQuestionnaireQuestion[]): Promise<any> => {
+  getRandomCustomQuestions: async (numQuestions: number, customQuestions: IQuestionnaireQuestionDB[]): Promise<any> => {
     try {
-      var questions: IQuestionnaireQuestion[] = [];
+      let questions: IQuestionnaireQuestionDB[] = [];
       while (questions.length < numQuestions) {
         const index = Math.floor(Math.random() * customQuestions.length);
         questions.push(customQuestions[index]);
@@ -69,9 +65,11 @@ export default {
 
   getQuestionsForQuiz: async (
     numQuestions: number,
+    previouslyUsedQuestionQuizText: string[],
     customMode: string
-  ): Promise<Array<PlayerQuestionnaireQuestion & { _id: Schema.Types.ObjectId }>> => {
-    let questions: Array<PlayerQuestionnaireQuestion & { _id: Schema.Types.ObjectId }> = [];
+  ): Promise<Array<IQuestionnaireQuestionDB>> => {
+    let questions: Array<IQuestionnaireQuestionDB> = [];
+
     if (customMode !== "") {
       questions = await Question.find({ tags: customMode });
       if (questions.length < numQuestions) {
@@ -81,13 +79,17 @@ export default {
       questions = await Question.find();
     }
 
+    if (numQuestions + previouslyUsedQuestionQuizText.length < questions.length) {
+      questions = questions.filter((q) => !previouslyUsedQuestionQuizText.includes(q.quizText));
+    }
+
     shuffle(questions);
     return questions.slice(0, numQuestions);
   },
 
   getRandomQuestions: async (
     numQuestions: number,
-    customQuestions: IQuestionnaireQuestion[],
+    customQuestions: IQuestionnaireQuestionDB[],
     prioritizeCustomQs: boolean
   ): Promise<any> => {
     try {
@@ -129,7 +131,7 @@ export default {
     }
   },
 
-  deleteAllQuestions: async (): Promise<any> => {
+  deleteAllQuestions: async (): Promise<void> => {
     try {
       await Question.deleteMany({});
     } catch (e) {

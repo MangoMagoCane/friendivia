@@ -7,6 +7,7 @@ const gameSchema = new Schema<IGameDB>({
   hostSocketId: { type: String, required: true },
   playerQuestionnaires: [{ type: Object }],
   quizQuestions: [{ type: Object }],
+  previouslyUsedQuestionQuizText: [{ type: String }],
   currentQuestionIndex: { type: Number, required: true },
   settings: { type: Object, required: true },
   customMode: { type: String }

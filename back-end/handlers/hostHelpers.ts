@@ -17,43 +17,45 @@ const PRE_QUESTIONNAIRE_MS = 500;
 let nextQuestionTimer: NodeJS.Timeout;
 
 export const hostGoNext = async (gameId: number, io: typedServer): Promise<void> => {
-  const currentGameData = await hostDb.getGameData(gameId);
-  if (currentGameData === null) {
+  const gameData = await hostDb.getGameData(gameId);
+  if (gameData === null) {
     return;
   }
 
-  io.to(currentGameData.hostSocketId).emit("host-next", currentGameData);
+  io.to(gameData.hostSocketId).emit("host-next", gameData);
 };
 
 export const hostGoToQuestionnaire = async (gameId: number, io: typedServer): Promise<void> => {
   try {
     const players = await playerDb.getPlayers(gameId);
 
-    if (players.length >= 2) {
-      const playerQuestionnaires = await hostDb.moveGameToQuestionnaire(gameId);
-      await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": "filling-questionnaire" } });
-      const gameData = await hostDb.getGameData(gameId);
-      if (gameData === null) {
-        return;
-      }
-
-      const playersInGame = await playerDb.getPlayers(gameId);
-      io.to(gameData.hostSocketId).emit("host-next", { ...gameData, playersInGame }); // playersInGame might make sense?
-
-      for (let i = 0; i < playerQuestionnaires.length; i++) {
-        const playerQuestionnaire = playerQuestionnaires[i];
-        const player = await playerDb.getPlayer(playerQuestionnaire.playerId);
-        if (player === null) {
-          continue;
-        }
-
-        const questionnaireQuestionsText = await questionDb.getQuestionnaireQuestionsText(playerQuestionnaire);
-        io.to(player.playerSocketId).emit("player-next", player, {
-          questionnaireQuestionsText: questionnaireQuestionsText
-        });
-      }
-    } else {
+    if (players.length < 2) {
       console.error("tried to start a game with too few players");
+      return;
+    }
+
+    const playerQuestionnaires = await hostDb.moveGameToQuestionnaire(gameId);
+    await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": "filling-questionnaire" } });
+
+    const gameData = await hostDb.getGameData(gameId);
+    if (gameData === null) {
+      return;
+    }
+
+    const playersInGame = await playerDb.getPlayers(gameId);
+    io.to(gameData.hostSocketId).emit("host-next", { ...gameData, playersInGame }); // playersInGame might make sense?
+
+    for (let i = 0; i < playerQuestionnaires.length; i++) {
+      const playerQuestionnaire = playerQuestionnaires[i];
+      const player = await playerDb.getPlayer(playerQuestionnaire.playerId);
+      if (player === null) {
+        continue;
+      }
+
+      const questionnaireQuestionsText = await questionDb.getQuestionnaireQuestionsText(playerQuestionnaire);
+      io.to(player.playerSocketId).emit("player-next", player, {
+        questionnaireQuestionsText: questionnaireQuestionsText
+      });
     }
   } catch (e) {
     console.error(`Failed to go to questionnaire: ${e}`);
