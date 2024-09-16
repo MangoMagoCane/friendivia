@@ -47,15 +47,21 @@ export default {
       const timePerLeaderboard = 5;
       const prioritizeCustomQs = false;
       const customQuestions = [];
+      const gameIdTryCount = 10001;
 
       let newId = -1;
-      while (true) {
+      let i = 0;
+      for (; i < gameIdTryCount; i++) {
         const testId = Math.floor(Math.random() * 9000 + 1000);
         const gameExists = await Game.exists({ id: testId });
         if (gameExists === null) {
           newId = testId;
           break;
         }
+      }
+
+      if (i === gameIdTryCount) {
+        throw Error("could not create a gameId");
       }
 
       const newGameObject: IGameDB = {
@@ -156,8 +162,8 @@ export default {
 
   getPlayerQuestionnaires: async function (gameId: number): Promise<PlayerQuestionnaire[]> {
     try {
-      const game: IGameDB | null = await this.getGameData(gameId);
-      if (!game) {
+      const game = await this.getGameData(gameId);
+      if (game === null) {
         return [];
       }
 
@@ -207,7 +213,7 @@ export default {
     return false;
   },
 
-  deleteAllGames: async (): Promise<any> => {
+  deleteAllGames: async (): Promise<void> => {
     try {
       await Game.deleteMany({});
       await PreGameSettings.deleteMany({});
@@ -225,7 +231,7 @@ export default {
     }
   },
 
-  deleteOneSettings: async (preSettingsId): Promise<any> => {
+  deleteOneSettings: async (preSettingsId): Promise<void> => {
     try {
       await PreGameSettings.deleteOne({ id: preSettingsId });
     } catch (e) {
@@ -233,7 +239,7 @@ export default {
     }
   },
 
-  deleteGame: async (gameId: number): Promise<any> => {
+  deleteGame: async (gameId: number): Promise<void> => {
     try {
       await Game.deleteOne({ id: gameId });
     } catch (e) {
@@ -241,7 +247,7 @@ export default {
     }
   },
 
-  updateSettings: async (gameId: number, settingsData: ISettings): Promise<any> => {
+  updateSettings: async (gameId: number, settingsData: ISettings): Promise<void> => {
     try {
       const timePerQuestion = settingsData.timePerQuestion;
       const numQuestionnaireQuestions = settingsData.numQuestionnaireQuestions;
@@ -382,6 +388,14 @@ export default {
       );
     } catch (e) {
       console.error(`Issue adding tiebreaker question: ${e}`);
+    }
+  },
+
+  resetGameStateToPreQuestionnaireState: async (gameId: number): Promise<void> => {
+    try {
+      await Game.updateOne({ id: gameId }, { $set: { quizQuestions: [], currentQuestionIndex: -1 } });
+    } catch (e) {
+      console.error(`Issue setting game state to pre-questionnaire state: ${e}`);
     }
   }
 };

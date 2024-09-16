@@ -1,11 +1,11 @@
 import * as React from "react";
 import PlayerJoinForm from "./PlayerJoinForm";
-import { IPlayerState } from "back-end/interfaces/IPlayerState";
+import { IPlayerState, PlayerState } from "back-end/interfaces/IPlayerState";
 import { SocketFrontend } from "../socket";
 
 interface PlayerJoinProps {
   socket: SocketFrontend;
-  playerState: string;
+  playerState: PlayerState | "";
 }
 
 export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {

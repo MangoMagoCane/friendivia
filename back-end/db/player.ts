@@ -22,6 +22,16 @@ export default {
     }
   },
 
+  getPlayer: async (playerId: string): Promise<IPlayerDB | null> => {
+    try {
+      const player = await Player.findOne({ id: playerId });
+      return player;
+    } catch (e) {
+      console.error(`Issue getting player state: ${e}`);
+      throw Error("Failed to get player", { cause: e });
+    }
+  },
+
   getPlayersWithQuestionnairesCompleted: async (gameId: number, qLength: number): Promise<IPlayerDB[]> => {
     try {
       const players = await Player.find({ gameId: gameId });
@@ -55,16 +65,6 @@ export default {
     } catch (e) {
       console.error(`Issue adding player: ${e}`);
       throw Error("Failed to add new player", { cause: e });
-    }
-  },
-
-  getPlayer: async (playerId: string): Promise<IPlayerDB | null> => {
-    try {
-      const player = await Player.findOne({ id: playerId });
-      return player;
-    } catch (e) {
-      console.error(`Issue getting player state: ${e}`);
-      throw Error("Failed to get player", { cause: e });
     }
   },
 
@@ -115,7 +115,7 @@ export default {
     }
   },
 
-  updatePlayerState: async (playerId: string, newState: PlayerState, io: typedServer): Promise<any> => {
+  updatePlayerState: async (playerId: string, newState: PlayerState, io: typedServer): Promise<void> => {
     try {
       await Player.updateOne({ id: playerId }, { $set: { "playerState.state": newState } });
       const players = await Player.find({ id: playerId });
@@ -188,7 +188,7 @@ export default {
     return guessingPlayers;
   },
 
-  awardAllPlayersConsolationPoints: async function (guessingPlayers: IPlayerDB[], quizQIndex: number): Promise<any> {
+  awardAllPlayersConsolationPoints: async function (guessingPlayers: IPlayerDB[], quizQIndex: number): Promise<void> {
     const sortedPlayers = this.getPlayersSortedByGuessSpeed(guessingPlayers, quizQIndex);
 
     for (let i = 0; i < sortedPlayers.length; i++) {
@@ -197,9 +197,9 @@ export default {
     }
   },
 
-  awardPlayerPoints: async (playerId: string, points: number): Promise<any> => {
+  awardPlayerPoints: async (playerId: string, points: number): Promise<void> => {
     try {
-      const player: IPlayerDB | null = await Player.findOne({ id: playerId });
+      const player = await Player.findOne({ id: playerId });
 
       if (player === null) {
         throw `Player not found: ${playerId}`;
@@ -305,9 +305,9 @@ export default {
     }
   },
 
-  deletePlayer: async function (playerId: string): Promise<void> {
+  deletePlayer: async (playerId: string): Promise<void> => {
     try {
-      await Player.deleteOne({ id: "foo" });
+      await Player.deleteOne({ id: playerId });
     } catch (e) {
       console.error(`Issue deleting player ${playerId}: ${e}`);
     }

@@ -13,24 +13,21 @@ interface ILeaderBoardProps {
 }
 
 export default function HostLeaderBoard({ gameId, playerScores, socket }: ILeaderBoardProps) {
-  playerScores.sort((p1, p2) => p2.score - p1.score);
   const [numPlayersToShow, setNumPlayersToShow] = React.useState<number>(5);
 
-  const onPlayAgain = () => {
-    socket.emit("play-again");
-  };
+  playerScores.sort((p1, p2) => p2.score - p1.score);
 
-  const onPlayAgainWithSamePlayers = () => {
+  const onPlayAgainWithSamePlayers = (): void => {
     socket.emit("play-again-with-same-players", gameId);
   };
 
-  const winnerText = () => {
+  const winnerText = (): string => {
     const winnerScore = playerScores[0].score;
     const winnerName = playerScores[0].name;
     return `The winner is "${winnerName}" with a score of "${winnerScore}"! Great job!`;
   };
 
-  const showAllPlayers = () => {
+  const showAllPlayers = (): void => {
     setNumPlayersToShow(playerScores.length);
   };
 
@@ -107,9 +104,6 @@ export default function HostLeaderBoard({ gameId, playerScores, socket }: ILeade
           style={{ margin: "2px" }}
         >
           show all players
-        </Button>
-        <Button onClick={onPlayAgain} variant="contained" style={{ margin: "2px" }}>
-          play again
         </Button>
         <Button onClick={onPlayAgainWithSamePlayers} variant="contained" style={{ margin: "2px" }}>
           play again with the same players

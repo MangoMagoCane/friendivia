@@ -4,7 +4,6 @@ import questionDb from "../db/question.ts";
 import Game from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
 import Player from "../models/Player.ts";
-import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import PreGameSettings from "../models/PreGameSettings.ts";
 import { valInArr } from "../../front-end/src/util.ts";
 import ISettings from "../interfaces/ISettings.ts";
@@ -109,7 +108,7 @@ export default (io: typedServer, socket: SocketBackend) => {
       await hostDb.deleteGame(gameData.id);
       socket.emit("host-game-ended");
 
-      const allPlayersInGame: IPlayerDB[] = await playerDb.getPlayers(gameData.id);
+      const allPlayersInGame = await playerDb.getPlayers(gameData.id);
       for (const player of allPlayersInGame) {
         await playerDb.deletePlayer(player.id);
         io.to(player.playerSocketId).emit("player-game-ended");
@@ -262,32 +261,11 @@ export default (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  // const onPlayAgainWithSamePlayers = async (gameId: number) => {
-  // try {
-  //   await playerDb.resetPlayerScores(gameId);
-  //   // socket.emit("reset-quiz-length");
-  //   await Game.updateOne(
-  //     { id: gameId },
-  //     {
-  //       $set: { currentQuestionIndex: -1 }
-  //     }
-  //   );
-  //   const questionnaireQuestionsText = await hostDb.moveGameToQuestionnaire(gameId);
-  //   await playerDb.updateAllPlayerStates(gameId, "filling-questionnaire", io, {
-  //     playerScores: [],
-  //     quizQuestionOptionsText: questionnaireQuestionsText
-  //   });
-  //   const playersInGame = await playerDb.getPlayers(gameId);
-  //   playersInGame.map((p) => (p.quizGuesses = []));
-  //   const gameData = await hostDb.getGameData(gameId);
-  //   if (gameData === null) {
-  //     throw Error("Bad game data");
-  //   }
-  //   io.to(gameData?.hostSocketId || "").emit("host-next", { ...gameData, playersInGame });
-  // } catch (e) {
-  //   console.error(`Failed to go to questionnaire: ${e}`);
-  // }
-  // };
+  const onPlayAgainWithSamePlayers = async (gameId: number): Promise<void> => {
+    await hostDb.resetGameStateToPreQuestionnaireState(gameId);
+    await playerDb.resetPlayerScores(gameId);
+    await onHostStart(gameId);
+  };
 
   socket.on("host-open", onHostOpen);
   socket.on("host-load", onHostLoad);
@@ -305,5 +283,5 @@ export default (io: typedServer, socket: SocketBackend) => {
   socket.on("host-back", onHostBack);
   socket.on("host-pre-settings", onHostPreSettings);
   socket.on("host-ps-back", onHostPSBack);
-  // socket.on("play-again-with-same-players", onPlayAgainWithSamePlayers);
+  socket.on("play-again-with-same-players", onPlayAgainWithSamePlayers);
 };
