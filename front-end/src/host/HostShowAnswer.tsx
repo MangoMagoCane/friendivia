@@ -1,20 +1,19 @@
 import * as React from "react";
-import "../style.css";
 import { Paper, Stack } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
-import { Socket } from "socket.io-client";
 import Speak from "../Speak";
 import { pickOne } from "../util";
 import PlayerBadge from "./PlayerBadge";
 import IQuizOption from "back-end/interfaces/IQuizOption";
+import { SocketFrontend } from "../socket";
 
-interface IShowAnswerProps {
+interface HostShowAnswerProps {
   playerName: string;
   questionText: string;
   options: IQuizOption[];
   correctAnswerIndex: number;
   playerGuesses: Array<any>;
-  socket: Socket;
+  socket: SocketFrontend;
   gameId: number;
   quizLength: number;
   handsFreeMode: boolean;
@@ -27,10 +26,8 @@ export default function HostShowAnswer({
   correctAnswerIndex,
   playerGuesses,
   socket,
-  gameId,
-  quizLength,
   handsFreeMode
-}: IShowAnswerProps) {
+}: HostShowAnswerProps) {
   const totalGuesses = playerGuesses.length - 1;
   const correctPlayers = playerGuesses.filter((g) => g?.guess === correctAnswerIndex);
   const numCorrect = correctPlayers.length;

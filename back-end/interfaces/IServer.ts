@@ -4,6 +4,8 @@ import IGameDB from "./IGameDB";
 import IPreGameSettings from "./IPreGameSettings";
 import IPlayerDB from "./IPlayerDB";
 import { IPlayerLoadSuccess } from "./ISocketCallbacks";
+import IPlayerScore from "./IPlayerScore";
+import IGuess from "./IGuess";
 
 export interface ServerToClientEvents {
   "player-game-ended": () => void;
@@ -17,8 +19,14 @@ export interface ServerToClientEvents {
 
   "host-open-success": (idFromServer: number) => void;
   // needs proper typing
-  "host-load-success": (data: IGameDB & { quizQuestionGuesses; playerScores; playersInGame }) => void;
-  "host-next": (data: (IGameDB & { quizQuestionGuesses; playerScores; playersInGame }) | IGameDB) => void; // this union type may be an error, will require further investigation
+  "host-load-success": (
+    data: IGameDB & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayerDB[] }
+  ) => void;
+  "host-next": (
+    data:
+      | (IGameDB & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayerDB[] })
+      | IGameDB
+  ) => void; // this union type may be an error, will require further investigation
   "presettings-close": (data: IPreGameSettings) => void;
   "host-presettings-success": (idFromServer: string) => void;
   "settings-load-success": (data: IPreGameSettings) => void;
@@ -66,6 +74,8 @@ export interface ClientToServerEvents {
   "player-quit": () => Promise<void>;
 
   "reload-players": () => void;
+  "play-again": () => void;
+  "play-again-with-same-players": (gameId: number) => void;
 }
 
 export type typedServer = Server<ClientToServerEvents, ServerToClientEvents>;

@@ -1,20 +1,19 @@
 import React from "react";
-import "../style.css";
 import crown from "../assets/crown.png";
 import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
 import Speak from "../Speak";
+import { SocketFrontend } from "../socket";
+import IPlayerScore from "back-end/interfaces/IPlayerScore";
 
 interface ILeaderBoardProps {
-  playerScores: Array<any>;
-  socket: any;
+  gameId: number;
+  playerScores: IPlayerScore[];
+  socket: SocketFrontend;
 }
 
-export default function HostLeaderBoard(props: ILeaderBoardProps) {
-  const socket = props.socket;
-  const playerScores = props.playerScores;
+export default function HostLeaderBoard({ gameId, playerScores, socket }: ILeaderBoardProps) {
   playerScores.sort((p1, p2) => p2.score - p1.score);
-
   const [numPlayersToShow, setNumPlayersToShow] = React.useState<number>(5);
 
   const onPlayAgain = () => {
@@ -22,7 +21,7 @@ export default function HostLeaderBoard(props: ILeaderBoardProps) {
   };
 
   const onPlayAgainWithSamePlayers = () => {
-    socket.emit("play-again-with-same-players");
+    socket.emit("play-again-with-same-players", gameId);
   };
 
   const winnerText = () => {
@@ -105,8 +104,15 @@ export default function HostLeaderBoard(props: ILeaderBoardProps) {
           onClick={showAllPlayers}
           variant="contained"
           sx={{ display: numPlayersToShow < playerScores.length ? "block" : "none" }}
+          style={{ margin: "2px" }}
         >
           show all players
+        </Button>
+        <Button onClick={onPlayAgain} variant="contained" style={{ margin: "2px" }}>
+          play again
+        </Button>
+        <Button onClick={onPlayAgainWithSamePlayers} variant="contained" style={{ margin: "2px" }}>
+          play again with the same players
         </Button>
       </div>
     </>

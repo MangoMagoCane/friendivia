@@ -1,7 +1,6 @@
 import hostDb from "../db/host.ts";
 import playerDb from "../db/player.ts";
 import questionDb from "../db/question.ts";
-import IGameDB from "../interfaces/IGameDB.ts";
 import Game from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
 import Player from "../models/Player.ts";
@@ -28,26 +27,27 @@ export default (io: typedServer, socket: SocketBackend) => {
     }
 
     try {
-      const dataForGame: any = await hostDb.getGameData(gameId);
-      if (dataForGame) {
-        const data = dataForGame;
-        const quizQuestionGuesses = await playerDb.getPlayerGuessesForQuizQuestion(gameId, data.currentQuestionIndex);
-        const playerScores = await playerDb.getPlayerScores(gameId);
-
-        const playersInGame = await playerDb.getPlayers(gameId);
-        await Game.updateOne(
-          {
-            id: gameId
-          },
-          {
-            $set: {
-              hostSocketId: socket.id
-            }
-          }
-        );
-        socket.emit("host-load-success", { ...data, quizQuestionGuesses, playerScores, playersInGame });
-        socket.emit("players-updated", gameId, playersInGame);
+      const gameData = await hostDb.getGameData(gameId);
+      if (gameData === null) {
+        return;
       }
+
+      const quizQuestionGuesses = await playerDb.getPlayerGuessesForQuizQuestion(gameId, gameData.currentQuestionIndex);
+      const playerScores = await playerDb.getPlayerScores(gameId);
+
+      const playersInGame = await playerDb.getPlayers(gameId);
+      await Game.updateOne(
+        {
+          id: gameId
+        },
+        {
+          $set: {
+            hostSocketId: socket.id
+          }
+        }
+      );
+      socket.emit("host-load-success", { ...gameData, quizQuestionGuesses, playerScores, playersInGame });
+      socket.emit("players-updated", gameId, playersInGame);
     } catch (e) {
       socket.emit("host-load-error", e);
     }
@@ -248,12 +248,12 @@ export default (io: typedServer, socket: SocketBackend) => {
 
   const onHostSkipQuestionnaire = async () => {
     try {
-      const gameData: IGameDB | null = await hostDb.getGameDataFromSocketId(socket.id);
+      const gameData = await hostDb.getGameDataFromSocketId(socket.id);
       if (gameData === null) {
         return;
       }
 
-      const playersInGame: IPlayerDB[] = await playerDb.getPlayers(gameData.id);
+      const playersInGame = await playerDb.getPlayers(gameData.id);
       if (playersInGame.some((p) => p.playerState.state === "submitted-questionnaire-waiting")) {
         await hostHelpers.hostStartQuiz(gameData.id, io);
       }
@@ -261,6 +261,33 @@ export default (io: typedServer, socket: SocketBackend) => {
       console.error(`Error skipping past questionnaire: ${e}`);
     }
   };
+
+  // const onPlayAgainWithSamePlayers = async (gameId: number) => {
+  // try {
+  //   await playerDb.resetPlayerScores(gameId);
+  //   // socket.emit("reset-quiz-length");
+  //   await Game.updateOne(
+  //     { id: gameId },
+  //     {
+  //       $set: { currentQuestionIndex: -1 }
+  //     }
+  //   );
+  //   const questionnaireQuestionsText = await hostDb.moveGameToQuestionnaire(gameId);
+  //   await playerDb.updateAllPlayerStates(gameId, "filling-questionnaire", io, {
+  //     playerScores: [],
+  //     quizQuestionOptionsText: questionnaireQuestionsText
+  //   });
+  //   const playersInGame = await playerDb.getPlayers(gameId);
+  //   playersInGame.map((p) => (p.quizGuesses = []));
+  //   const gameData = await hostDb.getGameData(gameId);
+  //   if (gameData === null) {
+  //     throw Error("Bad game data");
+  //   }
+  //   io.to(gameData?.hostSocketId || "").emit("host-next", { ...gameData, playersInGame });
+  // } catch (e) {
+  //   console.error(`Failed to go to questionnaire: ${e}`);
+  // }
+  // };
 
   socket.on("host-open", onHostOpen);
   socket.on("host-load", onHostLoad);
@@ -278,4 +305,5 @@ export default (io: typedServer, socket: SocketBackend) => {
   socket.on("host-back", onHostBack);
   socket.on("host-pre-settings", onHostPreSettings);
   socket.on("host-ps-back", onHostPSBack);
+  // socket.on("play-again-with-same-players", onPlayAgainWithSamePlayers);
 };

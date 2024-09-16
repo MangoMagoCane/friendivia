@@ -1,11 +1,11 @@
 import React, { ReactNode } from "react";
 import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
-import { Socket } from "socket.io-client";
 import Speak from "../Speak";
 import open from "../assets/audio/appopen.mp3";
 import PlayerBadge from "./PlayerBadge";
 import { pickOne } from "../util";
+import { SocketFrontend } from "../socket";
 
 const LEFT_BADGE_COUNT = 12;
 const TOP_BADGE_COUNT = 2;
@@ -21,7 +21,7 @@ const BOTTOM_BADGE_END = RIGHT_BADGE_END + BOTTOM_BADGE_COUNT;
 interface ILobbyViewProps {
   playerNames: string[];
   gameId: number;
-  socket: Socket;
+  socket: SocketFrontend;
 }
 
 export default function HostLobbyView({ playerNames, gameId, socket }: ILobbyViewProps) {
@@ -48,7 +48,7 @@ export default function HostLobbyView({ playerNames, gameId, socket }: ILobbyVie
   React.useEffect(() => {
     const updatedBadgeSpots = badgeSpots.slice();
     for (let i = 0; i < badgeSpots.length; i++) {
-      let spot = badgeSpots[i];
+      const spot = badgeSpots[i];
       const spotTaken = playerNames.some((name) => name === spot);
 
       if (!spotTaken) {
@@ -56,10 +56,8 @@ export default function HostLobbyView({ playerNames, gameId, socket }: ILobbyVie
       }
     }
 
-    for (let i = 0; i < playerNames.length; i++) {
-      let name = playerNames[i];
+    for (const name of playerNames) {
       const playerHeld = badgeSpots.some((spot) => spot === name);
-
       if (!playerHeld) {
         const possibleSpots = getOpenBadgeSpotIndices();
         const randomOpenIndex = pickOne(possibleSpots);

@@ -33,13 +33,13 @@ export const hostGoToQuestionnaire = async (gameId: number, io: typedServer): Pr
       const playerQuestionnaires = await hostDb.moveGameToQuestionnaire(gameId);
       await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": "filling-questionnaire" } });
       // await Player.updateMany({ gameId: gameId }, { $set: { playeState: { state: "filling-questionnaire" } } });
-      const currentGameData = await hostDb.getGameData(gameId);
-      if (currentGameData === null) {
+      const gameData = await hostDb.getGameData(gameId);
+      if (gameData === null) {
         return;
       }
 
       const playersInGame = await playerDb.getPlayers(gameId);
-      io.to(currentGameData.hostSocketId).emit("host-next", { ...currentGameData, playersInGame }); // playersInGame makes no sense
+      io.to(gameData.hostSocketId).emit("host-next", { ...gameData, playersInGame }); // playersInGame might make sense?
 
       for (let i = 0; i < playerQuestionnaires.length; i++) {
         const playerQuestionnaire = playerQuestionnaires[i];

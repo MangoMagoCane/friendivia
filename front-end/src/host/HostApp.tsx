@@ -23,6 +23,9 @@ import { HostAnnouncementQueue, AddAnnouncementContext } from "./HostAnnouncemen
 import { GameState } from "back-end/interfaces/IGameState";
 import IGameDB from "back-end/interfaces/IGameDB";
 import { SocketFrontend } from "../socket";
+import IPlayerScore from "back-end/interfaces/IPlayerScore";
+import IPlayerDB from "back-end/interfaces/IPlayerDB";
+import IGuess from "back-end/interfaces/IGuess";
 
 interface HostAppProps {
   socket: SocketFrontend;
@@ -38,9 +41,9 @@ export default function HostApp({ socket }: HostAppProps) {
   const [settingsState, setSettingsState] = React.useState<boolean>(false);
   const [quizQuestions, setQuizQuestions] = React.useState<IQuizQuestion[]>([]);
   const [currentQuizQuestionIndex, setCurrentQuizQuestionIndex] = React.useState<number>(-1);
-  const [quizQuestionGuesses, setQuizQuestionGuesses] = React.useState([]);
-  const [playerScores, setPlayerScores] = React.useState([]);
-  const [playersInGame, setPlayersInGame] = React.useState([]);
+  const [quizQuestionGuesses, setQuizQuestionGuesses] = React.useState<IGuess[]>([]); // type may be wrong, haven't done the most checking
+  const [playerScores, setPlayerScores] = React.useState<IPlayerScore[]>([]);
+  const [playersInGame, setPlayersInGame] = React.useState<IPlayerDB[]>([]);
   const [timePerQuestion, setTimePerQuestion] = React.useState<number>(15);
   const [numQuestionnaireQuestions, setNumQuestionnaireQuestions] = React.useState<number>(5);
   const [numQuizQuestions, setNumQuizQuestions] = React.useState<number>(5);
@@ -73,7 +76,9 @@ export default function HostApp({ socket }: HostAppProps) {
 
   console.log(`HostApp state: "${gameState}"`);
   React.useEffect(() => {
-    const onLoadSuccess = (data: IGameDB & { quizQuestionGuesses; playerScores; playersInGame }) => {
+    const onLoadSuccess = (
+      data: IGameDB & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayerDB[] }
+    ) => {
       setLoaded(true);
       setGameId(data.id);
       setGameState(data.gameState.state);
@@ -222,7 +227,7 @@ export default function HostApp({ socket }: HostAppProps) {
           </>
         );
       case "leader-board":
-        return <HostLeaderBoard playerScores={playerScores} socket={socket} />;
+        return <HostLeaderBoard gameId={gameId} playerScores={playerScores} socket={socket} />;
     }
     if (state === "settings" || settingsState === true) {
       return (

@@ -1,6 +1,5 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import PlayerJoin from "./PlayerJoin";
-import { Socket } from "socket.io-client";
 import PlayerQuestionnaire from "./PlayerQuestionnaire";
 import PlayerQuizQuestion from "./PlayerQuizQuestion";
 import PlayerWait from "./PlayerWait";
@@ -46,7 +45,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   }
 
   React.useEffect(() => {
-    const onLoadSuccess = (player: IPlayerDB, extraData: IPlayerLoadSuccess | undefined): void => {
+    const onLoadSuccess = (player: IPlayerDB, extraData?: IPlayerLoadSuccess): void => {
       setLoaded(true);
       setPlayerState(player.playerState.state);
       setPlayerName(player.name);

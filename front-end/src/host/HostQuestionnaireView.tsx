@@ -1,18 +1,20 @@
 import * as React from "react";
 import Paper from "@mui/material/Paper";
-import { Socket } from "socket.io-client";
 import Speak from "../Speak";
 import { Button } from "../extra/FrdvButton";
 import PlayerBadge from "./PlayerBadge";
 import { pickOneAndInterp, pickOne } from "../util";
+import { SocketFrontend } from "../socket";
 
 interface HostQuestionnaireViewProps {
-  donePlayers: any;
-  waitingPlayers: any;
-  socket: Socket;
+  socket: SocketFrontend;
+  donePlayers: string[];
+  waitingPlayers: string[];
 }
 
-export default function HostQuestionnaireView({ donePlayers, waitingPlayers, socket }: HostQuestionnaireViewProps) {
+export default function HostQuestionnaireView({ socket, donePlayers, waitingPlayers }: HostQuestionnaireViewProps) {
+  const [spokenWarnings, setSpokenWarnings] = React.useState<string[]>([]);
+
   const onPlayerKick = async (name: string) => {
     if (waitingPlayers.length + donePlayers.length > 2) {
       socket.emit("host-kick-player", name);
@@ -20,36 +22,6 @@ export default function HostQuestionnaireView({ donePlayers, waitingPlayers, soc
       alert("You need at least 2 players to play!");
     }
   };
-
-  const doneMessages = [
-    "Thank you, {{name}}.",
-    "You did it, {{name}}!",
-    "Good, {{name}}!",
-    "Yay, {{name}} is done!",
-    "{{name}} is finished!",
-    "{{name}} is ready to go!",
-    "Great job, {{name}}!",
-    "You're all set, {{name}}!",
-    "You're done, {{name}}!",
-    "You're all finished, {{name}}!",
-    "{{name}} is all set.",
-    "{{name}} has completed their questionnaire.",
-    "I knew you could do it, {{name}}."
-  ];
-
-  const warningMessages = [
-    "Let's go, {{name}}.",
-    "Hurry it up, {{name}}",
-    "What's taking {{name}} so long?",
-    "Don't worry, {{name}}. You still have time.",
-    "Ok seriously, let's go {{name}}.",
-    "Come on, {{name}}. We don't have all day.",
-    "Seriously, {{name}}. Let's get moving.",
-    "{{name}} has gotta pick up the pace.",
-    "I'm waiting, {{name}}."
-  ];
-
-  const [spokenWarnings, setSpokenWarnings] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     const intervalId = setInterval(() => {
@@ -188,3 +160,31 @@ export default function HostQuestionnaireView({ donePlayers, waitingPlayers, soc
     </>
   );
 }
+
+const doneMessages = [
+  "Thank you, {{name}}.",
+  "You did it, {{name}}!",
+  "Good, {{name}}!",
+  "Yay, {{name}} is done!",
+  "{{name}} is finished!",
+  "{{name}} is ready to go!",
+  "Great job, {{name}}!",
+  "You're all set, {{name}}!",
+  "You're done, {{name}}!",
+  "You're all finished, {{name}}!",
+  "{{name}} is all set.",
+  "{{name}} has completed their questionnaire.",
+  "I knew you could do it, {{name}}."
+];
+
+const warningMessages = [
+  "Let's go, {{name}}.",
+  "Hurry it up, {{name}}",
+  "What's taking {{name}} so long?",
+  "Don't worry, {{name}}. You still have time.",
+  "Ok seriously, let's go {{name}}.",
+  "Come on, {{name}}. We don't have all day.",
+  "Seriously, {{name}}. Let's get moving.",
+  "{{name}} has gotta pick up the pace.",
+  "I'm waiting, {{name}}."
+];
