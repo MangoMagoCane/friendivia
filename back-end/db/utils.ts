@@ -25,7 +25,6 @@ export async function createQuestionnairesForPlayers(
     previouslyUsedQuestionQuizText,
     customMode
   );
-  console.log(allQuestionsForQuiz);
   const playerQuestionnaires: PlayerQuestionnaire[] = [];
 
   for (let i = 0; i < players.length; i++) {

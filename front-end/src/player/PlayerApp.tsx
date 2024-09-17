@@ -38,7 +38,6 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   const [loaded, setLoaded] = React.useState<boolean>(false);
 
   // let bottomButtons: boolean;
-  console.log(`player state: "${playerState}"`);
 
   if (!loaded) {
     socket.emit("player-load", playerIdFromStorage);
@@ -127,7 +126,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
         // bottomButtons = true;
         return <PlayerJoin socket={socket} playerState={playerState} />;
       default:
-        console.log(`ERR: invalid playerState: ${playerState}`);
+        console.error(`ERR: invalid playerState: ${playerState}`);
         return <></>;
     }
   };

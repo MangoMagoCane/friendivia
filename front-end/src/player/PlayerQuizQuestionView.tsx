@@ -13,7 +13,6 @@ interface IQuizQuestionViewProps {
 
 export default function PlayerQuizQuestionView({ optionsList, socket, playerState }: IQuizQuestionViewProps) {
   const guessReceivedMessage = `Guess received! Hang tight...`;
-  console.log(optionsList);
 
   const goTo = (answerIndex: number): void => {
     answerQuestion(answerIndex);
