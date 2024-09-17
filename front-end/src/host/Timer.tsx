@@ -12,8 +12,9 @@ export default function Timer({ started, timePerQuestion }: TimerProps) {
     if (started && counter > 0) {
       setTimeout(() => setCounter(counter - 1), 1000);
     }
-  }, [counter]);
+  }, [counter, started]);
 
+  console.log(`timer: ${counter}`);
   return (
     <div className="dot">
       <div className="timer">
