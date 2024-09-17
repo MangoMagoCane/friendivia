@@ -14,19 +14,23 @@ import { IQuestionnaireQuestion } from "./interfaces/models/IQuestionnaireQuesti
 
 dotenv.config();
 const frontEndUrl = process.env["FRONT_END_URL"] || "http://localhost:3001";
+console.log(`frontEndUrl: ${frontEndUrl}`);
 
 const app = express();
 
-const corsOptions = {
-  origin: frontEndUrl,
-  optionsSuccessStatus: 200
-};
+app.use(
+  cors({
+    // origin: frontEndUrl,
+    origin: "*",
+    optionsSuccessStatus: 200
+  })
+);
 
-app.use(cors(corsOptions));
 const httpServer = createServer(app);
 const io: typedServer = new Server(httpServer, {
   cors: {
-    origin: frontEndUrl
+    // origin: frontEndUrl
+    origin: "*"
   }
 });
 
@@ -56,8 +60,8 @@ io.on("connection", (socket) => {
 });
 
 // hack to add all questions into mongo questions collection
-for (const question of basequestions) {
-  questionDb.addQuestion(question as IQuestionnaireQuestion);
+for (const question of basequestions as IQuestionnaireQuestion[]) {
+  questionDb.addQuestion(question);
 }
 
 httpServer.listen(4001, () => {

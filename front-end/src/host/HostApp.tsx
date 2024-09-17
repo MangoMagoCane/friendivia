@@ -25,7 +25,7 @@ import IGuess from "back-end/interfaces/IGuess";
 import { IGame } from "back-end/interfaces/models/IGame";
 import { IPlayer } from "back-end/interfaces/models/IPlayer";
 import { IPreGameSettings } from "back-end/interfaces/models/IPreGameSettings";
-import { IQuestionnaireQuestion } from "back-end/interfaces/models/IQuestionnaireQuestionDB";
+import { IQuestionnaireQuestion } from "back-end/interfaces/models/IQuestionnaireQuestion";
 
 interface HostAppProps {
   socket: SocketFrontend;

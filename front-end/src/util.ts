@@ -1,4 +1,4 @@
-import IPlayerDB from "back-end/interfaces/IPlayerDB";
+import { IPlayer } from "back-end/interfaces/models/IPlayer";
 
 export function pickOne<T>(arr: Array<T>): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -17,6 +17,6 @@ export function valInArr<T extends string, K extends T>(val: T, arr: K[]): boole
   return arr.includes(val as K);
 }
 
-export function getPlayerNamesForState(players: IPlayerDB[], state: string) {
+export function getPlayerNamesForState(players: IPlayer[], state: string) {
   return players.filter((p) => p.playerState.state === state).map((p) => p.name);
 }

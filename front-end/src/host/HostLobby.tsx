@@ -2,8 +2,8 @@ import * as React from "react";
 import HostLobbyView from "./HostLobbyView";
 import Speak from "../Speak";
 import { pickOneAndInterp } from "../util";
-import IPlayerDB from "back-end/interfaces/IPlayerDB";
 import { SocketFrontend } from "../socket";
+import { IPlayer } from "back-end/interfaces/models/IPlayer";
 
 interface HostLobbyProps {
   socket: SocketFrontend;
@@ -15,7 +15,7 @@ export default function HostLobby({ socket, gameId, classroomGame }: HostLobbyPr
   const [playerNames, setPlayerNames] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    const onPlayersUpdated = (gameId: number, players: IPlayerDB[]): void => {
+    const onPlayersUpdated = (gameId: number, players: IPlayer[]): void => {
       if (gameId !== -1 && gameId === gameId) {
         setPlayerNames(players.map((p) => p.name));
       }

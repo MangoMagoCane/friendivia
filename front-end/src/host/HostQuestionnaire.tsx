@@ -1,14 +1,14 @@
 import * as React from "react";
 import theme from "../assets/audio/theme.mp3";
 import Speak from "../Speak";
-import IPlayerDB from "back-end/interfaces/IPlayerDB";
 import HostQuestionnaireView from "./HostQuestionnaireView";
 import { getPlayerNamesForState } from "../util";
 import { SocketFrontend } from "../socket";
+import { IPlayer } from "back-end/interfaces/models/IPlayer";
 
 interface HostQuestionnaireProps {
   socket: SocketFrontend;
-  playersInGame: IPlayerDB[];
+  playersInGame: IPlayer[];
 }
 
 export default function HostQuestionnaire({ socket, playersInGame }: HostQuestionnaireProps) {
@@ -24,7 +24,7 @@ export default function HostQuestionnaire({ socket, playersInGame }: HostQuestio
       setWaitingPlayers(playerStatusList[1]);
     };
 
-    const onPlayersUpdated = (gameId: number, players: IPlayerDB[]) => {
+    const onPlayersUpdated = (gameId: number, players: IPlayer[]) => {
       const updatedDonePlayers = getPlayerNamesForState(players, "submitted-questionnaire-waiting");
       const updatedWaitingPlayers = getPlayerNamesForState(players, "filling-questionnaire");
       onStatusReceived([updatedDonePlayers, updatedWaitingPlayers]);

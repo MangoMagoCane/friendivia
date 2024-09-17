@@ -17,9 +17,9 @@ import IQuizOption from "back-end/interfaces/IQuizOption";
 import { PlayerState } from "back-end/interfaces/IPlayerState";
 import { valInArr } from "../util";
 import IPlayerScore from "back-end/interfaces/IPlayerScore";
-import IPlayerDB from "back-end/interfaces/IPlayerDB";
 import { IPlayerLoadSuccess } from "back-end/interfaces/ISocketCallbacks";
 import { SocketFrontend } from "../socket";
+import { IPlayer } from "back-end/interfaces/models/IPlayer";
 
 interface PlayerAppProps {
   socket: SocketFrontend;
@@ -44,7 +44,7 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
   }
 
   React.useEffect(() => {
-    const onLoadSuccess = (player: IPlayerDB, extraData?: IPlayerLoadSuccess): void => {
+    const onLoadSuccess = (player: IPlayer, extraData?: IPlayerLoadSuccess): void => {
       setLoaded(true);
       setPlayerState(player.playerState.state);
       setPlayerName(player.name);

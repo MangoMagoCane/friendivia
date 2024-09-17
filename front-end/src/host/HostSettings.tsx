@@ -4,15 +4,15 @@ import { Socket } from "socket.io-client";
 import TextField from "@mui/material/TextField";
 import Switch from "@mui/material/Switch";
 import Stack from "@mui/material/Stack";
-import { IQuestionnaireQuestionDB } from "back-end/interfaces/IQuestionnaireQuestionDB";
-import IPlayerDB from "back-end/interfaces/IPlayerDB";
+import { IPlayer } from "back-end/interfaces/models/IPlayer";
+import { IQuestionnaireQuestion } from "back-end/interfaces/models/IQuestionnaireQuestion";
 
 interface HostSettingsProps {
   socket: Socket;
   gameId: number;
   preSettingsId: string;
   settingsState: boolean;
-  playersInGame: IPlayerDB[];
+  playersInGame: IPlayer[];
   timePerQuestionSetting: number;
   numQuestionnaireQuestionsSetting: number;
   numQuizQuestionsSetting: number;
@@ -20,7 +20,7 @@ interface HostSettingsProps {
   timePerAnswerSetting: number;
   timePerLeaderboardSetting: number;
   prioritizeCustomQsSetting: boolean;
-  customQuestionsSetting: IQuestionnaireQuestionDB[];
+  customQuestionsSetting: IQuestionnaireQuestion[];
 }
 
 export default function HostSettings({
@@ -53,10 +53,8 @@ export default function HostSettings({
   const [timePerLeaderboard, setTimePerLeaderboard] = React.useState<number>(timePerLeaderboardSetting || 5);
   const [timePerLeaderboardInput, setTimePerLeaderboardInput] = React.useState<number>(timePerLeaderboard);
   const [prioritizeCustomQs, setPrioritizeCustomQs] = React.useState<boolean>(prioritizeCustomQsSetting);
-  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestionDB[]>(
-    customQuestionsSetting || []
-  );
-  const [mappedQuestions, setMappedQuestions] = React.useState<IQuestionnaireQuestionDB[]>(customQuestions || []);
+  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestion[]>(customQuestionsSetting || []);
+  const [mappedQuestions, setMappedQuestions] = React.useState<IQuestionnaireQuestion[]>(customQuestions || []);
   const [maxNumQuizQuestions, setMaxNumQuizQuestions] = React.useState<number>(
     numQuestionnaireQuestions * playersInGame.length || 5
   );
@@ -104,10 +102,11 @@ export default function HostSettings({
   }, [timePerLeaderboard, setTimePerLeaderboard]);
 
   const addCustomQuestion = () => {
-    setCustomQuestions((prevQuestions: IQuestionnaireQuestionDB[]) => [
-      { id: "", text: "", quizText: "", fakeAnswers: [], tags: [] },
-      ...prevQuestions
-    ]);
+    // ! FIGURE THIS OUT
+    // setCustomQuestions((prevQuestions: IQuestionnaireQuestion[]) => [
+    //   { id: "", text: "", quizText: "", fakeAnswers: [], tags: [] },
+    //   ...prevQuestions
+    // ]);
   };
 
   const removeCustomQuestion = (index: number) => {
