@@ -6,7 +6,6 @@ import HostPreQuiz from "./HostPreQuiz";
 import HostShowQuestion from "./HostShowQuestion";
 import IQuizQuestion from "back-end/interfaces/IQuizQuestion";
 import IQuizOption from "back-end/interfaces/IQuizOption";
-import IPreGameSettings from "back-end/interfaces/IPreGameSettings";
 import HostShowAnswer from "./HostShowAnswer";
 import HostLeaderBoard from "./HostLeaderBoard";
 import { IconButton } from "@mui/material/";
@@ -18,14 +17,15 @@ import Speak from "../Speak";
 import lobbyMusic from "../assets/audio/theme.mp3";
 import musicOn from "../assets/musicon.png";
 import musicOff from "../assets/musicoff.png";
-import { IQuestionnaireQuestionDB } from "back-end/interfaces/IQuestionnaireQuestionDB";
 import { HostAnnouncementQueue, AddAnnouncementContext } from "./HostAnnouncementQueue";
 import { GameState } from "back-end/interfaces/IGameState";
-import IGameDB from "back-end/interfaces/IGameDB";
 import { SocketFrontend } from "../socket";
 import IPlayerScore from "back-end/interfaces/IPlayerScore";
-import IPlayerDB from "back-end/interfaces/IPlayerDB";
 import IGuess from "back-end/interfaces/IGuess";
+import { IGame } from "back-end/interfaces/models/IGame";
+import { IPlayer } from "back-end/interfaces/models/IPlayer";
+import { IPreGameSettings } from "back-end/interfaces/models/IPreGameSettings";
+import { IQuestionnaireQuestion } from "back-end/interfaces/models/IQuestionnaireQuestionDB";
 
 interface HostAppProps {
   socket: SocketFrontend;
@@ -45,7 +45,7 @@ export default function HostApp({ socket }: HostAppProps) {
   const [currentQuizQuestionIndex, setCurrentQuizQuestionIndex] = React.useState<number>(-1);
   const [quizQuestionGuesses, setQuizQuestionGuesses] = React.useState<IGuess[]>([]); // type may be wrong, haven't done the most checking
   const [playerScores, setPlayerScores] = React.useState<IPlayerScore[]>([]);
-  const [playersInGame, setPlayersInGame] = React.useState<IPlayerDB[]>([]);
+  const [playersInGame, setPlayersInGame] = React.useState<IPlayer[]>([]);
   const [timePerQuestion, setTimePerQuestion] = React.useState<number>(15);
   const [numQuestionnaireQuestions, setNumQuestionnaireQuestions] = React.useState<number>(5);
   const [numQuizQuestions, setNumQuizQuestions] = React.useState<number>(5);
@@ -53,7 +53,7 @@ export default function HostApp({ socket }: HostAppProps) {
   const [timePerAnswer, setTimePerAnswer] = React.useState<number>(10);
   const [timePerLeaderboard, setTimePerLeaderboard] = React.useState<number>(5);
   const [prioritizeCustomQs, setPrioritizeCustomQs] = React.useState<boolean>(true);
-  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestionDB[]>([]);
+  const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestion[]>([]);
 
   const [loaded, setLoaded] = React.useState<boolean>(false);
   const [announcementAudioObjects, setAnnouncementAudioObjects] = React.useState<any>([]);
@@ -82,7 +82,7 @@ export default function HostApp({ socket }: HostAppProps) {
 
   React.useEffect(() => {
     const onLoadSuccess = (
-      data: IGameDB & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayerDB[] }
+      data: IGame & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayer[] }
     ) => {
       setLoaded(true);
       setGameId(data.id);

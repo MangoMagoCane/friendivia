@@ -1,4 +1,4 @@
-import { IQuestionnaireQuestionDB } from "./IQuestionnaireQuestionDB";
+import { IQuestionnaireQuestion } from "./models/IQuestionnaireQuestion";
 
 export default interface ISettings {
   timePerQuestion: number;
@@ -8,5 +8,5 @@ export default interface ISettings {
   timePerAnswer: number;
   timePerLeaderboard: number;
   prioritizeCustomQs: boolean;
-  customQuestions: IQuestionnaireQuestionDB[];
+  customQuestions: IQuestionnaireQuestion[];
 }

@@ -1,9 +1,9 @@
-import { IPlayerState } from "./IPlayerState";
-import IGuess from "./IGuess";
 import mongoose from "mongoose";
+import IGuess from "../IGuess";
+import { IPlayerState } from "../IPlayerState";
 
-export default interface IPlayerDB {
-  _id?: mongoose.Types.ObjectId;
+export interface IPlayer {
+  _id: mongoose.Types.ObjectId;
   id: string;
   name: string;
   questionnaireAnswers: string[];

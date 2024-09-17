@@ -1,12 +1,11 @@
 import { Schema, model } from "mongoose";
-import { IQuestionnaireQuestionDB } from "../interfaces/IQuestionnaireQuestionDB";
+import { IQuestionnaireQuestion } from "../interfaces/models/IQuestionnaireQuestion";
 
-const questionSchema = new Schema<IQuestionnaireQuestionDB>({
+const questionSchema = new Schema<IQuestionnaireQuestion>({
   text: { type: String, required: true },
   quizText: { type: String, required: true },
   tags: [{ type: String }],
   fakeAnswers: [{ type: String }]
 });
 
-const Question = model<IQuestionnaireQuestionDB>("Question", questionSchema);
-export default Question;
+export const Question = model<IQuestionnaireQuestion>("Question", questionSchema);

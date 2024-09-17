@@ -1,16 +1,16 @@
 import { Server, Socket } from "socket.io";
-import ISettings from "./ISettings";
-import IGameDB from "./IGameDB";
-import IPreGameSettings from "./IPreGameSettings";
-import IPlayerDB from "./IPlayerDB";
-import { IPlayerLoadSuccess } from "./ISocketCallbacks";
 import IPlayerScore from "./IPlayerScore";
 import IGuess from "./IGuess";
+import { IPlayer } from "./models/IPlayer";
+import { IGame } from "./models/IGame";
+import ISettings from "./ISettings";
+import { IPlayerLoadSuccess } from "./ISocketCallbacks";
+import { IPreGameSettings } from "./models/IPreGameSettings";
 
 export interface ServerToClientEvents {
   "player-game-ended": () => void;
-  "player-next": (player: IPlayerDB, extraData?: IPlayerLoadSuccess) => void;
-  "player-load-success": (player: IPlayerDB, extraData?: IPlayerLoadSuccess) => void;
+  "player-next": (player: IPlayer, extraData?: IPlayerLoadSuccess) => void;
+  "player-load-success": (player: IPlayer, extraData?: IPlayerLoadSuccess) => void;
   "player-load-error": (errorMsg: string) => void; // not listened for
   "player-submit-questionnaire-success": () => void;
   "player-submit-questionnaire-error": (errorMsg: string) => void;
@@ -18,12 +18,10 @@ export interface ServerToClientEvents {
   "player-answer-question-error": (error: any) => void; // not listened for
   "host-open-success": (idFromServer: number) => void;
   "host-load-success": (
-    data: IGameDB & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayerDB[] }
+    data: IGame & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayer[] }
   ) => void;
   "host-next": (
-    data:
-      | (IGameDB & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayerDB[] })
-      | IGameDB
+    data: (IGame & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayer[] }) | IGame
   ) => void; // this union type may be an error, will require further investigation
   "presettings-close": (data: IPreGameSettings) => void;
   "host-presettings-success": (idFromServer: string) => void;
@@ -35,7 +33,7 @@ export interface ServerToClientEvents {
   "host-view-update-error": (error: any) => void; // not listened for
   "settings-load-error": (error: any) => void; // not listened for
   "host-presettings-error": (error: any) => void; // not listened for
-  "players-updated": (gameId: number, players: IPlayerDB[]) => void;
+  "players-updated": (gameId: number, players: IPlayer[]) => void;
   "start-timer-success": () => void;
   "join-success": (playerId: string) => void;
   "join-error": (errorMsg: string) => void;

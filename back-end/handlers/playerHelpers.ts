@@ -1,6 +1,6 @@
-import playerDb from "../db/player.ts";
-import hostDb from "../db/host.ts";
-import Player from "../models/Player.ts";
+import { playerDb } from "../db/player.ts";
+import { hostDb } from "../db/host.ts";
+import { Player } from "../models/Player.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
 import { Server } from "socket.io";
 import { valInArr } from "../../front-end/src/util.ts";

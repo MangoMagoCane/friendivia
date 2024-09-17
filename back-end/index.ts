@@ -5,11 +5,12 @@ import dotenv from "dotenv";
 import { createServer } from "http";
 import registerPlayerHandlers from "./handlers/playerHandler.ts";
 import registerHostHandlers from "./handlers/hostHandler.ts";
-import hostDb from "./db/host.ts";
+import { hostDb } from "./db/host.ts";
 import { typedServer } from "./interfaces/IServer.ts";
 import { Server } from "socket.io";
 import basequestions from "./db/basequestions.ts";
-import questionDb from "./db/question.ts";
+import { questionDb } from "./db/question.ts";
+import { IQuestionnaireQuestion } from "./interfaces/models/IQuestionnaireQuestion.ts";
 
 dotenv.config();
 const frontEndUrl = process.env["FRONT_END_URL"] || "http://localhost:3001";
@@ -56,7 +57,7 @@ io.on("connection", (socket) => {
 
 // hack to add all questions into mongo questions collection
 for (const question of basequestions) {
-  questionDb.addQuestion(question);
+  questionDb.addQuestion(question as IQuestionnaireQuestion);
 }
 
 httpServer.listen(4001, () => {

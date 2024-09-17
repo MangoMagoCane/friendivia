@@ -1,18 +1,18 @@
-import IGameDB from "../interfaces/IGameDB.ts";
-import IPreGameSettings from "../interfaces/IPreGameSettings.ts";
+import { IGame } from "../interfaces/models/IGame.ts";
 import { GameState } from "../interfaces/IGameState.ts";
-import Game from "../models/Game.ts";
-import PreGameSettings from "../models/PreGameSettings.ts";
+import { Game } from "../models/Game.ts";
+import { PreGameSettings } from "../models/PreGameSettings.ts";
 import * as utilDb from "../db/utils.ts";
 import IQuizQuestion from "../interfaces/IQuizQuestion.ts";
-import playerDb from "../db/player.ts";
+import { playerDb } from "../db/player.ts";
 import * as uuid from "uuid";
-import Player from "../models/Player.ts";
+import { Player } from "../models/Player.ts";
 import friendsQuestions from "./friendsTriviaQuestions.ts";
-import { PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestionDB.ts";
+import { PlayerQuestionnaire } from "../interfaces/models/IQuestionnaireQuestion.ts";
 import ISettings from "../interfaces/ISettings.ts";
+import { IPreGameSettings } from "../interfaces/models/IPreGameSettings.ts";
 
-export default {
+export const hostDb = {
   getAllGameIds: async (): Promise<number[]> => {
     try {
       const allGames = await Game.find({});
@@ -25,19 +25,14 @@ export default {
 
   getPreSettingsData: async (preSettingsId: string): Promise<IPreGameSettings | null> => {
     try {
-      const settingsData = await PreGameSettings.findOne({ id: preSettingsId });
-      const settingsDataPOJO = settingsData?.toObject();
-      if (settingsDataPOJO === undefined) {
-        throw Error("Couldn't convert settings data into POJO");
-      }
-      return settingsDataPOJO;
+      return await PreGameSettings.findOne({ id: preSettingsId }).lean();
     } catch (e) {
       console.error(`Issue getting settings data: ${e}`);
       throw Error("Failed to get settings data", { cause: e });
     }
   },
 
-  hostOpenGame: async function (socketId: string, customMode: string): Promise<number> {
+  hostOpenGame: async (socketId: string, customMode: string): Promise<number> => {
     try {
       const timePerQuestion = 15;
       const numQuestionnaireQuestions = 5;
@@ -64,7 +59,7 @@ export default {
         throw Error("could not create a gameId");
       }
 
-      const newGameObject: IGameDB = {
+      const newGame = new Game({
         id: newId,
         gameState: {
           state: "lobby",
@@ -86,9 +81,7 @@ export default {
           customQuestions: customQuestions
         },
         customMode: customMode
-      };
-
-      const newGame = new Game(newGameObject);
+      });
       await newGame.save();
 
       return newId;
@@ -98,21 +91,24 @@ export default {
     }
   },
 
-  getGameData: async (gameId: number): Promise<IGameDB | null> => {
+  getGameData: async (gameId: number): Promise<IGame | null> => {
     try {
-      const gameData = await Game.findOne({ id: gameId });
-      const gameDataPOJO = gameData?.toObject();
-      if (gameDataPOJO === undefined) {
-        throw Error("Couldn't convert game data into POJO");
-      }
-      return gameDataPOJO;
+      const data = await Game.findOne({ id: gameId }).lean();
+      console.log(data);
+      return data;
+
+      // const gameDataPOJO = gameData?.toObject();
+      // if (gameDataPOJO === undefined) {
+      //   throw Error("Couldn't convert game data into POJO");
+      // }
+      // return gameDataPOJO;
     } catch (e) {
       console.error(`Issue getting game data: ${e}`);
       throw Error("Failed to get game data", { cause: e });
     }
   },
 
-  getGameDataFromSocketId: async (socketId: string): Promise<IGameDB | null> => {
+  getGameDataFromSocketId: async (socketId: string): Promise<IGame | null> => {
     try {
       const gameData: any = await Game.findOne({ hostSocketId: socketId });
       return gameData?.toObject();
@@ -135,9 +131,9 @@ export default {
     }
   },
 
-  moveGameToQuestionnaire: async function (gameId: number): Promise<PlayerQuestionnaire[]> {
+  moveGameToQuestionnaire: async (gameId: number): Promise<PlayerQuestionnaire[]> => {
     try {
-      const gameData = await this.getGameData(gameId);
+      const gameData = await hostDb.getGameData(gameId);
       if (gameData === null) {
         return [];
       }
@@ -148,7 +144,7 @@ export default {
         gameData.previouslyUsedQuestionQuizText,
         gameData.customMode
       );
-      await this.setGameState(gameId, "questionnaire");
+      await hostDb.setGameState(gameId, "questionnaire");
 
       await Game.updateOne(
         { id: gameId },
@@ -167,9 +163,9 @@ export default {
     }
   },
 
-  getPlayerQuestionnaires: async function (gameId: number): Promise<PlayerQuestionnaire[]> {
+  getPlayerQuestionnaires: async (gameId: number): Promise<PlayerQuestionnaire[]> => {
     try {
-      const game = await this.getGameData(gameId);
+      const game = await hostDb.getGameData(gameId);
       if (game === null) {
         return [];
       }
@@ -181,7 +177,7 @@ export default {
     }
   },
 
-  buildQuiz: async (game: IGameDB): Promise<IQuizQuestion[]> => {
+  buildQuiz: async (game: IGame): Promise<IQuizQuestion[]> => {
     const quizQuestions: IQuizQuestion[] = await utilDb.createQuiz(game.playerQuestionnaires, game.customMode);
     await Game.updateOne(
       { id: game.id },
@@ -193,20 +189,20 @@ export default {
     return quizQuestions;
   },
 
-  questionsRemaining: function (game: IGameDB): boolean {
+  questionsRemaining: (game: IGame): boolean => {
     const currentQuestionIndex = game.currentQuestionIndex;
     const nextQuestionIndex = currentQuestionIndex + 1;
 
     return nextQuestionIndex < game.quizQuestions.length;
   },
 
-  nextQuestion: async function (gameId: number): Promise<boolean> {
-    const currentGame = await this.getGameData(gameId);
+  nextQuestion: async (gameId: number): Promise<boolean> => {
+    const currentGame = await hostDb.getGameData(gameId);
     if (currentGame === null) {
       return false;
     }
 
-    if (this.questionsRemaining(currentGame)) {
+    if (hostDb.questionsRemaining(currentGame)) {
       await Game.updateOne(
         { id: gameId },
         {
@@ -297,10 +293,10 @@ export default {
     }
   },
 
-  hostOpenPreSettings: async function (socketId: string): Promise<string> {
+  hostOpenPreSettings: async (socketId: string): Promise<string> => {
     try {
-      var newId = `preSettings_${uuid.v4()}`;
-      const newPreSettingsObject: IPreGameSettings = {
+      const newId = `preSettings_${uuid.v4()}`;
+      const newPreSettings = new PreGameSettings({
         id: newId,
         hostSocketId: socketId,
         settingsState: true,
@@ -314,11 +310,9 @@ export default {
           prioritizeCustomQs: true,
           customQuestions: []
         }
-      };
+      });
 
-      const newPreSettings = new PreGameSettings(newPreSettingsObject);
       await newPreSettings.save();
-
       return newId;
     } catch (e) {
       console.error(`Issue creating new game: ${e}`);
@@ -326,7 +320,7 @@ export default {
     }
   },
 
-  hostClosePreSettings: async function (preSettingsId: string, settingsData: ISettings): Promise<void> {
+  hostClosePreSettings: async (preSettingsId: string, settingsData: ISettings): Promise<void> => {
     try {
       const timePerQuestion = settingsData.timePerQuestion;
       const numQuestionnaireQuestions = settingsData.numQuestionnaireQuestions;

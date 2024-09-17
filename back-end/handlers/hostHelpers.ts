@@ -1,13 +1,13 @@
-import playerDb from "../db/player.ts";
-import questionDb from "../db/question.ts";
-import hostDb from "../db/host.ts";
-import IGameDB from "../interfaces/IGameDB.ts";
+import { playerDb } from "../db/player.ts";
+import { questionDb } from "../db/question.ts";
+import { hostDb } from "../db/host.ts";
 import playerHelpers from "./playerHelpers.ts";
-import Player from "../models/Player.ts";
+import { Player } from "../models/Player.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
-import IPlayerDB from "../interfaces/IPlayerDB.ts";
 import IGuess from "../interfaces/IGuess.ts";
 import { typedServer } from "../interfaces/IServer.ts";
+import { IGame } from "../interfaces/models/IGame.ts";
+import { IPlayer } from "../interfaces/models/IPlayer.ts";
 
 const PRE_QUIZ_MS = 5000;
 const PRE_ANSWER_MS = 3000;
@@ -187,7 +187,7 @@ export const hostPreAnswer = async (gameId: number, io: typedServer): Promise<vo
   setTimeout(hostShowAnswer, PRE_ANSWER_MS, gameId, io);
 };
 
-export const handleTiebreakerAnswers = async (allPlayers: IPlayerDB[], quizQIndex, correctQIndex): Promise<void> => {
+export const handleTiebreakerAnswers = async (allPlayers: IPlayer[], quizQIndex, correctQIndex): Promise<void> => {
   if (allPlayers.length < 1) {
     return;
   }
@@ -201,7 +201,7 @@ export const handleTiebreakerAnswers = async (allPlayers: IPlayerDB[], quizQInde
   }
 
   const bottomPlayersBySpeed = playerDb.getPlayersSortedByGuessSpeed(topPlayers, quizQIndex);
-  let bonusPlayer: IPlayerDB = bottomPlayersBySpeed[0];
+  let bonusPlayer = bottomPlayersBySpeed[0];
   for (let i = 1; i < bottomPlayersBySpeed.length; i++) {
     const currentPlayer = bottomPlayersBySpeed[i];
     const currentGuess = currentPlayer.quizGuesses[quizQIndex];
@@ -264,7 +264,7 @@ export const hostShowAnswer = async (gameId: number, io: typedServer): Promise<v
   }
 
   for (let i = 0; i < nonSubjectPlayers.length; i++) {
-    const currentPlayer: IPlayerDB = nonSubjectPlayers[i];
+    const currentPlayer: IPlayer = nonSubjectPlayers[i];
     const currentPlayerCurrentGuess: IGuess = currentPlayer.quizGuesses[currentQuestionIndex];
     const playerCorrect: boolean = currentPlayerCurrentGuess && currentPlayerCurrentGuess.guess === correctGuess;
     const currentPlayerNewState: PlayerState = playerCorrect ? "seeing-answer-correct" : "seeing-answer-incorrect";
@@ -328,7 +328,7 @@ export const onHostViewUpdate = async (gameId: number, io: typedServer) => {
   }
 };
 
-export const handlePlayerQuit = async (player: IPlayerDB, game: IGameDB, io: typedServer) => {
+export const handlePlayerQuit = async (player: IPlayer, game: IGame, io: typedServer) => {
   await playerDb.kickPlayer(player.name, game.id);
   const allPlayersInGame = await playerDb.getPlayers(game.id);
 

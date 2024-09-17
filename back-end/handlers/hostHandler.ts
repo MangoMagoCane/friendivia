@@ -1,13 +1,13 @@
-import hostDb from "../db/host.ts";
-import playerDb from "../db/player.ts";
+import { hostDb } from "../db/host.ts";
+import { playerDb } from "../db/player.ts";
 import questionDb from "../db/question.ts";
-import Game from "../models/Game.ts";
+import { Game } from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
-import Player from "../models/Player.ts";
-import PreGameSettings from "../models/PreGameSettings.ts";
+import { Player } from "../models/Player.ts";
+import { PreGameSettings } from "../models/PreGameSettings.ts";
 import { valInArr } from "../../front-end/src/util.ts";
-import ISettings from "../interfaces/ISettings.ts";
 import { typedServer, SocketBackend } from "../interfaces/IServer.ts";
+import ISettings from "../interfaces/ISettings.ts";
 
 let PreSettingsId: string | null;
 export default (io: typedServer, socket: SocketBackend) => {

@@ -1,7 +1,7 @@
-import { Schema } from "mongoose";
+import mongoose from "mongoose";
 
-export interface IQuestionnaireQuestionDB {
-  _id?: Schema.Types.ObjectId;
+export interface IQuestionnaireQuestion {
+  _id: mongoose.Types.ObjectId;
   text: string;
   quizText: string;
   tags: string[];
@@ -9,7 +9,7 @@ export interface IQuestionnaireQuestionDB {
 }
 
 export type PlayerQuestionnaireQuestion = {
-  questionId: Schema.Types.ObjectId;
+  questionId: mongoose.Types.ObjectId;
   subjectQuestion: boolean;
   answer: string;
 };

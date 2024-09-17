@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
-import IGameDB from "../interfaces/IGameDB";
+import { IGame } from "../interfaces/models/IGame";
 
-const gameSchema = new Schema<IGameDB>({
+const gameSchema = new Schema<IGame>({
   id: { type: Number, required: true },
   gameState: { type: Object, required: true },
   hostSocketId: { type: String, required: true },
@@ -13,5 +13,4 @@ const gameSchema = new Schema<IGameDB>({
   customMode: { type: String }
 });
 
-const Game = model<IGameDB>("Game", gameSchema);
-export default Game;
+export const Game = model<IGame>("Game", gameSchema);

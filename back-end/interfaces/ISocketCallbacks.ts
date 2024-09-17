@@ -1,6 +1,6 @@
-import IPlayerDB from "./IPlayerDB";
 import IPlayerScore from "./IPlayerScore";
 import IQuizOption from "./IQuizOption";
+import { IPlayer } from "./models/IPlayer";
 
 export interface IPlayerLoadSuccess {
   questionnaireQuestionsText?: string[];
@@ -10,5 +10,5 @@ export interface IPlayerLoadSuccess {
 
 export interface IPlayersObject {
   gameId: number;
-  players: IPlayerDB[];
+  players: IPlayer[];
 }

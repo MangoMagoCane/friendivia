@@ -1,10 +1,9 @@
-import Question from "../models/Question.ts";
-import { IQuestionnaireQuestionDB, PlayerQuestionnaire } from "../interfaces/IQuestionnaireQuestionDB.ts";
-import questionDb from "../db/question.ts";
+import { Question } from "../models/Question.ts";
 import { shuffle } from "./utils.ts";
-import { ObjectId } from "mongoose";
+import mongoose from "mongoose";
+import { IQuestionnaireQuestion, PlayerQuestionnaire } from "../interfaces/models/IQuestionnaireQuestion.ts";
 
-export default {
+export const questionDb = {
   getQuestions: async (): Promise<any> => {
     try {
       const questions = await Question.find();
@@ -15,9 +14,10 @@ export default {
     }
   },
 
-  getQuestionById: async (questionId: ObjectId): Promise<IQuestionnaireQuestionDB | null> => {
+  getQuestionById: async (questionId: mongoose.Types.ObjectId): Promise<IQuestionnaireQuestion | null> => {
     try {
-      const question: IQuestionnaireQuestionDB | null = await Question.findById(questionId);
+      const question = await Question.findById(questionId).lean();
+      console.log(question);
       return question;
     } catch (e) {
       console.error(`Issue getting question: ${e}`);
@@ -25,7 +25,7 @@ export default {
     }
   },
 
-  addQuestion: async (question: IQuestionnaireQuestionDB): Promise<any> => {
+  addQuestion: async (question: IQuestionnaireQuestion): Promise<IQuestionnaireQuestion | null> => {
     try {
       const newQuestion = new Question(question);
       const questionExists =
@@ -48,9 +48,12 @@ export default {
     }
   },
 
-  getRandomCustomQuestions: async (numQuestions: number, customQuestions: IQuestionnaireQuestionDB[]): Promise<any> => {
+  getRandomCustomQuestions: async (
+    numQuestions: number,
+    customQuestions: IQuestionnaireQuestion[]
+  ): Promise<IQuestionnaireQuestion[]> => {
     try {
-      let questions: IQuestionnaireQuestionDB[] = [];
+      const questions: IQuestionnaireQuestion[] = [];
       while (questions.length < numQuestions) {
         const index = Math.floor(Math.random() * customQuestions.length);
         questions.push(customQuestions[index]);
@@ -67,8 +70,8 @@ export default {
     numQuestions: number,
     previouslyUsedQuestionQuizText: string[],
     customMode: string
-  ): Promise<Array<IQuestionnaireQuestionDB>> => {
-    let questions: Array<IQuestionnaireQuestionDB> = [];
+  ): Promise<IQuestionnaireQuestion[]> => {
+    let questions: IQuestionnaireQuestion[] = [];
 
     if (customMode !== "") {
       questions = await Question.find({ tags: customMode });
@@ -89,11 +92,11 @@ export default {
 
   getRandomQuestions: async (
     numQuestions: number,
-    customQuestions: IQuestionnaireQuestionDB[],
+    customQuestions: IQuestionnaireQuestion[],
     prioritizeCustomQs: boolean
-  ): Promise<any> => {
+  ): Promise<IQuestionnaireQuestion[]> => {
     try {
-      let questions;
+      let questions: IQuestionnaireQuestion[];
 
       if (prioritizeCustomQs === true) {
         const length = numQuestions - customQuestions.length;
@@ -120,7 +123,8 @@ export default {
       for (let i = 0; i < questions.length; i++) {
         for (let j = i + 1; j < questions.length; j++) {
           while (questions[i].text == questions[j].text) {
-            questions[i] = await Question.aggregate([{ $sample: { size: 1 } }]);
+            questions[i] = (await Question.aggregate([{ $sample: { size: 1 } }])) as unknown as IQuestionnaireQuestion;
+            console.log(questions[i]);
           }
         }
       }

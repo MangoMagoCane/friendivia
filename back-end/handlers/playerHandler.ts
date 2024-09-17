@@ -1,17 +1,17 @@
-import playerDb from "../db/player.ts";
-import hostDb from "../db/host.ts";
+import { playerDb } from "../db/player.ts";
+import { hostDb } from "../db/host.ts";
 import questionDb from "../db/question.ts";
-import IPlayerDB from "../interfaces/IPlayerDB.ts";
-import IGameDB from "../interfaces/IGameDB.ts";
-import Game from "../models/Game.ts";
+import { Game } from "../models/Game.ts";
 import * as hostHelpers from "./hostHelpers.ts";
-import Player from "../models/Player.ts";
+import { Player } from "../models/Player.ts";
 import { SocketBackend, typedServer } from "../interfaces/IServer.ts";
+import { IGame } from "../interfaces/models/IGame.ts";
+import { IPlayer } from "../interfaces/models/IPlayer.ts";
 
 export default (io: typedServer, socket: SocketBackend) => {
   const onPlayerSubmitJoin = async (name: string, gameId: number) => {
     try {
-      const game: IGameDB | null = await Game.findOne({ id: gameId }).exec();
+      const game: IGame | null = await Game.findOne({ id: gameId }).exec();
       if (game?.gameState.state !== "lobby") {
         throw Error("Invalid Game ID");
       }
@@ -134,12 +134,12 @@ export default (io: typedServer, socket: SocketBackend) => {
 
   const onHostKickPlayer = async (playerName: string) => {
     try {
-      const currentGameData: IGameDB | null = await hostDb.getGameDataFromSocketId(socket.id);
+      const currentGameData: IGame | null = await hostDb.getGameDataFromSocketId(socket.id);
       if (currentGameData === null) {
         return;
       }
       const gameId = currentGameData.id;
-      const player: IPlayerDB | null = await playerDb.getPlayerByName(playerName, gameId);
+      const player: IPlayer | null = await playerDb.getPlayerByName(playerName, gameId);
       if (player === null) {
         // ! TEMPORARYCHAGNE
         return;

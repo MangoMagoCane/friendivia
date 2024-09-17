@@ -1,18 +1,18 @@
 import * as uuid from "uuid";
-import IPlayerDB from "../interfaces/IPlayerDB.ts";
-import Player from "../models/Player.ts";
-import IGameDB from "../interfaces/IGameDB.ts";
+import { Player } from "../models/Player.ts";
 import IGuess from "../interfaces/IGuess.ts";
-import Game from "../models/Game.ts";
-import hostDb from "./host.ts";
+import { Game } from "../models/Game.ts";
+import { hostDb } from "./host.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
 import IPlayerScore from "../interfaces/IPlayerScore.ts";
 import { Server } from "socket.io";
 import { IPlayerLoadSuccess } from "../interfaces/ISocketCallbacks.ts";
 import { typedServer } from "../interfaces/IServer.ts";
+import { IGame } from "../interfaces/models/IGame.ts";
+import { IPlayer } from "../interfaces/models/IPlayer.ts";
 
-export default {
-  getPlayers: async (gameId: number): Promise<IPlayerDB[]> => {
+export const playerDb = {
+  getPlayers: async (gameId: number): Promise<IPlayer[]> => {
     try {
       const players = await Player.find({ gameId: gameId });
       return players;
@@ -22,7 +22,7 @@ export default {
     }
   },
 
-  getPlayer: async (playerId: string): Promise<IPlayerDB | null> => {
+  getPlayer: async (playerId: string): Promise<IPlayer | null> => {
     try {
       const player = await Player.findOne({ id: playerId });
       return player;
@@ -32,7 +32,7 @@ export default {
     }
   },
 
-  getPlayersWithQuestionnairesCompleted: async (gameId: number, qLength: number): Promise<IPlayerDB[]> => {
+  getPlayersWithQuestionnairesCompleted: async (gameId: number, qLength: number): Promise<IPlayer[]> => {
     try {
       const players = await Player.find({ gameId: gameId });
       return players.filter((p) => p.questionnaireAnswers.length === qLength);
@@ -45,7 +45,8 @@ export default {
   addPlayer: async (playerName: string, gameId: number, socketId: string): Promise<string> => {
     try {
       const playerId = `player_${uuid.v4()}`;
-      const newPlayerObject: IPlayerDB = {
+
+      const newPlayer = new Player({
         name: playerName,
         id: playerId,
         questionnaireAnswers: [],
@@ -57,9 +58,8 @@ export default {
           message: ""
         },
         playerSocketId: socketId
-      };
+      });
 
-      const newPlayer = new Player(newPlayerObject);
       await newPlayer.save();
       return playerId;
     } catch (e) {
@@ -68,7 +68,7 @@ export default {
     }
   },
 
-  getPlayerByName: async (playerName: string, gameId: number): Promise<IPlayerDB | null> => {
+  getPlayerByName: async (playerName: string, gameId: number): Promise<IPlayer | null> => {
     try {
       const player = await Player.findOne({ name: playerName, gameId: gameId });
       return player;
@@ -87,7 +87,7 @@ export default {
     }
   },
 
-  getPlayerBySocketId: async (socketId: string): Promise<IPlayerDB | null> => {
+  getPlayerBySocketId: async (socketId: string): Promise<IPlayer | null> => {
     try {
       const player = await Player.findOne({ playerSocketId: socketId });
       return player;
@@ -128,7 +128,7 @@ export default {
     }
   },
 
-  playerCompleteQuestionnaire: async (player: IPlayerDB, questionnaireAnswers: string[]): Promise<undefined> => {
+  playerCompleteQuestionnaire: async (player: IPlayer, questionnaireAnswers: string[]): Promise<undefined> => {
     try {
       const game = await hostDb.getGameData(player.gameId);
       if (game === null) {
@@ -180,20 +180,20 @@ export default {
     }
   },
 
-  getPlayersSortedByGuessSpeed: function (guessingPlayers: IPlayerDB[], quizQIndex: number): IPlayerDB[] {
-    const guessTime = (p) => (p.quizGuesses[quizQIndex] ? p.quizGuesses[quizQIndex].timestamp : 0);
-    const timeBetweenPlayerGuesses = (a: IPlayerDB, b: IPlayerDB) => guessTime(b) - guessTime(a);
+  getPlayersSortedByGuessSpeed: (guessingPlayers: IPlayer[], quizQIndex: number): IPlayer[] => {
+    const guessTime = (p: IPlayer) => (p.quizGuesses[quizQIndex] ? p.quizGuesses[quizQIndex].timestamp : 0);
+    const timeBetweenPlayerGuesses = (a: IPlayer, b: IPlayer) => guessTime(b) - guessTime(a);
     guessingPlayers.sort(timeBetweenPlayerGuesses);
 
     return guessingPlayers;
   },
 
-  awardAllPlayersConsolationPoints: async function (guessingPlayers: IPlayerDB[], quizQIndex: number): Promise<void> {
-    const sortedPlayers = this.getPlayersSortedByGuessSpeed(guessingPlayers, quizQIndex);
+  awardAllPlayersConsolationPoints: async (guessingPlayers: IPlayer[], quizQIndex: number): Promise<void> => {
+    const sortedPlayers = playerDb.getPlayersSortedByGuessSpeed(guessingPlayers, quizQIndex);
 
     for (let i = 0; i < sortedPlayers.length; i++) {
       const currentPlayer = sortedPlayers[i];
-      await this.awardPlayerPoints(currentPlayer.id, 25 * (i + 1));
+      await playerDb.awardPlayerPoints(currentPlayer.id, 25 * (i + 1));
     }
   },
 
@@ -220,7 +220,7 @@ export default {
     }
   },
 
-  playerAnswerQuestion: async function (playerId: string, guess: number, gameData: IGameDB): Promise<void> {
+  playerAnswerQuestion: async (playerId: string, guess: number, gameData: IGame): Promise<void> => {
     try {
       const player = await Player.findOne({ id: playerId });
       if (player === null) {
@@ -233,7 +233,10 @@ export default {
 
       if (correctGuess) {
         scoreAdd += 200;
-        const currentGuesses = await this.getPlayerGuessesForQuizQuestion(gameData.id, gameData.currentQuestionIndex);
+        const currentGuesses = await playerDb.getPlayerGuessesForQuizQuestion(
+          gameData.id,
+          gameData.currentQuestionIndex
+        );
         const numGuesses = currentGuesses.filter((g) => g).length;
         if (numGuesses < 3) {
           scoreAdd += 75 - numGuesses * 25;
@@ -275,13 +278,13 @@ export default {
     }
   },
 
-  getPlayerGuessesForQuizQuestion: async function (gameId: number, questionIndex: number): Promise<IGuess[]> {
-    const playersInGame = await this.getPlayers(gameId);
+  getPlayerGuessesForQuizQuestion: async (gameId: number, questionIndex: number): Promise<IGuess[]> => {
+    const playersInGame = await playerDb.getPlayers(gameId);
     return playersInGame.map((p) => p.quizGuesses[questionIndex]);
   },
 
-  getPlayerScores: async function (gameId: number): Promise<IPlayerScore[]> {
-    const playersInGame = await this.getPlayers(gameId);
+  getPlayerScores: async (gameId: number): Promise<IPlayerScore[]> => {
+    const playersInGame = await playerDb.getPlayers(gameId);
     const playerScores: IPlayerScore[] = playersInGame.map((p) => ({
       name: p.name,
       score: p.score
@@ -289,8 +292,8 @@ export default {
     return playerScores;
   },
 
-  resetPlayerScores: async function (gameId: number) {
-    const playersInGame = await this.getPlayers(gameId);
+  resetPlayerScores: async (gameId: number) => {
+    const playersInGame = await playerDb.getPlayers(gameId);
     for (const player of playersInGame) {
       await Player.updateOne(
         {

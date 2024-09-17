@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import IPreGameSettings from "../interfaces/IPreGameSettings";
+import { IPreGameSettings } from "../interfaces/models/IPreGameSettings";
 
 const preGameSettingsSchema = new Schema<IPreGameSettings>({
   id: { type: String, required: true },
@@ -8,5 +8,4 @@ const preGameSettingsSchema = new Schema<IPreGameSettings>({
   settings: { type: Object, required: true }
 });
 
-const PreGameSettings = model<IPreGameSettings>("PreGameSettings", preGameSettingsSchema);
-export default PreGameSettings;
+export const PreGameSettings = model<IPreGameSettings>("PreGameSettings", preGameSettingsSchema);
