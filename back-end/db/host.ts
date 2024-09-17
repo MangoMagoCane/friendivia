@@ -93,15 +93,7 @@ export const hostDb = {
 
   getGameData: async (gameId: number): Promise<IGame | null> => {
     try {
-      const data = await Game.findOne({ id: gameId }).lean();
-      console.log(data);
-      return data;
-
-      // const gameDataPOJO = gameData?.toObject();
-      // if (gameDataPOJO === undefined) {
-      //   throw Error("Couldn't convert game data into POJO");
-      // }
-      // return gameDataPOJO;
+      return await Game.findOne({ id: gameId }).lean();
     } catch (e) {
       console.error(`Issue getting game data: ${e}`);
       throw Error("Failed to get game data", { cause: e });
@@ -110,8 +102,7 @@ export const hostDb = {
 
   getGameDataFromSocketId: async (socketId: string): Promise<IGame | null> => {
     try {
-      const gameData: any = await Game.findOne({ hostSocketId: socketId });
-      return gameData?.toObject();
+      return await Game.findOne({ hostSocketId: socketId }).lean();
     } catch (e) {
       console.error(`Issue getting game data from Host SocketId ${socketId}: ${e}`);
       return null;

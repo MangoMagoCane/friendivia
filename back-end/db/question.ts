@@ -16,9 +16,7 @@ export const questionDb = {
 
   getQuestionById: async (questionId: mongoose.Types.ObjectId): Promise<IQuestionnaireQuestion | null> => {
     try {
-      const question = await Question.findById(questionId).lean();
-      console.log(question);
-      return question;
+      return await Question.findById(questionId).lean();
     } catch (e) {
       console.error(`Issue getting question: ${e}`);
       return null;
@@ -124,7 +122,6 @@ export const questionDb = {
         for (let j = i + 1; j < questions.length; j++) {
           while (questions[i].text == questions[j].text) {
             questions[i] = (await Question.aggregate([{ $sample: { size: 1 } }])) as unknown as IQuestionnaireQuestion;
-            console.log(questions[i]);
           }
         }
       }

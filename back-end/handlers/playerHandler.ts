@@ -1,8 +1,7 @@
 import { playerDb } from "../db/player.ts";
 import { hostDb } from "../db/host.ts";
-import questionDb from "../db/question.ts";
-import { Game } from "../models/Game.ts";
-import * as hostHelpers from "./hostHelpers.ts";
+import { questionDb } from "../db/question.ts";
+import { hostHelpers } from "./hostHelpers.ts";
 import { Player } from "../models/Player.ts";
 import { SocketBackend, typedServer } from "../interfaces/IServer.ts";
 import { IGame } from "../interfaces/models/IGame.ts";
@@ -11,9 +10,9 @@ import { IPlayer } from "../interfaces/models/IPlayer.ts";
 export default (io: typedServer, socket: SocketBackend) => {
   const onPlayerSubmitJoin = async (name: string, gameId: number) => {
     try {
-      const game: IGame | null = await Game.findOne({ id: gameId }).exec();
-      if (game?.gameState.state !== "lobby") {
-        throw Error("Invalid Game ID");
+      const gameData = await hostDb.getGameData(gameId);
+      if (gameData?.gameState.state !== "lobby") {
+        throw Error("", { cause: "Could not find current game data" });
       }
 
       const allPlayersInGame = await playerDb.getPlayers(gameId);
@@ -23,10 +22,6 @@ export default (io: typedServer, socket: SocketBackend) => {
       }
 
       const newPlayerId = await playerDb.addPlayer(name, gameId, socket.id);
-      const currentGameData = await hostDb.getGameData(gameId);
-      if (currentGameData === null) {
-        throw Error("", { cause: "Could not find current game data" });
-      }
 
       const updatedPlayer = await playerDb.getPlayer(newPlayerId);
       if (updatedPlayer === null) {
@@ -35,7 +30,7 @@ export default (io: typedServer, socket: SocketBackend) => {
 
       io.to(updatedPlayer.playerSocketId).emit("player-next", updatedPlayer);
       allPlayersInGame.push(updatedPlayer); // necessary otherwise allPlayersInGame only contains the players before the new one is added
-      io.to(currentGameData.hostSocketId).emit("players-updated", gameId, allPlayersInGame);
+      io.to(gameData.hostSocketId).emit("players-updated", gameId, allPlayersInGame);
 
       socket.emit("join-success", newPlayerId);
     } catch (e) {
@@ -108,7 +103,7 @@ export default (io: typedServer, socket: SocketBackend) => {
         hostHelpers.onHostViewUpdate(gameId, io);
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
       socket.emit("player-submit-questionnaire-error", e);
     }
   };

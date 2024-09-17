@@ -5,7 +5,7 @@ import { PlayerState } from "../interfaces/IPlayerState.ts";
 import { Server } from "socket.io";
 import { valInArr } from "../../front-end/src/util.ts";
 
-export default {
+export const playerHelpers = {
   allPlayersGoToNextQuestion: async (gameId: number, io: Server): Promise<void> => {
     const currentGameData = await hostDb.getGameData(gameId);
     if (currentGameData === null) {
