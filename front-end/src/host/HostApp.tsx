@@ -34,6 +34,8 @@ interface HostAppProps {
 export default function HostApp({ socket }: HostAppProps) {
   const gameIdFromStorage = Number(localStorage.getItem("game-id")) || -1;
   const settingsIdFromStorage = String(localStorage.getItem("settings-id")) || "-1";
+  const mutedFromStorage = localStorage.getItem("music-muted");
+
   const [gameId, setGameId] = React.useState<number>(gameIdFromStorage);
   const [preSettingsId, setPreSettingsId] = React.useState<string>(settingsIdFromStorage);
   const [gameState, setGameState] = React.useState<GameState>("init");
@@ -54,12 +56,16 @@ export default function HostApp({ socket }: HostAppProps) {
   const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestionDB[]>([]);
 
   const [loaded, setLoaded] = React.useState<boolean>(false);
-  const [muted, setMuted] = React.useState<boolean>(true);
   const [announcementAudioObjects, setAnnouncementAudioObjects] = React.useState<any>([]);
 
+  const [muted, setMuted] = React.useState<boolean>(!!mutedFromStorage);
   const musicRef = React.useRef<HTMLAudioElement>(new Audio(lobbyMusic));
+  const setMusic = (muted: boolean) => {
+    localStorage.setItem("music-muted", String(muted));
+    setMuted(muted);
+  };
 
-  const addAnnouncement = (newAnnouncementAudio) => {
+  const addAnnouncement = (newAnnouncementAudio: any[]) => {
     setAnnouncementAudioObjects((arr) => [...arr, newAnnouncementAudio]);
   };
 
@@ -264,13 +270,13 @@ export default function HostApp({ socket }: HostAppProps) {
           gameState={gameState}
         />
         <audio
-          autoPlay
+          autoPlay={mutedFromStorage === null}
           loop={!muted}
           ref={musicRef}
           src={lobbyMusic}
           muted={muted}
           onPlaying={() => {
-            setMuted(false);
+            setMusic(false);
           }}
         />
         <div id="host-banner">
@@ -278,7 +284,7 @@ export default function HostApp({ socket }: HostAppProps) {
             <IconButton
               onClick={() => {
                 musicRef.current.play();
-                setMuted(!muted);
+                setMusic(!muted);
               }}
             >
               <img className="musicIcon" src={muted ? musicOff : musicOn} />
