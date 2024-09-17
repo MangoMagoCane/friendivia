@@ -123,6 +123,7 @@ export default function HostShowAnswer({
         >
           {options.map((op: IQuizOption, i: number) => (
             <div
+              key={i}
               className="guesses"
               style={{
                 width: "100%",
@@ -145,7 +146,6 @@ export default function HostShowAnswer({
                   border: "2px solid purple",
                   borderRadius: "20px"
                 }}
-                key={i}
               >
                 <p
                   style={{
@@ -177,10 +177,10 @@ export default function HostShowAnswer({
                 {playerGuesses
                   .filter((g) => g && g.guess === i)
                   .map((g, j) => (
-                    <>
+                    <React.Fragment key={j}>
                       <PlayerBadge name={g.name} />
                       <div style={{ height: "0.4vh" }} />
-                    </>
+                    </React.Fragment>
                   ))}
               </Stack>
             </div>

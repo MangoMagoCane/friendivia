@@ -30,7 +30,9 @@ export default function HostLobby({ socket, gameId, classroomGame }: HostLobbyPr
 
   return (
     <>
-      <div>{!classroomGame && playerNames.map((p) => <Speak text={pickOneAndInterp(welcomeMessages, p)} />)}</div>
+      <div>
+        {!classroomGame && playerNames.map((p, i) => <Speak key={i} text={pickOneAndInterp(welcomeMessages, p)} />)}
+      </div>
       <HostLobbyView playerNames={playerNames} gameId={gameId} socket={socket} />
     </>
   );

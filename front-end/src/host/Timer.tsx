@@ -14,7 +14,6 @@ export default function Timer({ started, timePerQuestion }: TimerProps) {
     }
   }, [counter, started]);
 
-  console.log(`timer: ${counter}`);
   return (
     <div className="dot">
       <div className="timer">

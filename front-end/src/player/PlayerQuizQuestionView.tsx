@@ -14,6 +14,7 @@ interface IQuizQuestionViewProps {
 export default function PlayerQuizQuestionView({ optionsList, socket, playerState }: IQuizQuestionViewProps) {
   const guessReceivedMessage = `Guess received! Hang tight...`;
   console.log(optionsList);
+
   const goTo = (answerIndex: number): void => {
     answerQuestion(answerIndex);
     allPlayersAnswerQuestion(answerIndex);
@@ -30,8 +31,8 @@ export default function PlayerQuizQuestionView({ optionsList, socket, playerStat
   const optionsForm = (
     <div>
       <div className="answerOptions">
-        {optionsList.map((o: IQuizOption, i: number) => (
-          <>
+        {optionsList.map((o, i) => (
+          <React.Fragment key={i}>
             <br />
             <Button
               className="answerButton"
@@ -47,7 +48,7 @@ export default function PlayerQuizQuestionView({ optionsList, socket, playerStat
             >
               {o.answerText}
             </Button>
-          </>
+          </React.Fragment>
         ))}
       </div>
 
@@ -55,11 +56,12 @@ export default function PlayerQuizQuestionView({ optionsList, socket, playerStat
     </div>
   );
 
-  if (playerState.state === "answered-quiz-question-waiting") {
-    return <PlayerWait message={guessReceivedMessage} />;
-  } else if (playerState.state === "question-being-read") {
-    return <PlayerWait message="Get ready to answer..." />;
-  } else {
-    return optionsForm;
+  switch (playerState.state) {
+    case "answered-quiz-question-waiting":
+      return <PlayerWait message={guessReceivedMessage} />;
+    case "question-being-read":
+      return <PlayerWait message="Get ready to answer..." />;
+    default:
+      return optionsForm;
   }
 }

@@ -28,6 +28,7 @@ function HostShowQuestion({
 }: HostShowQuestionprops) {
   const [timerStarted, setTimerStarted] = React.useState<boolean>(false);
   const [part1, part2] = questionText.split("<PLAYER>");
+
   const instructions = [
     " Answer on your devices now.",
     " Give it your best guess.",
@@ -56,13 +57,13 @@ function HostShowQuestion({
     <>
       <Speak text={quizText} callback={startTimer} />
       <Timer started={timerStarted} timePerQuestion={timePerQuestion} />
-      <p style={{ marginBottom: "30px", fontSize: "1.3em" }}>
-        <p className="question">
+      <div style={{ marginBottom: "30px", fontSize: "1.3em" }}>
+        <div className="question">
           {part1}
           <b>{playerName}</b>
           {part2}
-        </p>
-      </p>
+        </div>
+      </div>
 
       <div
         style={{
