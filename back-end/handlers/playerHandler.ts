@@ -4,8 +4,6 @@ import { questionDb } from "../db/question.ts";
 import { hostHelpers } from "./hostHelpers.ts";
 import { Player } from "../models/Player.ts";
 import { SocketBackend, typedServer } from "../interfaces/IServer.ts";
-import { IGame } from "../interfaces/models/IGame.ts";
-import { IPlayer } from "../interfaces/models/IPlayer.ts";
 
 export default (io: typedServer, socket: SocketBackend) => {
   const onPlayerSubmitJoin = async (name: string, gameId: number) => {
@@ -129,12 +127,12 @@ export default (io: typedServer, socket: SocketBackend) => {
 
   const onHostKickPlayer = async (playerName: string) => {
     try {
-      const currentGameData: IGame | null = await hostDb.getGameDataFromSocketId(socket.id);
-      if (currentGameData === null) {
+      const gameData = await hostDb.getGameDataFromSocketId(socket.id);
+      if (gameData === null) {
         return;
       }
-      const gameId = currentGameData.id;
-      const player: IPlayer | null = await playerDb.getPlayerByName(playerName, gameId);
+      const gameId = gameData.id;
+      const player = await playerDb.getPlayerByName(playerName, gameId);
       if (player === null) {
         // ! TEMPORARYCHAGNE
         return;
@@ -143,7 +141,7 @@ export default (io: typedServer, socket: SocketBackend) => {
       await playerDb.kickPlayer(playerName, gameId);
       const allPlayersInGame = await playerDb.getPlayers(gameId);
 
-      io.to(currentGameData.hostSocketId).emit("players-updated", gameId, allPlayersInGame);
+      io.to(gameData.hostSocketId).emit("players-updated", gameId, allPlayersInGame);
 
       await hostHelpers.onHostViewUpdate(gameId, io);
     } catch (e) {

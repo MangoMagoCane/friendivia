@@ -1,8 +1,7 @@
 import { hostDb } from "../db/host.ts";
 import { playerDb } from "../db/player.ts";
-import questionDb from "../db/question.ts";
 import { Game } from "../models/Game.ts";
-import * as hostHelpers from "./hostHelpers.ts";
+import { hostHelpers } from "./hostHelpers.ts";
 import { Player } from "../models/Player.ts";
 import { PreGameSettings } from "../models/PreGameSettings.ts";
 import { valInArr } from "../../front-end/src/util.ts";
@@ -79,16 +78,17 @@ export default (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onDeletePlease = async () => {
-    try {
-      await playerDb.deleteAllPlayers();
-      await hostDb.deleteAllGames();
-      await questionDb.deleteAllQuestions();
-      PreSettingsId = null;
-    } catch (e) {
-      console.error("failed to delete all");
-    }
-  };
+  // never used
+  // const onDeletePlease = async () => {
+  //   try {
+  //     await playerDb.deleteAllPlayers();
+  //     await hostDb.deleteAllGames();
+  //     await questionDb.deleteAllQuestions();
+  //     PreSettingsId = null;
+  //   } catch (e) {
+  //     console.error("failed to delete all");
+  //   }
+  // };
 
   const onHostStart = async (gameId: number) => {
     try {
@@ -270,7 +270,7 @@ export default (io: typedServer, socket: SocketBackend) => {
   socket.on("host-open", onHostOpen);
   socket.on("host-load", onHostLoad);
   socket.on("settings-load", onSettingsLoad);
-  socket.on("delete-please", onDeletePlease);
+  // socket.on("delete-please", onDeletePlease);
   socket.on("host-start", onHostStart);
   socket.on("host-end-game", onHostEndGame);
   socket.on("host-start-quiz-timer", onHostStartQuizTimer);

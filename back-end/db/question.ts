@@ -4,15 +4,16 @@ import mongoose from "mongoose";
 import { IQuestionnaireQuestion, PlayerQuestionnaire } from "../interfaces/models/IQuestionnaireQuestion.ts";
 
 export const questionDb = {
-  getQuestions: async (): Promise<any> => {
-    try {
-      const questions = await Question.find();
-      return questions;
-    } catch (e) {
-      console.error(`Issue getting questions: ${e}`);
-      return [];
-    }
-  },
+  // seemingly never used
+  // getQuestions: async (): Promise<IQuestionnaireQuestion[]> => {
+  //   try {
+  //     const questions = await Question.find().lean();
+  //     return questions;
+  //   } catch (e) {
+  //     console.error(`Issue getting questions: ${e}`);
+  //     return [];
+  //   }
+  // },
 
   getQuestionById: async (questionId: mongoose.Types.ObjectId): Promise<IQuestionnaireQuestion | null> => {
     try {

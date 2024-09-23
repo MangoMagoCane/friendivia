@@ -292,8 +292,8 @@ export const hostHelpers = {
 
   getQuestionnaireStatus: async (gameId: number): Promise<string[][]> => {
     const allPlayersInGame = await playerDb.getPlayers(gameId);
-    let donePlayerNames: string[] = [];
-    let waitingPlayerNames: string[] = [];
+    const donePlayerNames: string[] = [];
+    const waitingPlayerNames: string[] = [];
 
     for (let i = 0; i < allPlayersInGame.length; i++) {
       const player = allPlayersInGame[i];

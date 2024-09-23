@@ -130,7 +130,6 @@ export default function HostQuestionnaireView({ socket, donePlayers, waitingPlay
             >
               {donePlayers.map((name: string, i: number) => (
                 <li className="li" key={i}>
-                  {waitingPlayers.length > 1 && <Speak text={pickOneAndInterp(doneMessages, name)} />}
                   <PlayerBadge name={name} onClick={() => onPlayerKick(name)} />
                 </li>
               ))}
@@ -160,22 +159,6 @@ export default function HostQuestionnaireView({ socket, donePlayers, waitingPlay
     </>
   );
 }
-
-const doneMessages = [
-  "Thank you, {{name}}.",
-  "You did it, {{name}}!",
-  "Good, {{name}}!",
-  "Yay, {{name}} is done!",
-  "{{name}} is finished!",
-  "{{name}} is ready to go!",
-  "Great job, {{name}}!",
-  "You're all set, {{name}}!",
-  "You're done, {{name}}!",
-  "You're all finished, {{name}}!",
-  "{{name}} is all set.",
-  "{{name}} has completed their questionnaire.",
-  "I knew you could do it, {{name}}."
-];
 
 const warningMessages = [
   "Let's go, {{name}}.",
