@@ -1,10 +1,10 @@
 import * as React from "react";
 
-interface IHostOpenButtonProps {
+interface HostOpenButtonProps {
   symbol: string;
   title: string;
   description: string;
-  onClick?: () => any;
+  onClick?: () => void;
   bgImage?: string;
   disabled?: boolean;
   size?: string;
@@ -18,7 +18,7 @@ export default function HostOpenButton({
   bgImage,
   disabled,
   size
-}: IHostOpenButtonProps): React.ReactElement {
+}: HostOpenButtonProps): React.ReactElement {
   const disabledBg = "radial-gradient(circle, var(--main-light), var(--main))";
   const topDisplayBig = (
     <>

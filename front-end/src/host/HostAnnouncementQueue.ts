@@ -1,14 +1,13 @@
 import * as React from "react";
-import { Socket } from "socket.io-client";
+import { socket } from "../socket";
 
-interface IHostAnnouncementProps {
+interface hostAnnouncementQueueProps {
   announcementAudioObjects: any;
-  socket: Socket;
   gameId: number;
   gameState: string;
 }
 
-export function HostAnnouncementQueue({ announcementAudioObjects, socket, gameId, gameState }: IHostAnnouncementProps) {
+export function HostAnnouncementQueue({ announcementAudioObjects, gameId, gameState }: hostAnnouncementQueueProps) {
   const [currentIndex, setCurrentIndex] = React.useState<number>(0);
 
   React.useEffect(() => {

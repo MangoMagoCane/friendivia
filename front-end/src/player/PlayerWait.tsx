@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import hourglass from "../assets/hourglass.png";
 
 interface IWaitProps {

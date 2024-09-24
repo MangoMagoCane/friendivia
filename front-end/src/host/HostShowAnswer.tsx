@@ -5,7 +5,7 @@ import Speak from "../Speak";
 import { pickOne } from "../util";
 import PlayerBadge from "./PlayerBadge";
 import IQuizOption from "back-end/interfaces/IQuizOption";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 
 interface HostShowAnswerProps {
   playerName: string;
@@ -13,7 +13,6 @@ interface HostShowAnswerProps {
   options: IQuizOption[];
   correctAnswerIndex: number;
   playerGuesses: Array<any>;
-  socket: SocketFrontend;
   gameId: number;
   quizLength: number;
   handsFreeMode: boolean;
@@ -25,7 +24,6 @@ export default function HostShowAnswer({
   playerName,
   correctAnswerIndex,
   playerGuesses,
-  socket,
   handsFreeMode
 }: HostShowAnswerProps) {
   const totalGuesses = playerGuesses.length - 1;

@@ -1,18 +1,13 @@
 import * as React from "react";
 import PlayerQuestionnaireForm from "./PlayerQuestionnaireForm";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 
 interface PlayerQuestionnaireProps {
-  socket: SocketFrontend;
   playerState: string;
   questionnaireQuestionsText: string[];
 }
 
-export default function PlayerQuestionnaire({
-  socket,
-  playerState,
-  questionnaireQuestionsText
-}: PlayerQuestionnaireProps) {
+export default function PlayerQuestionnaire({ playerState, questionnaireQuestionsText }: PlayerQuestionnaireProps) {
   const [questionnairePlayerState, setQuestionnairePlayerState] = React.useState({
     state: playerState,
     message: ""
@@ -42,11 +37,5 @@ export default function PlayerQuestionnaire({
     };
   }, [questionnairePlayerState, setQuestionnairePlayerState]);
 
-  return (
-    <PlayerQuestionnaireForm
-      socket={socket}
-      playerState={questionnairePlayerState}
-      questions={questionnaireQuestionsText}
-    />
-  );
+  return <PlayerQuestionnaireForm playerState={questionnairePlayerState} questions={questionnaireQuestionsText} />;
 }

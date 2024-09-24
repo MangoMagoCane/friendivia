@@ -19,7 +19,7 @@ import musicOn from "../assets/musicon.png";
 import musicOff from "../assets/musicoff.png";
 import { HostAnnouncementQueue, AddAnnouncementContext } from "./HostAnnouncementQueue";
 import { GameState } from "back-end/interfaces/IGameState";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 import IPlayerScore from "back-end/interfaces/IPlayerScore";
 import IGuess from "back-end/interfaces/IGuess";
 import { IGame } from "back-end/interfaces/models/IGame";
@@ -27,11 +27,7 @@ import { IPlayer } from "back-end/interfaces/models/IPlayer";
 import { IPreGameSettings } from "back-end/interfaces/models/IPreGameSettings";
 import { IQuestionnaireQuestion } from "back-end/interfaces/models/IQuestionnaireQuestion";
 
-interface HostAppProps {
-  socket: SocketFrontend;
-}
-
-export default function HostApp({ socket }: HostAppProps) {
+export default function HostApp() {
   const gameIdFromStorage = Number(localStorage.getItem("game-id")) || -1;
   const settingsIdFromStorage = String(localStorage.getItem("settings-id")) || "-1";
   const mutedFromStorage = localStorage.getItem("music-muted");
@@ -167,9 +163,9 @@ export default function HostApp({ socket }: HostAppProps) {
         );
       case "lobby":
         socket.emit("reload-players");
-        return <HostLobby socket={socket} gameId={gameId} classroomGame={customMode === "classroom"} />;
+        return <HostLobby gameId={gameId} classroomGame={customMode === "classroom"} />;
       case "questionnaire":
-        return <HostQuestionnaire socket={socket} playersInGame={playersInGame} />;
+        return <HostQuestionnaire playersInGame={playersInGame} />;
       case "pre-quiz":
         return <HostPreQuiz />;
       case "showing-question":
@@ -179,7 +175,6 @@ export default function HostApp({ socket }: HostAppProps) {
         quizQuestionPlayerName = currentQuizQuestion.playerName;
         return (
           <HostShowQuestion
-            socket={socket}
             gameId={gameId}
             options={quizQuestionOptions}
             questionText={quizQuestionText}
@@ -204,7 +199,6 @@ export default function HostApp({ socket }: HostAppProps) {
         const quizQuestionsLength = quizQuestions.length;
         return (
           <HostShowAnswer
-            socket={socket}
             gameId={gameId}
             options={quizQuestionOptions}
             questionText={quizQuestionText}
@@ -216,14 +210,7 @@ export default function HostApp({ socket }: HostAppProps) {
           />
         );
       case "intermediary-leaderboard":
-        return (
-          <HostIntLeaderBoard
-            gameId={gameId}
-            socket={socket}
-            playerScores={playerScores}
-            handsFreeMode={handsFreeMode}
-          />
-        );
+        return <HostIntLeaderBoard gameId={gameId} playerScores={playerScores} handsFreeMode={handsFreeMode} />;
       case "pre-leader-board":
         return (
           <>
@@ -232,12 +219,11 @@ export default function HostApp({ socket }: HostAppProps) {
           </>
         );
       case "leader-board":
-        return <HostLeaderBoard gameId={gameId} playerScores={playerScores} socket={socket} />;
+        return <HostLeaderBoard gameId={gameId} playerScores={playerScores} />;
     }
     if (state === "settings" || settingsState === true) {
       return (
         <HostSettings
-          socket={socket}
           gameId={gameId}
           preSettingsId={preSettingsId}
           settingsState={settingsState}
@@ -256,7 +242,7 @@ export default function HostApp({ socket }: HostAppProps) {
       return <HostTiebreaker />;
     } else {
       // state === "init" and potentially some other state
-      return <HostOpen socket={socket} />;
+      return <HostOpen />;
     }
   };
 
@@ -265,7 +251,6 @@ export default function HostApp({ socket }: HostAppProps) {
       <AddAnnouncementContext.Provider value={addAnnouncement}>
         <HostAnnouncementQueue
           announcementAudioObjects={announcementAudioObjects}
-          socket={socket}
           gameId={gameId}
           gameState={gameState}
         />

@@ -1,11 +1,7 @@
 import * as React from "react";
-import { Socket } from "socket.io-client";
 import PlayerJoinForm from "./PlayerJoinForm";
+import { socket } from "../socket";
 
-interface PlayerKickedProps {
-  socket: Socket;
-}
-
-export default function PlayerKicked({ socket }: PlayerKickedProps) {
-  return <PlayerJoinForm socket={socket} playerState={{ state: "init", message: "" }} />;
+export default function PlayerKicked() {
+  return <PlayerJoinForm playerState={{ state: "init", message: "" }} />;
 }

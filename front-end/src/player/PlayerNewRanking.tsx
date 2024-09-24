@@ -1,12 +1,12 @@
 import IPlayerScore from "back-end/interfaces/IPlayerScore";
 import * as React from "react";
 
-interface RankingProps {
+interface PlayerNewRankingProps {
   playerScores: IPlayerScore[];
   playerName: string;
 }
 
-export default function PlayerNewRanking({ playerScores, playerName }: RankingProps) {
+export default function PlayerNewRanking({ playerScores, playerName }: PlayerNewRankingProps) {
   playerScores.sort((p1, p2) => p2.score - p1.score);
 
   const getPlayerRankDisplay = () => {

@@ -1,17 +1,20 @@
 import * as React from "react";
-import "./style.css";
 
-export default function LoadingPage(props) {
+interface LoadingPageProps {
+  msg: string;
+}
+
+export default function LoadingPage({ msg }: LoadingPageProps) {
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "center"
       }}
     >
       <h1>Friendivia</h1>
-      <p style={{ margin: "auto", textAlign: "center" }}>{props.msg}</p>
+      <p style={{ margin: "auto", textAlign: "center" }}>{msg}</p>
     </div>
   );
 }

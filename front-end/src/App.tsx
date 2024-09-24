@@ -1,6 +1,6 @@
 import React from "react";
+import "../src/style.css";
 import { backEndUrl } from "./environment";
-import { socket } from "./socket";
 import PlayerApp from "./player/PlayerApp";
 import HostApp from "./host/HostApp";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -37,8 +37,8 @@ export default function App() {
       <div className="fillScreen">
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={isLoading ? loadingElement : <PlayerApp socket={socket} />} />
-            <Route path="/host" element={isLoading ? loadingElement : <HostApp socket={socket} />} />
+            <Route path="/" element={isLoading ? loadingElement : <PlayerApp />} />
+            <Route path="/host" element={isLoading ? loadingElement : <HostApp />} />
             <Route path="/about" element={<AboutPage />} />
           </Routes>
         </BrowserRouter>

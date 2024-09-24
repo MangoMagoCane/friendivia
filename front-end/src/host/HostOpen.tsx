@@ -1,13 +1,9 @@
 import * as React from "react";
 import { Button } from "../extra/FrdvButton";
 import HostOpenButton from "../extra/HostOpenButton";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 
-interface IOpenProps {
-  socket: SocketFrontend;
-}
-
-export default function HostOpen({ socket }: IOpenProps) {
+export default function HostOpen() {
   const [showCustom, setShowCustom] = React.useState<boolean>(false);
 
   const onHost = (customGame: string) => {

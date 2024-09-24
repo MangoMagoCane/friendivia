@@ -1,7 +1,4 @@
 import React from "react";
-import "../style.css";
-import correct from "../assets/correct.png";
-import incorrect from "../assets/incorrect.png";
 import rankone from "../assets/rankone.png";
 import ranktwo from "../assets/ranktwo.png";
 import rankthree from "../assets/rankthree.png";

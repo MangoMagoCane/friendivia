@@ -2,16 +2,15 @@ import * as React from "react";
 import { Button } from "../extra/FrdvButton";
 import PlayerWait from "./PlayerWait";
 import IQuizOption from "back-end/interfaces/IQuizOption";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 import { IPlayerState } from "back-end/interfaces/IPlayerState";
 
 interface IQuizQuestionViewProps {
   optionsList: IQuizOption[];
-  socket: SocketFrontend;
   playerState: IPlayerState;
 }
 
-export default function PlayerQuizQuestionView({ optionsList, socket, playerState }: IQuizQuestionViewProps) {
+export default function PlayerQuizQuestionView({ optionsList, playerState }: IQuizQuestionViewProps) {
   const guessReceivedMessage = `Guess received! Hang tight...`;
 
   const goTo = (answerIndex: number): void => {

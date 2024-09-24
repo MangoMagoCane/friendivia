@@ -18,14 +18,10 @@ import { PlayerState } from "back-end/interfaces/IPlayerState";
 import { valInArr } from "../util";
 import IPlayerScore from "back-end/interfaces/IPlayerScore";
 import { IPlayerLoadSuccess } from "back-end/interfaces/ISocketCallbacks";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 import { IPlayer } from "back-end/interfaces/models/IPlayer";
 
-interface PlayerAppProps {
-  socket: SocketFrontend;
-}
-
-export default function PlayerApp({ socket }: PlayerAppProps) {
+export default function PlayerApp() {
   const playerIdFromStorage = localStorage.getItem("player-id") || "";
   const [playerState, setPlayerState] = React.useState<PlayerState | "">("");
   const [playerName, setPlayerName] = React.useState<string>("");
@@ -86,16 +82,12 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
       case "filling-questionnaire":
       case "submitted-questionnaire-waiting":
         return (
-          <PlayerQuestionnaire
-            socket={socket}
-            playerState={playerState}
-            questionnaireQuestionsText={questionnaireQuestionsText}
-          />
+          <PlayerQuestionnaire playerState={playerState} questionnaireQuestionsText={questionnaireQuestionsText} />
         );
       case "seeing-question":
       case "answered-quiz-question-waiting":
       case "question-being-read":
-        return <PlayerQuizQuestion socket={socket} optionsList={quizQuestionOptionsText} playerState={playerState} />;
+        return <PlayerQuizQuestion optionsList={quizQuestionOptionsText} playerState={playerState} />;
       case "did-not-answer-question-waiting":
         return <PlayerRanOutOfTime />;
       case "question-about-me":
@@ -119,12 +111,12 @@ export default function PlayerApp({ socket }: PlayerAppProps) {
         return <PlayerOver rank={3} />;
       case "kicked":
         // bottomButtons = true;
-        return <PlayerKicked socket={socket} />;
+        return <PlayerKicked />;
       case "":
       case "init":
       case "joined-waiting":
         // bottomButtons = true;
-        return <PlayerJoin socket={socket} playerState={playerState} />;
+        return <PlayerJoin playerState={playerState} />;
       default:
         console.error(`ERR: invalid playerState: ${playerState}`);
         return <></>;

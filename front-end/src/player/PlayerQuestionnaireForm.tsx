@@ -2,15 +2,14 @@ import * as React from "react";
 import { Button } from "../extra/FrdvButton";
 import TextField from "@mui/material/TextField";
 import PlayerWait from "./PlayerJoinWait";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 
 interface PlayerQuestionnaireFormProps {
-  socket: SocketFrontend;
   playerState: any;
   questions: string[];
 }
 
-export default function PlayerQuestionnaireForm({ socket, playerState, questions }: PlayerQuestionnaireFormProps) {
+export default function PlayerQuestionnaireForm({ playerState, questions }: PlayerQuestionnaireFormProps) {
   const [answers, setAnswers] = React.useState<string[]>(Array(questions.length).fill(""));
   const inMessage = `Submission accepted! Please wait for the other players to finish.`;
   const maxAnswer = 50;

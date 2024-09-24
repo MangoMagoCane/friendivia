@@ -4,15 +4,14 @@ import Speak from "../Speak";
 import { Button } from "../extra/FrdvButton";
 import PlayerBadge from "./PlayerBadge";
 import { pickOneAndInterp, pickOne } from "../util";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 
 interface HostQuestionnaireViewProps {
-  socket: SocketFrontend;
   donePlayers: string[];
   waitingPlayers: string[];
 }
 
-export default function HostQuestionnaireView({ socket, donePlayers, waitingPlayers }: HostQuestionnaireViewProps) {
+export default function HostQuestionnaireView({ donePlayers, waitingPlayers }: HostQuestionnaireViewProps) {
   const [spokenWarnings, setSpokenWarnings] = React.useState<string[]>([]);
 
   const onPlayerKick = async (name: string) => {

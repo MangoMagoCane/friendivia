@@ -2,16 +2,15 @@ import * as React from "react";
 import HostLobbyView from "./HostLobbyView";
 import Speak from "../Speak";
 import { pickOneAndInterp } from "../util";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 import { IPlayer } from "back-end/interfaces/models/IPlayer";
 
 interface HostLobbyProps {
-  socket: SocketFrontend;
   gameId: number;
   classroomGame: boolean;
 }
 
-export default function HostLobby({ socket, gameId, classroomGame }: HostLobbyProps) {
+export default function HostLobby({ gameId, classroomGame }: HostLobbyProps) {
   const [playerNames, setPlayerNames] = React.useState<string[]>([]);
 
   React.useEffect(() => {
@@ -33,7 +32,7 @@ export default function HostLobby({ socket, gameId, classroomGame }: HostLobbyPr
       <div>
         {!classroomGame && playerNames.map((p, i) => <Speak key={i} text={pickOneAndInterp(welcomeMessages, p)} />)}
       </div>
-      <HostLobbyView playerNames={playerNames} gameId={gameId} socket={socket} />
+      <HostLobbyView playerNames={playerNames} gameId={gameId} />
     </>
   );
 }

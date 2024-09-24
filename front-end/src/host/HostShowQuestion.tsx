@@ -1,17 +1,16 @@
 import * as React from "react";
 import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
-import { Socket } from "socket.io-client";
 import Speak from "../Speak";
 import { pickOne } from "../util";
 import IQuizOption from "back-end/interfaces/IQuizOption";
 import Timer from "./Timer";
+import { socket } from "../socket";
 
 interface HostShowQuestionprops {
   playerName: string;
   questionText: string;
   options: IQuizOption[];
-  socket: Socket;
   gameId: number;
   timePerQuestion: number;
   handsFreeMode: boolean;
@@ -21,7 +20,6 @@ function HostShowQuestion({
   playerName,
   questionText,
   options,
-  socket,
   gameId,
   timePerQuestion,
   handsFreeMode

@@ -1,27 +1,24 @@
 import * as React from "react";
-import "../style.css";
 import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
 import Speak from "../Speak";
 import { pickOne } from "../util";
+import IPlayerScore from "back-end/interfaces/IPlayerScore";
+import { socket } from "../socket";
 
 interface IntLeaderboardProps {
   gameId: number;
-  socket: any;
-  playerScores: Array<any>;
+  playerScores: IPlayerScore[];
   handsFreeMode: boolean;
 }
 
-export default function HostIntLeaderBoard(props: IntLeaderboardProps) {
-  const playerScores = props.playerScores;
-  const handsFreeMode = props.handsFreeMode;
-  const ogPlayerScores = playerScores;
+export default function HostIntLeaderBoard({ gameId, playerScores, handsFreeMode }: IntLeaderboardProps) {
   playerScores.sort((p1, p2) => p2.score - p1.score);
 
-  const randomMessageGenerator = (firstPlayer, secondPlayer, lastPlayer) => {
-    let first = `"${firstPlayer.name}"`;
-    let second = `"${secondPlayer.name}"`;
-    let last = `"${lastPlayer.name}"`;
+  const randomMessageGenerator = (firstPlayer: IPlayerScore, secondPlayer: IPlayerScore, lastPlayer: IPlayerScore) => {
+    let first = firstPlayer.name;
+    let second = secondPlayer.name;
+    let last = lastPlayer.name;
 
     const randomMessages = [
       `${first} is in the top spot - let's see how long it lasts.`,
@@ -106,7 +103,7 @@ export default function HostIntLeaderBoard(props: IntLeaderboardProps) {
       `I'm having a great time.`,
       `I'm having the best time.`,
       `I'm having the best time of my life.`,
-      `Are we having fun yet?`,
+      `Are we having fun yet?`
     ];
 
     // const randomMessagesFemale = [
@@ -127,22 +124,18 @@ export default function HostIntLeaderBoard(props: IntLeaderboardProps) {
     return pickOne(randomMessages);
   };
 
-  let randomMessage;
+  let randomMessage: string;
   if (playerScores.length > 1) {
-    randomMessage = randomMessageGenerator(
-      playerScores[0],
-      playerScores[1],
-      playerScores[playerScores.length - 1]
-    );
+    randomMessage = randomMessageGenerator(playerScores[0], playerScores[1], playerScores[playerScores.length - 1]);
   } else if (playerScores.length === 1) {
     randomMessage = "Congrats on being the only player here, " + playerScores[0].name;
   } else {
     randomMessage = "Please end the game. No one is here.";
   }
 
-  function onNext() {
-    props.socket.emit("next-question", props.gameId);
-  }
+  const onNext = () => {
+    socket.emit("next-question", gameId);
+  };
 
   return (
     <>
@@ -151,12 +144,12 @@ export default function HostIntLeaderBoard(props: IntLeaderboardProps) {
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
+          alignItems: "center"
         }}
       >
         <h1 style={{ fontFamily: "var(--action-font)" }}>leaderboard</h1>
         <div className="leaderboard">
-          {playerScores.slice(0, 5).map((ps, i) => (
+          {playerScores.slice(0, 5).map((ps: IPlayerScore, i: number) => (
             <div
               key={i}
               style={{
@@ -164,19 +157,16 @@ export default function HostIntLeaderBoard(props: IntLeaderboardProps) {
                 alignItems: "center",
                 marginBottom: i < 9 ? "-15px" : "-20px",
                 width: "100%",
-                paddingBottom: "20px",
+                paddingBottom: "20px"
               }}
             >
               <Paper
                 elevation={3}
                 className="lobby_player"
                 sx={{
-                  background:
-                    i === 0
-                      ? "var(--main-gradient-rev)"
-                      : "white",
+                  background: i === 0 ? "var(--main-gradient-rev)" : "white",
                   borderRadius: "20px",
-                  marginRight: "10px",
+                  marginRight: "10px"
                 }}
               >
                 <p
@@ -186,7 +176,7 @@ export default function HostIntLeaderBoard(props: IntLeaderboardProps) {
                     color: i === 0 ? "white" : "black",
                     paddingTop: i === 0 ? "8px" : "3px",
                     paddingBottom: i === 0 ? "8px" : "3px",
-                    fontSize: i === 0 ? "1.3em" : "1em",
+                    fontSize: i === 0 ? "1.3em" : "1em"
                   }}
                 >
                   {ps.name}
@@ -203,11 +193,8 @@ export default function HostIntLeaderBoard(props: IntLeaderboardProps) {
                   fontWeight: i === 0 ? "bold" : "normal",
                   borderRadius: "15px",
                   color: i === 0 ? "white" : "black",
-                  background:
-                    i === 0
-                      ? "var(--main-gradient-rev)"
-                      : "white",
-                  width: "40%",
+                  background: i === 0 ? "var(--main-gradient-rev)" : "white",
+                  width: "40%"
                 }}
               >
                 {ps.score}
@@ -216,20 +203,12 @@ export default function HostIntLeaderBoard(props: IntLeaderboardProps) {
           ))}
         </div>
       </div>
-      {!handsFreeMode ? (
-        <div
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
-        >
-          <Button
-            variant="contained"
-            style={{ marginTop: "5vh" }}
-            onClick={onNext}
-          >
+      {!handsFreeMode && (
+        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+          <Button variant="contained" style={{ marginTop: "5vh" }} onClick={onNext}>
             next
           </Button>
         </div>
-      ) : (
-        ""
       )}
     </>
   );

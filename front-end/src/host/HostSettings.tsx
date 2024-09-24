@@ -1,14 +1,13 @@
 import * as React from "react";
 import { Button } from "@mui/material";
-import { Socket } from "socket.io-client";
 import TextField from "@mui/material/TextField";
 import Switch from "@mui/material/Switch";
 import Stack from "@mui/material/Stack";
 import { IPlayer } from "back-end/interfaces/models/IPlayer";
 import { IQuestionnaireQuestion } from "back-end/interfaces/models/IQuestionnaireQuestion";
+import { socket } from "../socket";
 
 interface HostSettingsProps {
-  socket: Socket;
   gameId: number;
   preSettingsId: string;
   settingsState: boolean;
@@ -24,7 +23,6 @@ interface HostSettingsProps {
 }
 
 export default function HostSettings({
-  socket,
   gameId,
   preSettingsId,
   settingsState,

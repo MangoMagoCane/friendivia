@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import correct from "../assets/correct.png";
 
 interface PlayerCorrectProps {

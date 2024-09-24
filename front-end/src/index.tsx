@@ -1,14 +1,17 @@
-import * as React from 'react';
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import * as React from "react";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 
-import App from './App';
+import App from "./App";
 
-const rootElement: any = document.getElementById('root');
-const root = createRoot(rootElement);
-
-root.render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-);
+const rootElement = document.getElementById("root");
+if (rootElement !== null) {
+  const root = createRoot(rootElement);
+  root.render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+} else {
+  console.error("the rootElement is null!");
+}

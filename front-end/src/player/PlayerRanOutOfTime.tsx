@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../style.css";
 import clock from "../assets/Clock.png";
 
 export default function PlayerRanOutOfTime() {

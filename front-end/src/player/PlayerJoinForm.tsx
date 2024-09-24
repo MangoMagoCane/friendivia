@@ -4,14 +4,13 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import PlayerWait from "./PlayerJoinWait";
 import { IPlayerState } from "back-end/interfaces/IPlayerState";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 
 interface PlayerJoinFormProps {
-  socket: SocketFrontend;
   playerState: IPlayerState;
 }
 
-export default function PlayerJoinForm({ socket, playerState }: PlayerJoinFormProps) {
+export default function PlayerJoinForm({ playerState }: PlayerJoinFormProps) {
   const [name, setName] = React.useState<string>("");
   const [gameId, setGameId] = React.useState<number>(0);
   // const inMessage = `You're in! Please wait for the game to begin.`;

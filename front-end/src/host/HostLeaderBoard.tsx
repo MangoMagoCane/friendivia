@@ -3,16 +3,15 @@ import crown from "../assets/crown.png";
 import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
 import Speak from "../Speak";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 import IPlayerScore from "back-end/interfaces/IPlayerScore";
 
 interface ILeaderBoardProps {
   gameId: number;
   playerScores: IPlayerScore[];
-  socket: SocketFrontend;
 }
 
-export default function HostLeaderBoard({ gameId, playerScores, socket }: ILeaderBoardProps) {
+export default function HostLeaderBoard({ gameId, playerScores }: ILeaderBoardProps) {
   const [numPlayersToShow, setNumPlayersToShow] = React.useState<number>(5);
 
   playerScores.sort((p1, p2) => p2.score - p1.score);

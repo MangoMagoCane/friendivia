@@ -5,7 +5,7 @@ import Speak from "../Speak";
 import open from "../assets/audio/appopen.mp3";
 import PlayerBadge from "./PlayerBadge";
 import { pickOne } from "../util";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 
 const LEFT_BADGE_COUNT = 12;
 const TOP_BADGE_COUNT = 2;
@@ -21,10 +21,9 @@ const BOTTOM_BADGE_END = RIGHT_BADGE_END + BOTTOM_BADGE_COUNT;
 interface ILobbyViewProps {
   playerNames: string[];
   gameId: number;
-  socket: SocketFrontend;
 }
 
-export default function HostLobbyView({ playerNames, gameId, socket }: ILobbyViewProps) {
+export default function HostLobbyView({ playerNames, gameId }: ILobbyViewProps) {
   const [badgeSpots, setBadgeSpots] = React.useState<string[]>(new Array(BOTTOM_BADGE_END).fill(""));
 
   const getSliceOfBadges = (start: number, end: number): ReactNode => {

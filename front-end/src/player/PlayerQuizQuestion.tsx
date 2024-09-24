@@ -1,16 +1,15 @@
 import * as React from "react";
 import PlayerQuizQuestionView from "./PlayerQuizQuestionView";
 import IQuizOption from "back-end/interfaces/IQuizOption";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 import { PlayerState } from "back-end/interfaces/IPlayerState";
 
 interface PlayerQuizQuestionProps {
   optionsList: IQuizOption[];
-  socket: SocketFrontend;
   playerState: PlayerState;
 }
 
-export default function PlayerQuizQuestion({ optionsList, socket, playerState }: PlayerQuizQuestionProps) {
+export default function PlayerQuizQuestion({ optionsList, playerState }: PlayerQuizQuestionProps) {
   const [quizQuestionPlayerState, setQuizQuestionPlayerState] = React.useState({
     state: playerState,
     message: ""
@@ -38,5 +37,5 @@ export default function PlayerQuizQuestion({ optionsList, socket, playerState }:
     };
   }, []);
 
-  return <PlayerQuizQuestionView optionsList={optionsList} socket={socket} playerState={quizQuestionPlayerState} />;
+  return <PlayerQuizQuestionView optionsList={optionsList} playerState={quizQuestionPlayerState} />;
 }

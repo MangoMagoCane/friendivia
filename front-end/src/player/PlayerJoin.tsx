@@ -1,14 +1,13 @@
 import * as React from "react";
 import PlayerJoinForm from "./PlayerJoinForm";
 import { IPlayerState, PlayerState } from "back-end/interfaces/IPlayerState";
-import { SocketFrontend } from "../socket";
+import { socket } from "../socket";
 
 interface PlayerJoinProps {
-  socket: SocketFrontend;
   playerState: PlayerState | "";
 }
 
-export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {
+export default function PlayerJoin({ playerState }: PlayerJoinProps) {
   const [joiningPlayerState, setJoiningPlayerState] = React.useState<IPlayerState>({} as IPlayerState);
 
   React.useEffect(() => {
@@ -45,5 +44,5 @@ export default function PlayerJoin({ socket, playerState }: PlayerJoinProps) {
     };
   }, [joiningPlayerState, setJoiningPlayerState]);
 
-  return <PlayerJoinForm socket={socket} playerState={joiningPlayerState} />;
+  return <PlayerJoinForm playerState={joiningPlayerState} />;
 }
