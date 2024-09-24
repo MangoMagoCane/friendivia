@@ -10,7 +10,7 @@ import { ISettings } from "../interfaces/ISettings.ts";
 
 let PreSettingsId: string | null;
 export const hostHandler = (io: typedServer, socket: SocketBackend) => {
-  const onHostOpen = async (customMode: string) => {
+  const onHostOpen = async (customMode: string): Promise<void> => {
     try {
       const newGameId = await hostDb.hostOpenGame(socket.id, customMode);
       socket.emit("host-open-success", newGameId);
@@ -19,7 +19,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onHostLoad = async (gameId: number) => {
+  const onHostLoad = async (gameId: number): Promise<void> => {
     if (gameId === -1) {
       return;
     }
@@ -51,12 +51,12 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onSettingsLoad = async (preSettingsId: string) => {
-    if (preSettingsId === "-1") {
-      return;
-    }
-
+  const onSettingsLoad = async (preSettingsId: string): Promise<void> => {
     try {
+      if (preSettingsId === "-1") {
+        return;
+      }
+
       const dataForSettings = await hostDb.getPreSettingsData(preSettingsId);
       if (dataForSettings === null) {
         return;
@@ -90,7 +90,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
   //   }
   // };
 
-  const onHostStart = async (gameId: number) => {
+  const onHostStart = async (gameId: number): Promise<void> => {
     try {
       await hostHelpers.hostGoPreQuestionnaire(gameId, io);
     } catch (e) {
@@ -118,7 +118,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onNextFromQuizAnswer = async () => {
+  const onNextFromQuizAnswer = async (): Promise<void> => {
     const gameData = await hostDb.getGameDataFromSocketId(socket.id);
     if (gameData === null) {
       return;
@@ -133,7 +133,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onNextQuestion = async (gameId: number) => {
+  const onNextQuestion = async (gameId: number): Promise<void> => {
     try {
       hostHelpers.hostNextQuestionOrLeaderboard(gameId, io);
     } catch (e) {
@@ -141,7 +141,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onHostStartQuizTimer = async (gameId: number) => {
+  const onHostStartQuizTimer = async (gameId: number): Promise<void> => {
     try {
       socket.emit("start-timer-success");
       hostHelpers.hostStartQuizTimer(gameId, io);
@@ -150,7 +150,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onTimerSkip = async (gameId: number) => {
+  const onTimerSkip = async (gameId: number): Promise<void> => {
     try {
       hostHelpers.hostSkipTimer(gameId, io);
     } catch (e) {
@@ -158,7 +158,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const allPlayersAnsweredQuestion = async (guess: number) => {
+  const allPlayersAnsweredQuestion = async (guess: number): Promise<void> => {
     try {
       const player = await playerDb.getPlayerBySocketId(socket.id);
       if (player === null) {
@@ -189,7 +189,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onHostSettings = async (gameId: number) => {
+  const onHostSettings = async (gameId: number): Promise<void> => {
     try {
       await hostDb.setGameState(gameId, "settings");
       const currentGameData = await hostDb.getGameData(gameId);
@@ -203,7 +203,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onHostBack = async (gameId: number, settingsData: ISettings) => {
+  const onHostBack = async (gameId: number, settingsData: ISettings): Promise<void> => {
     try {
       await hostDb.setGameState(gameId, "lobby");
       await hostDb.updateSettings(gameId, settingsData);
@@ -219,7 +219,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onHostPreSettings = async () => {
+  const onHostPreSettings = async (): Promise<void> => {
     try {
       if (!PreSettingsId) {
         const newSettingsId = await hostDb.hostOpenPreSettings(socket.id);
@@ -232,7 +232,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onHostPSBack = async (preSettingsId: string, preSettingsData: ISettings) => {
+  const onHostPSBack = async (preSettingsId: string, preSettingsData: ISettings): Promise<void> => {
     try {
       await hostDb.hostClosePreSettings(preSettingsId, preSettingsData);
       const currentSettingsData = await hostDb.getPreSettingsData(preSettingsId);
@@ -245,7 +245,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onHostSkipQuestionnaire = async () => {
+  const onHostSkipQuestionnaire = async (): Promise<void> => {
     try {
       const gameData = await hostDb.getGameDataFromSocketId(socket.id);
       if (gameData === null) {

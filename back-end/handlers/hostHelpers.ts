@@ -4,7 +4,6 @@ import { hostDb } from "../db/host.ts";
 import { playerHelpers } from "./playerHelpers.ts";
 import { Player } from "../models/Player.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
-import { IGuess } from "../interfaces/IGuess.ts";
 import { typedServer } from "../interfaces/IServer.ts";
 import { IGame } from "../interfaces/models/IGame.ts";
 import { IPlayer } from "../interfaces/models/IPlayer.ts";
@@ -27,8 +26,12 @@ export const hostHelpers = {
 
   hostGoToQuestionnaire: async (gameId: number, io: typedServer): Promise<void> => {
     try {
-      const players = await playerDb.getPlayers(gameId);
+      const gameData = await hostDb.getGameData(gameId);
+      if (gameData === null) {
+        return;
+      }
 
+      const players = await playerDb.getPlayers(gameId);
       if (players.length < 2) {
         console.error("tried to start a game with too few players");
         return;
@@ -36,11 +39,6 @@ export const hostHelpers = {
 
       const playerQuestionnaires = await hostDb.moveGameToQuestionnaire(gameId);
       await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": "filling-questionnaire" } });
-
-      const gameData = await hostDb.getGameData(gameId);
-      if (gameData === null) {
-        return;
-      }
 
       const playersInGame = await playerDb.getPlayers(gameId);
       io.to(gameData.hostSocketId).emit("host-next", { ...gameData, playersInGame }); // playersInGame might make sense?
@@ -247,7 +245,6 @@ export const hostHelpers = {
 
     if (subjectPlayer) {
       subjectBonus = isNaN(subjectBonus) ? 0 : subjectBonus;
-
       await Player.updateOne(
         {
           id: subjectPlayer.id
@@ -264,11 +261,10 @@ export const hostHelpers = {
     }
 
     for (let i = 0; i < nonSubjectPlayers.length; i++) {
-      const currentPlayer: IPlayer = nonSubjectPlayers[i];
-      const currentPlayerCurrentGuess: IGuess = currentPlayer.quizGuesses[currentQuestionIndex];
-      const playerCorrect: boolean = currentPlayerCurrentGuess && currentPlayerCurrentGuess.guess === correctGuess;
+      const currentPlayer = nonSubjectPlayers[i];
+      const currentPlayerGuess = currentPlayer.quizGuesses[currentQuestionIndex];
+      const playerCorrect = currentPlayerGuess && currentPlayerGuess.guess === correctGuess;
       const currentPlayerNewState: PlayerState = playerCorrect ? "seeing-answer-correct" : "seeing-answer-incorrect";
-
       await playerDb.updatePlayerState(currentPlayer.id, currentPlayerNewState, io);
     }
 
@@ -309,7 +305,7 @@ export const hostHelpers = {
     return [donePlayerNames, waitingPlayerNames];
   },
 
-  onHostViewUpdate: async (gameId: number, io: typedServer) => {
+  onHostViewUpdate: async (gameId: number, io: typedServer): Promise<void> => {
     const gameData = await hostDb.getGameData(gameId);
     if (gameData === null) {
       throw Error("Error finding game data");
@@ -328,7 +324,7 @@ export const hostHelpers = {
     }
   },
 
-  handlePlayerQuit: async (player: IPlayer, game: IGame, io: typedServer) => {
+  handlePlayerQuit: async (player: IPlayer, game: IGame, io: typedServer): Promise<void> => {
     await playerDb.kickPlayer(player.name, game.id);
     const allPlayersInGame = await playerDb.getPlayers(game.id);
 

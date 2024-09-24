@@ -6,7 +6,7 @@ import { Player } from "../models/Player.ts";
 import { SocketBackend, typedServer } from "../interfaces/IServer.ts";
 
 export const playerHandler = (io: typedServer, socket: SocketBackend) => {
-  const onPlayerSubmitJoin = async (name: string, gameId: number) => {
+  const onPlayerSubmitJoin = async (name: string, gameId: number): Promise<void> => {
     try {
       const gameData = await hostDb.getGameData(gameId);
       if (gameData?.gameState.state !== "lobby") {
@@ -39,7 +39,7 @@ export const playerHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onPlayerLoad = async (playerId: string) => {
+  const onPlayerLoad = async (playerId: string): Promise<void> => {
     try {
       const player = await playerDb.getPlayer(playerId);
       if (player === null) {
@@ -84,7 +84,7 @@ export const playerHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onPlayerSubmitQuestionnaire = async (answers: string[]) => {
+  const onPlayerSubmitQuestionnaire = async (answers: string[]): Promise<void> => {
     try {
       const player = await playerDb.getPlayerBySocketId(socket.id);
       if (player === null) {
@@ -106,7 +106,7 @@ export const playerHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onPlayerAnswerQuestion = async (guess: number) => {
+  const onPlayerAnswerQuestion = async (guess: number): Promise<void> => {
     try {
       const player = await playerDb.getPlayerBySocketId(socket.id);
       if (player === null) {
@@ -125,7 +125,7 @@ export const playerHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onHostKickPlayer = async (playerName: string) => {
+  const onHostKickPlayer = async (playerName: string): Promise<void> => {
     try {
       const gameData = await hostDb.getGameDataFromSocketId(socket.id);
       if (gameData === null) {
@@ -149,7 +149,7 @@ export const playerHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
-  const onPlayerQuit = async () => {
+  const onPlayerQuit = async (): Promise<void> => {
     const player = await playerDb.getPlayerBySocketId(socket.id);
     if (player === null) {
       socket.emit("player-game-ended");

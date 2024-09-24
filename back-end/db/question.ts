@@ -30,12 +30,12 @@ export const questionDb = {
       const questionExists =
         (await Question.exists({ text: question.text })) || (await Question.exists({ quizText: question.quizText }));
       const nothingEmpty =
-        question.text != "" &&
-        question.quizText != "" &&
-        question.fakeAnswers[0] != "" &&
-        question.fakeAnswers[1] != "" &&
-        question.fakeAnswers[2] != "" &&
-        question.fakeAnswers[3] != "";
+        question.text !== "" &&
+        question.quizText !== "" &&
+        question.fakeAnswers[0] !== "" &&
+        question.fakeAnswers[1] !== "" &&
+        question.fakeAnswers[2] !== "" &&
+        question.fakeAnswers[3] !== "";
       if (!questionExists && nothingEmpty) {
         await newQuestion.save();
         return newQuestion;

@@ -13,15 +13,15 @@ import { ISettings } from "../interfaces/ISettings.ts";
 import { IPreGameSettings } from "../interfaces/models/IPreGameSettings.ts";
 
 export const hostDb = {
-  getAllGameIds: async (): Promise<number[]> => {
-    try {
-      const allGames = await Game.find({});
-      return allGames.map((g) => g.id);
-    } catch (e) {
-      console.error(`Issue getting all game ids: ${e}`);
-      return [];
-    }
-  },
+  // getAllGameIds: async (): Promise<number[]> => {
+  //   try {
+  //     const allGames = await Game.find({});
+  //     return allGames.map((g) => g.id);
+  //   } catch (e) {
+  //     console.error(`Issue getting all game ids: ${e}`);
+  //     return [];
+  //   }
+  // },
 
   getPreSettingsData: async (preSettingsId: string): Promise<IPreGameSettings | null> => {
     try {
@@ -46,6 +46,7 @@ export const hostDb = {
 
       let newId = -1;
       let i = 0;
+      // try creating a new Id only gameIdTryCount times to prevent an infinite loop,
       for (; i < gameIdTryCount; i++) {
         const testId = Math.floor(Math.random() * 9000 + 1000);
         const gameExists = await Game.exists({ id: testId });
