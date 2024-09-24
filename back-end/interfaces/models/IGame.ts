@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { IGameState } from "../IGameState";
-import IQuizQuestion from "../IQuizQuestion";
-import ISettings from "../ISettings";
+import { IQuizQuestion } from "../IQuizQuestion";
+import { ISettings } from "../ISettings";
 import { PlayerQuestionnaire } from "./IQuestionnaireQuestion";
 
 export interface IGame {

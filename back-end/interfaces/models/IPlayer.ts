@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import IGuess from "../IGuess";
+import { IGuess } from "../IGuess";
 import { IPlayerState } from "../IPlayerState";
 
 export interface IPlayer {

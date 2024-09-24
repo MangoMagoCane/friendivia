@@ -3,7 +3,7 @@ import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
 import Speak from "../Speak";
 import { pickOne } from "../util";
-import IQuizOption from "back-end/interfaces/IQuizOption";
+import { IQuizOption } from "back-end/interfaces/IQuizOption";
 import Timer from "./Timer";
 import { socket } from "../socket";
 

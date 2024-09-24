@@ -1,10 +1,10 @@
 import * as uuid from "uuid";
 import { Player } from "../models/Player.ts";
-import IGuess from "../interfaces/IGuess.ts";
+import { IGuess } from "../interfaces/IGuess.ts";
 import { Game } from "../models/Game.ts";
 import { hostDb } from "./host.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
-import IPlayerScore from "../interfaces/IPlayerScore.ts";
+import { IPlayerScore } from "../interfaces/IPlayerScore.ts";
 import { Server } from "socket.io";
 import { IPlayerLoadSuccess } from "../interfaces/ISocketCallbacks.ts";
 import { typedServer } from "../interfaces/IServer.ts";

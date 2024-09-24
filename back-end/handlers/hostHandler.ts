@@ -6,10 +6,10 @@ import { Player } from "../models/Player.ts";
 import { PreGameSettings } from "../models/PreGameSettings.ts";
 import { valInArr } from "../../front-end/src/util.ts";
 import { typedServer, SocketBackend } from "../interfaces/IServer.ts";
-import ISettings from "../interfaces/ISettings.ts";
+import { ISettings } from "../interfaces/ISettings.ts";
 
 let PreSettingsId: string | null;
-export default (io: typedServer, socket: SocketBackend) => {
+export const hostHandler = (io: typedServer, socket: SocketBackend) => {
   const onHostOpen = async (customMode: string) => {
     try {
       const newGameId = await hostDb.hostOpenGame(socket.id, customMode);

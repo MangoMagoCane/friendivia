@@ -1,7 +1,7 @@
-import IQuizQuestion from "../interfaces/IQuizQuestion";
+import { IQuizQuestion } from "../interfaces/IQuizQuestion";
 import { questionDb } from "../db/question.ts";
 import { playerDb } from "../db/player.ts";
-import IQuizOption from "../interfaces/IQuizOption.ts";
+import { IQuizOption } from "../interfaces/IQuizOption.ts";
 import { IPlayer } from "../interfaces/models/IPlayer.ts";
 import {
   PlayerQuestionnaire,

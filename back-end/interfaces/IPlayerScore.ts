@@ -1,4 +1,4 @@
-export default interface IPlayerScore {
+export interface IPlayerScore {
   name: string;
   score: number;
 }

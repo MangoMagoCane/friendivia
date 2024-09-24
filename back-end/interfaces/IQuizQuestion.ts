@@ -1,6 +1,6 @@
-import IQuizOption from "./IQuizOption";
+import { IQuizOption } from "./IQuizOption";
 
-export default interface IQuizQuestion {
+export interface IQuizQuestion {
   text: string;
   playerId: string;
   playerName: string;

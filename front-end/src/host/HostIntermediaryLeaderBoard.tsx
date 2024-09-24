@@ -3,7 +3,7 @@ import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
 import Speak from "../Speak";
 import { pickOne } from "../util";
-import IPlayerScore from "back-end/interfaces/IPlayerScore";
+import { IPlayerScore } from "back-end/interfaces/IPlayerScore";
 import { socket } from "../socket";
 
 interface IntLeaderboardProps {

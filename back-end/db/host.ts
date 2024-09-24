@@ -3,13 +3,13 @@ import { GameState } from "../interfaces/IGameState.ts";
 import { Game } from "../models/Game.ts";
 import { PreGameSettings } from "../models/PreGameSettings.ts";
 import * as utilDb from "../db/utils.ts";
-import IQuizQuestion from "../interfaces/IQuizQuestion.ts";
+import { IQuizQuestion } from "../interfaces/IQuizQuestion.ts";
 import { playerDb } from "../db/player.ts";
 import * as uuid from "uuid";
 import { Player } from "../models/Player.ts";
 import friendsQuestions from "./friendsTriviaQuestions.ts";
 import { PlayerQuestionnaire } from "../interfaces/models/IQuestionnaireQuestion.ts";
-import ISettings from "../interfaces/ISettings.ts";
+import { ISettings } from "../interfaces/ISettings.ts";
 import { IPreGameSettings } from "../interfaces/models/IPreGameSettings.ts";
 
 export const hostDb = {

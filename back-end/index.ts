@@ -3,14 +3,14 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { createServer } from "http";
-import registerPlayerHandlers from "./handlers/playerHandler.ts";
-import registerHostHandlers from "./handlers/hostHandler.ts";
 import { hostDb } from "./db/host.ts";
 import { typedServer } from "./interfaces/IServer.ts";
 import { Server } from "socket.io";
 import basequestions from "./db/basequestions.ts";
 import { questionDb } from "./db/question.ts";
 import { IQuestionnaireQuestion } from "./interfaces/models/IQuestionnaireQuestion.ts";
+import { playerHandler } from "./handlers/playerHandler.ts";
+import { hostHandler } from "./handlers/hostHandler.ts";
 
 dotenv.config();
 const frontEndUrl = process.env["FRONT_END_URL"] || "http://localhost:3001";
@@ -55,8 +55,8 @@ mongoose
   .catch((err) => console.error(err));
 
 io.on("connection", (socket) => {
-  registerPlayerHandlers(io, socket);
-  registerHostHandlers(io, socket);
+  playerHandler(io, socket);
+  hostHandler(io, socket);
 });
 
 // hack to add all questions into mongo questions collection

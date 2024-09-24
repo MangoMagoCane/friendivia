@@ -1,6 +1,6 @@
 import * as React from "react";
 import PlayerQuizQuestionView from "./PlayerQuizQuestionView";
-import IQuizOption from "back-end/interfaces/IQuizOption";
+import { IQuizOption } from "back-end/interfaces/IQuizOption";
 import { socket } from "../socket";
 import { PlayerState } from "back-end/interfaces/IPlayerState";
 

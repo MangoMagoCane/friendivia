@@ -4,7 +4,7 @@ import { hostDb } from "../db/host.ts";
 import { playerHelpers } from "./playerHelpers.ts";
 import { Player } from "../models/Player.ts";
 import { PlayerState } from "../interfaces/IPlayerState.ts";
-import IGuess from "../interfaces/IGuess.ts";
+import { IGuess } from "../interfaces/IGuess.ts";
 import { typedServer } from "../interfaces/IServer.ts";
 import { IGame } from "../interfaces/models/IGame.ts";
 import { IPlayer } from "../interfaces/models/IPlayer.ts";

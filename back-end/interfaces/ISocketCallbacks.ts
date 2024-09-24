@@ -1,5 +1,5 @@
-import IPlayerScore from "./IPlayerScore";
-import IQuizOption from "./IQuizOption";
+import { IPlayerScore } from "./IPlayerScore";
+import { IQuizOption } from "./IQuizOption";
 import { IPlayer } from "./models/IPlayer";
 
 export interface IPlayerLoadSuccess {

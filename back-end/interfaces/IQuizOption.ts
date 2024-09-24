@@ -1,4 +1,4 @@
-export default interface IQuizOption {
+export interface IQuizOption {
   answerText: string;
   answerer: string;
 }

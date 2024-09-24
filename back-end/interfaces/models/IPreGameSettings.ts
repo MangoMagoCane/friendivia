@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import ISettings from "../ISettings";
+import { ISettings } from "../ISettings";
 
 export interface IPreGameSettings {
   _id: mongoose.Types.ObjectId;

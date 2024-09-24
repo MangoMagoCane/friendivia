@@ -5,7 +5,7 @@ import { hostHelpers } from "./hostHelpers.ts";
 import { Player } from "../models/Player.ts";
 import { SocketBackend, typedServer } from "../interfaces/IServer.ts";
 
-export default (io: typedServer, socket: SocketBackend) => {
+export const playerHandler = (io: typedServer, socket: SocketBackend) => {
   const onPlayerSubmitJoin = async (name: string, gameId: number) => {
     try {
       const gameData = await hostDb.getGameData(gameId);

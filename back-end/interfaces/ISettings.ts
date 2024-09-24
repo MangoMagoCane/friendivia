@@ -1,6 +1,6 @@
 import { IQuestionnaireQuestion } from "./models/IQuestionnaireQuestion";
 
-export default interface ISettings {
+export interface ISettings {
   timePerQuestion: number;
   numQuestionnaireQuestions: number;
   numQuizQuestions: number;

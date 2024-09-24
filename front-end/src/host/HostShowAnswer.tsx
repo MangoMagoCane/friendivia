@@ -4,7 +4,7 @@ import { Button } from "../extra/FrdvButton";
 import Speak from "../Speak";
 import { pickOne } from "../util";
 import PlayerBadge from "./PlayerBadge";
-import IQuizOption from "back-end/interfaces/IQuizOption";
+import { IQuizOption } from "back-end/interfaces/IQuizOption";
 import { socket } from "../socket";
 
 interface HostShowAnswerProps {

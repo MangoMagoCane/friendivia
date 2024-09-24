@@ -4,7 +4,7 @@ import { Paper } from "@mui/material";
 import { Button } from "../extra/FrdvButton";
 import Speak from "../Speak";
 import { socket } from "../socket";
-import IPlayerScore from "back-end/interfaces/IPlayerScore";
+import { IPlayerScore } from "back-end/interfaces/IPlayerScore";
 
 interface ILeaderBoardProps {
   gameId: number;

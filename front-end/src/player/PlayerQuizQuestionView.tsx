@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button } from "../extra/FrdvButton";
 import PlayerWait from "./PlayerWait";
-import IQuizOption from "back-end/interfaces/IQuizOption";
+import { IQuizOption } from "back-end/interfaces/IQuizOption";
 import { socket } from "../socket";
 import { IPlayerState } from "back-end/interfaces/IPlayerState";
 

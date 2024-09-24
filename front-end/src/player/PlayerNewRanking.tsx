@@ -1,4 +1,4 @@
-import IPlayerScore from "back-end/interfaces/IPlayerScore";
+import { IPlayerScore } from "back-end/interfaces/IPlayerScore";
 import * as React from "react";
 
 interface PlayerNewRankingProps {
