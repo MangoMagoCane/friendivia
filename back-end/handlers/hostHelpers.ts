@@ -20,17 +20,12 @@ export const hostHelpers = {
     if (gameData === null) {
       return;
     }
-
+    // console.log(gameData);
     io.to(gameData.hostSocketId).emit("host-next", gameData);
   },
 
   hostGoToQuestionnaire: async (gameId: number, io: typedServer): Promise<void> => {
     try {
-      const gameData = await hostDb.getGameData(gameId);
-      if (gameData === null) {
-        return;
-      }
-
       const players = await playerDb.getPlayers(gameId);
       if (players.length < 2) {
         console.error("tried to start a game with too few players");
@@ -39,8 +34,12 @@ export const hostHelpers = {
 
       const playerQuestionnaires = await hostDb.moveGameToQuestionnaire(gameId);
       await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": "filling-questionnaire" } });
-
       const playersInGame = await playerDb.getPlayers(gameId);
+
+      const gameData = await hostDb.getGameData(gameId);
+      if (gameData === null) {
+        return;
+      }
       io.to(gameData.hostSocketId).emit("host-next", { ...gameData, playersInGame }); // playersInGame might make sense?
 
       for (let i = 0; i < playerQuestionnaires.length; i++) {
@@ -65,6 +64,26 @@ export const hostHelpers = {
     await hostHelpers.hostGoNext(gameId, io);
 
     setTimeout(hostHelpers.hostGoToQuestionnaire, PRE_QUESTIONNAIRE_MS, gameId, io);
+  },
+
+  // ! needs more working on
+  hostGoCustomPlayerQuestionnaires: async (gameId: number, io: typedServer): Promise<void> => {
+    try {
+      await hostDb.setGameState(gameId, "custom-player-questionnaire");
+      await Player.updateMany({ gameId: gameId }, { $set: { "playerState.state": "filling-custom-questionnaire" } });
+
+      const playersInGame = await playerDb.getPlayers(gameId);
+
+      const gameData = await hostDb.getGameData(gameId);
+      if (gameData === null) {
+        return;
+      }
+      io.to(gameData.hostSocketId).emit("host-next", { ...gameData, playersInGame }); // playersInGame might make sense?
+
+      for (const player of playersInGame) {
+        io.to(player.playerSocketId).emit("player-next", player);
+      }
+    } catch (e) {}
   },
 
   hostShowLeaderBoard: async (gameId: number, io: typedServer): Promise<void> => {

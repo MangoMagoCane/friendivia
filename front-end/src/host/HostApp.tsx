@@ -26,6 +26,7 @@ import { IGame } from "back-end/interfaces/models/IGame";
 import { IPlayer } from "back-end/interfaces/models/IPlayer";
 import { IPreGameSettings } from "back-end/interfaces/models/IPreGameSettings";
 import { IQuestionnaireQuestion } from "back-end/interfaces/models/IQuestionnaireQuestion";
+import HostCustomPlayerQuestionnaire from "./HostCustomPlayerQuestionnaire";
 
 export default function HostApp() {
   const gameIdFromStorage = Number(localStorage.getItem("game-id")) || -1;
@@ -76,10 +77,13 @@ export default function HostApp() {
     }
   };
 
+  console.log(`GameState: "${gameState}"`);
+
   React.useEffect(() => {
     const onLoadSuccess = (
       data: IGame & { quizQuestionGuesses: IGuess[]; playerScores: IPlayerScore[]; playersInGame: IPlayer[] }
     ) => {
+      console.log(`onLoadSuccess gameState: "${data.gameState.state}"`);
       setLoaded(true);
       setGameId(data.id);
       setGameState(data.gameState.state);
@@ -144,6 +148,7 @@ export default function HostApp() {
       socket.off("presettings-close", onSettingsLoadSuccess);
       socket.off("host-presettings-success", onPresettingsSuccess);
       socket.off("settings-load-success", onSettingsLoadSuccess);
+      socket.off("host-game-ended", onHostGameEnded);
     };
   }, [gameId, setGameId, gameState, setGameState]);
 
@@ -164,6 +169,9 @@ export default function HostApp() {
       case "lobby":
         socket.emit("reload-players");
         return <HostLobby gameId={gameId} classroomGame={customMode === "classroom"} />;
+      case "custom-player-questionnaire":
+        socket.emit("reload-players");
+        return <HostCustomPlayerQuestionnaire />;
       case "questionnaire":
         return <HostQuestionnaire playersInGame={playersInGame} />;
       case "pre-quiz":

@@ -78,6 +78,10 @@ export default function HostLobbyView({ playerNames, gameId }: ILobbyViewProps) 
     socket.emit("host-start", gameId);
   };
 
+  const onCustomPlayerQuestionnaires = async () => {
+    socket.emit("host-custom-player-questionnaires", gameId);
+  };
+
   const onPlayerKick = async (name: string) => {
     socket.emit("host-kick-player", name);
   };
@@ -169,6 +173,19 @@ export default function HostLobbyView({ playerNames, gameId }: ILobbyViewProps) 
               onClick={onStart}
             >
               start
+            </Button>
+            <Button
+              variant="contained"
+              disabled={playerNames.length < 2}
+              sx={{
+                paddingTop: "30px",
+                borderRadius: "20px",
+                fontSize: "2em",
+                marginBottom: "10px"
+              }}
+              onClick={onCustomPlayerQuestionnaires}
+            >
+              play with custom player questionnaires
             </Button>
             <p>{playerCountText}</p>
           </div>

@@ -1,7 +1,7 @@
 import { Question } from "../models/Question.ts";
-import { shuffle } from "./utils.ts";
 import mongoose from "mongoose";
 import { IQuestionnaireQuestion, PlayerQuestionnaire } from "../interfaces/models/IQuestionnaireQuestion.ts";
+import { utilDb } from "./utils.ts";
 
 export const questionDb = {
   // seemingly never used
@@ -85,7 +85,7 @@ export const questionDb = {
       questions = questions.filter((q) => !previouslyUsedQuestionQuizText.includes(q.quizText));
     }
 
-    shuffle(questions);
+    utilDb.shuffle(questions);
     return questions.slice(0, numQuestions);
   },
 
@@ -145,10 +145,9 @@ export const questionDb = {
     const questionnaireQuestionsText: string[] = [];
     for (const pqq of questionnaire.questions) {
       const question = await questionDb.getQuestionById(pqq.questionId);
-      if (question === null) {
-        continue;
+      if (question !== null) {
+        questionnaireQuestionsText.push(question.text);
       }
-      questionnaireQuestionsText.push(question.text);
     }
     return questionnaireQuestionsText;
   }

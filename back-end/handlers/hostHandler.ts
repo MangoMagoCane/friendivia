@@ -98,6 +98,14 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
+  const onHostCustomPlayerQuestionnaires = async (gameId: number): Promise<void> => {
+    try {
+      await hostHelpers.hostGoCustomPlayerQuestionnaires(gameId, io);
+    } catch (e) {
+      console.error("failed to start");
+    }
+  };
+
   const onHostEndGame = async (): Promise<void> => {
     try {
       const gameData = await hostDb.getGameDataFromSocketId(socket.id);
@@ -272,6 +280,7 @@ export const hostHandler = (io: typedServer, socket: SocketBackend) => {
   socket.on("settings-load", onSettingsLoad);
   // socket.on("delete-please", onDeletePlease);
   socket.on("host-start", onHostStart);
+  socket.on("host-custom-player-questionnaires", onHostCustomPlayerQuestionnaires);
   socket.on("host-end-game", onHostEndGame);
   socket.on("host-start-quiz-timer", onHostStartQuizTimer);
   socket.on("next-question", onNextQuestion);

@@ -14,6 +14,8 @@ export interface ServerToClientEvents {
   "player-load-error": (errorMsg: string) => void; // not listened for
   "player-submit-questionnaire-success": () => void;
   "player-submit-questionnaire-error": (errorMsg: string) => void;
+  "player-submit-custom-questionnaire-success": () => void;
+  "player-submit-custom-questionnaire-error": (errorMsg: string) => void;
   "player-answer-question-success": () => void;
   "player-answer-question-error": (error: any) => void; // not listened for
   "players-updated": (gameId: number, players: IPlayer[]) => void;
@@ -43,6 +45,7 @@ export interface ClientToServerEvents {
   "host-open": (customMode: string) => Promise<void>;
   "host-load": (gameId: number) => Promise<void>;
   "host-start": (gameId: number) => Promise<void>;
+  "host-custom-player-questionnaires": (gameId: number) => Promise<void>;
   "host-end-game": () => Promise<void>;
   "host-start-quiz-timer": (gameId: number) => Promise<void>;
   "next-question": (gameId: number) => Promise<void>;

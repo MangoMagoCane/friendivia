@@ -20,6 +20,7 @@ import { IPlayerScore } from "back-end/interfaces/IPlayerScore";
 import { IPlayerLoadSuccess } from "back-end/interfaces/ISocketCallbacks";
 import { socket } from "../socket";
 import { IPlayer } from "back-end/interfaces/models/IPlayer";
+import PlayerCustomQuestionnaire from "./PlayerCustomQuestionnaire";
 
 export default function PlayerApp() {
   const playerIdFromStorage = localStorage.getItem("player-id") || "";
@@ -38,6 +39,8 @@ export default function PlayerApp() {
   if (!loaded) {
     socket.emit("player-load", playerIdFromStorage);
   }
+
+  console.log(`playerState: "${playerState}"`);
 
   React.useEffect(() => {
     const onLoadSuccess = (player: IPlayer, extraData?: IPlayerLoadSuccess): void => {
@@ -72,6 +75,7 @@ export default function PlayerApp() {
 
     return () => {
       socket.off("player-load-success", onLoadSuccess);
+      socket.off("player-game-ended", onPlayerGameEnded);
       socket.off("player-next", onLoadSuccess);
     };
   }, [playerState, setPlayerState]);
@@ -83,6 +87,14 @@ export default function PlayerApp() {
       case "submitted-questionnaire-waiting":
         return (
           <PlayerQuestionnaire playerState={playerState} questionnaireQuestionsText={questionnaireQuestionsText} />
+        );
+      case "filling-custom-questionnaire":
+      case "submitted-custom-questionnaire-waiting":
+        return (
+          <PlayerCustomQuestionnaire
+            playerState={playerState}
+            questionnaireQuestionsText={questionnaireQuestionsText}
+          />
         );
       case "seeing-question":
       case "answered-quiz-question-waiting":

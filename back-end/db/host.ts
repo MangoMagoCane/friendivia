@@ -2,7 +2,7 @@ import { IGame } from "../interfaces/models/IGame.ts";
 import { GameState } from "../interfaces/IGameState.ts";
 import { Game } from "../models/Game.ts";
 import { PreGameSettings } from "../models/PreGameSettings.ts";
-import * as utilDb from "../db/utils.ts";
+import { utilDb } from "../db/utils.ts";
 import { IQuizQuestion } from "../interfaces/IQuizQuestion.ts";
 import { playerDb } from "../db/player.ts";
 import * as uuid from "uuid";
@@ -129,11 +129,14 @@ export const hostDb = {
       if (gameData === null) {
         return [];
       }
+      console.log("BEFORE");
+      console.log(gameData);
 
       const players = await playerDb.getPlayers(gameId);
       const [questionnaires, newQuizText] = await utilDb.createQuestionnairesForPlayers(
         players,
         gameData.previouslyUsedQuestionQuizText,
+        gameData.playerQuestionnaires, // if players didn't submit their own questions this prop will be [], otherwise it will be the questionnaires
         gameData.customMode
       );
       await hostDb.setGameState(gameId, "questionnaire");
@@ -147,6 +150,12 @@ export const hostDb = {
           }
         }
       );
+
+      {
+        const gameData = await hostDb.getGameData(gameId);
+        console.log("AFTER");
+        console.log(gameData);
+      }
 
       return questionnaires;
     } catch (e) {
@@ -386,7 +395,10 @@ export const hostDb = {
 
   resetGameStateToPreQuestionnaireState: async (gameId: number): Promise<void> => {
     try {
-      await Game.updateOne({ id: gameId }, { $set: { quizQuestions: [], currentQuestionIndex: -1 } });
+      await Game.updateOne(
+        { id: gameId },
+        { $set: { playerQuestionnaires: [], quizQuestions: [], currentQuestionIndex: -1 } }
+      );
     } catch (e) {
       console.error(`Issue setting game state to pre-questionnaire state: ${e}`);
     }

@@ -4,6 +4,8 @@ export type PlayerState =
   | "kicked"
   | "filling-questionnaire"
   | "submitted-questionnaire-waiting"
+  | "filling-custom-questionnaire"
+  | "submitted-custom-questionnaire-waiting"
   | "question-being-read"
   | "seeing-question"
   | "question-about-me"

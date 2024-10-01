@@ -3,6 +3,7 @@ export type GameState =
   | "lobby"
   | "pre-questionnaire"
   | "questionnaire"
+  | "custom-player-questionnaire"
   | "pre-quiz"
   | "showing-question"
   | "pre-answer"

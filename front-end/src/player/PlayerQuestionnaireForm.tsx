@@ -4,6 +4,8 @@ import TextField from "@mui/material/TextField";
 import PlayerWait from "./PlayerJoinWait";
 import { socket } from "../socket";
 
+const MAXANSWER = 50;
+
 interface PlayerQuestionnaireFormProps {
   playerState: any;
   questions: string[];
@@ -11,8 +13,6 @@ interface PlayerQuestionnaireFormProps {
 
 export default function PlayerQuestionnaireForm({ playerState, questions }: PlayerQuestionnaireFormProps) {
   const [answers, setAnswers] = React.useState<string[]>(Array(questions.length).fill(""));
-  const inMessage = `Submission accepted! Please wait for the other players to finish.`;
-  const maxAnswer = 50;
 
   const onSubmitQuestionnaire = () => {
     for (let i = 0; i < answers.length; i++) {
@@ -70,7 +70,7 @@ export default function PlayerQuestionnaireForm({ playerState, questions }: Play
               className="questionnaireInput"
               margin="dense"
               value={answers[i]}
-              inputProps={{ maxLength: maxAnswer }}
+              inputProps={{ maxLength: MAXANSWER }}
               onChange={(e) => onInputChange(e.target.value, i)}
               sx={{
                 width: "100%",

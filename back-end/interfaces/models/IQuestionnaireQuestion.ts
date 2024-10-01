@@ -8,13 +8,13 @@ export interface IQuestionnaireQuestion {
   fakeAnswers: string[];
 }
 
-export type PlayerQuestionnaireQuestion = {
+export interface PlayerQuestionnaire {
+  playerId: string;
+  questions: PlayerQuestionnaireQuestion[];
+}
+
+export interface PlayerQuestionnaireQuestion {
   questionId: mongoose.Types.ObjectId;
   subjectQuestion: boolean;
   answer: string;
-};
-
-export type PlayerQuestionnaire = {
-  playerId: string;
-  questions: PlayerQuestionnaireQuestion[];
-};
+}
