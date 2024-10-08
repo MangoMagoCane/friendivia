@@ -305,16 +305,20 @@ export const hostHelpers = {
     }
   },
 
-  getQuestionnaireStatus: async (gameId: number): Promise<string[][]> => {
+  getQuestionnaireStatus: async (gameId: number, customQuestion = false): Promise<string[][]> => {
     const allPlayersInGame = await playerDb.getPlayers(gameId);
     const donePlayerNames: string[] = [];
     const waitingPlayerNames: string[] = [];
+    const submittedState: PlayerState = customQuestion
+      ? "submitted-custom-questionnaire-waiting"
+      : "submitted-questionnaire-waiting";
+    const waitingState: PlayerState = customQuestion ? "filling-custom-questionnaire" : "filling-questionnaire";
 
     for (let i = 0; i < allPlayersInGame.length; i++) {
       const player = allPlayersInGame[i];
-      if (player.playerState.state === "submitted-questionnaire-waiting") {
+      if (player.playerState.state === submittedState) {
         donePlayerNames.push(player.name);
-      } else if (player.playerState.state === "filling-questionnaire") {
+      } else if (player.playerState.state === waitingState) {
         waitingPlayerNames.push(player.name);
       } else {
         console.error(`Player: ${player.name} has state: ${player.playerState.state}`);
@@ -324,16 +328,16 @@ export const hostHelpers = {
     return [donePlayerNames, waitingPlayerNames];
   },
 
-  onHostViewUpdate: async (gameId: number, io: typedServer): Promise<void> => {
+  onHostViewUpdate: async (gameId: number, io: typedServer, customQuestion: boolean = false): Promise<void> => {
     const gameData = await hostDb.getGameData(gameId);
     if (gameData === null) {
       throw Error("Error finding game data");
     }
 
     try {
-      const allPlayersDone = await playerDb.checkAllPlayersDoneWithQuestionnaire(gameId);
+      const allPlayersDone = await playerDb.checkAllPlayersDoneWithQuestionnaire(gameId, customQuestion);
       if (!allPlayersDone) {
-        const playerStatusLists = await hostHelpers.getQuestionnaireStatus(gameId);
+        const playerStatusLists = await hostHelpers.getQuestionnaireStatus(gameId, customQuestion);
         io.to(gameData.hostSocketId).emit("host-view-update", playerStatusLists);
       } else if (gameData.gameState.state === "questionnaire") {
         await hostHelpers.hostStartQuiz(gameId, io);

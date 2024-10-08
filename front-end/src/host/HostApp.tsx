@@ -27,6 +27,7 @@ import { IPlayer } from "back-end/interfaces/models/IPlayer";
 import { IPreGameSettings } from "back-end/interfaces/models/IPreGameSettings";
 import { IQuestionnaireQuestion } from "back-end/interfaces/models/IQuestionnaireQuestion";
 import HostCustomPlayerQuestionnaire from "./HostCustomPlayerQuestionnaire";
+import HostCustomQuestionnaire from "./HostCustomPlayerQuestionnaire";
 
 export default function HostApp() {
   const gameIdFromStorage = Number(localStorage.getItem("game-id")) || -1;
@@ -51,7 +52,7 @@ export default function HostApp() {
   const [timePerLeaderboard, setTimePerLeaderboard] = React.useState<number>(5);
   const [prioritizeCustomQs, setPrioritizeCustomQs] = React.useState<boolean>(true);
   const [customQuestions, setCustomQuestions] = React.useState<IQuestionnaireQuestion[]>([]);
-
+  const [customPlayerQuestions, setCustomPlayerQuestions] = React.useState<string[]>([]);
   const [loaded, setLoaded] = React.useState<boolean>(false);
   const [announcementAudioObjects, setAnnouncementAudioObjects] = React.useState<any>([]);
 
@@ -171,7 +172,7 @@ export default function HostApp() {
         return <HostLobby gameId={gameId} classroomGame={customMode === "classroom"} />;
       case "custom-player-questionnaire":
         socket.emit("reload-players");
-        return <HostCustomPlayerQuestionnaire />;
+        return <HostCustomQuestionnaire playersInGame={playersInGame} />;
       case "questionnaire":
         return <HostQuestionnaire playersInGame={playersInGame} />;
       case "pre-quiz":

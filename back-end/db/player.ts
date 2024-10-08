@@ -170,10 +170,44 @@ export const playerDb = {
     }
   },
 
-  checkAllPlayersDoneWithQuestionnaire: async (gameId: number): Promise<boolean> => {
+  playerCompleteCustomQuestion: async (player: IPlayer, question: string): Promise<undefined> => {
     try {
+      const game = await hostDb.getGameData(player.gameId);
+      if (game === null) {
+        return;
+      }
+
+      await Game.updateOne(
+        {
+          id: player.gameId
+        },
+        {
+          $set: { customPlayerQuestions: [...game.customPlayerQuestions, question] }
+        }
+      );
+
+      await Player.updateOne(
+        {
+          id: player.id
+        },
+        {
+          $set: {
+            "playerState.state": "submitted-custom-questionnaire-waiting"
+          }
+        }
+      );
+    } catch (e) {
+      console.error(`Issue adding player questionnaire answers: ${e}`);
+    }
+  },
+
+  checkAllPlayersDoneWithQuestionnaire: async (gameId: number, customQuestion: boolean = false): Promise<boolean> => {
+    try {
+      const playerState: PlayerState = customQuestion
+        ? "submitted-custom-questionnaire-waiting"
+        : "submitted-questionnaire-waiting";
       const allPlayersInGame = await Player.find({ gameId: gameId });
-      return allPlayersInGame.every((p) => p.playerState.state === "submitted-questionnaire-waiting");
+      return allPlayersInGame.every((p) => p.playerState.state === playerState);
     } catch (e) {
       console.error(`Issue checking if all players are done with questionnaire: ${e}`);
       return false;

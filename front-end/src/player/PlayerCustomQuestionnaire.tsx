@@ -1,9 +1,10 @@
 import * as React from "react";
-import PlayerCustomQuestionnaireForm from "./PlayerQuestionnaireForm";
+import PlayerCustomQuestionnaireForm from "./PlayerCustomQuestionnaireForm";
 import { socket } from "../socket";
+import { IPlayerState, PlayerState } from "back-end/interfaces/IPlayerState";
 
 interface PlayerCustomQuestionnaireProps {
-  playerState: string;
+  playerState: PlayerState;
   questionnaireQuestionsText: string[];
 }
 
@@ -11,7 +12,7 @@ export default function PlayerCustomQuestionnaire({
   playerState,
   questionnaireQuestionsText
 }: PlayerCustomQuestionnaireProps) {
-  const [questionnairePlayerState, setQuestionnairePlayerState] = React.useState({
+  const [questionnairePlayerState, setQuestionnairePlayerState] = React.useState<IPlayerState>({
     state: playerState,
     message: ""
   });
@@ -42,7 +43,5 @@ export default function PlayerCustomQuestionnaire({
 
   //   return <div>We are in the player custom questionnaire</div>;
 
-  return (
-    <PlayerCustomQuestionnaireForm playerState={questionnairePlayerState} questions={questionnaireQuestionsText} />
-  );
+  return <PlayerCustomQuestionnaireForm playerState={questionnairePlayerState} />;
 }

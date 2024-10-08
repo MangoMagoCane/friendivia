@@ -106,6 +106,30 @@ export const playerHandler = (io: typedServer, socket: SocketBackend) => {
     }
   };
 
+  const onPlayerSubmitCustomQuestionnaire = async (question: string): Promise<void> => {
+    try {
+      const player = await playerDb.getPlayerBySocketId(socket.id);
+      if (player === null) {
+        throw Error("Player could not be found");
+      }
+      const gameId = player.gameId;
+      await playerDb.playerCompleteCustomQuestion(player, question);
+      socket.emit("player-submit-custom-questionnaire-success");
+
+      const allPlayersDone = await playerDb.checkAllPlayersDoneWithQuestionnaire(gameId, true);
+      if (allPlayersDone) {
+        // ! needs to start the filling of questionnaires here, should be good now???
+        await hostHelpers.hostGoPreQuestionnaire(gameId, io);
+        console.log("all custom questions are submitted!");
+      } else {
+        await hostHelpers.onHostViewUpdate(gameId, io, true);
+      }
+    } catch (e) {
+      console.error(e);
+      socket.emit("player-submit-custom-questionnaire-error", e);
+    }
+  };
+
   const onPlayerAnswerQuestion = async (guess: number): Promise<void> => {
     try {
       const player = await playerDb.getPlayerBySocketId(socket.id);
@@ -168,6 +192,7 @@ export const playerHandler = (io: typedServer, socket: SocketBackend) => {
   socket.on("player-submit-join", onPlayerSubmitJoin);
   socket.on("player-load", onPlayerLoad);
   socket.on("player-submit-questionnaire", onPlayerSubmitQuestionnaire);
+  socket.on("player-submit-custom-questionnaire", onPlayerSubmitCustomQuestionnaire);
   socket.on("player-answer-question", onPlayerAnswerQuestion);
   socket.on("host-kick-player", onHostKickPlayer);
   socket.on("player-quit", onPlayerQuit);

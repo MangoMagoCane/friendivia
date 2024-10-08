@@ -2,11 +2,13 @@ import * as React from "react";
 import { Button } from "../extra/FrdvButton";
 import TextField from "@mui/material/TextField";
 import PlayerWait from "./PlayerJoinWait";
+import { socket } from "../socket";
+import { IPlayerState } from "back-end/interfaces/IPlayerState";
 
 const MAX_ANSWER = 50;
 
 interface PlayerCustomQuestionnaireFormProps {
-  playerState: any;
+  playerState: IPlayerState;
 }
 
 export default function PlayerCustomQuestionnaireForm({ playerState }: PlayerCustomQuestionnaireFormProps) {
@@ -15,19 +17,12 @@ export default function PlayerCustomQuestionnaireForm({ playerState }: PlayerCus
   const onSubmitCustomQuestion = () => {
     let question = customQuestion.trim();
     if (question === "") {
+      // this shouldn't ever run but still good to have just in case
       alert("Please fill out your question not just spaces.");
       return;
     }
     // ! wrong socket find the right one
-    // socket.emit("player-submit-questionnaire", question);
-  };
-
-  const onInputChange = (newValue: string) => {
-    // const newAnswers: string[] = [];
-    // for (let i = 0; i < questions.length; i++) {
-    //   newAnswers[i] = index === i ? newValue : customQuestion[i];
-    // }
-    // setAnswers(newAnswers);
+    socket.emit("player-submit-custom-questionnaire", question);
   };
 
   const questionnaireInputs = (
@@ -49,13 +44,15 @@ export default function PlayerCustomQuestionnaireForm({ playerState }: PlayerCus
         <div>
           <p
             style={{
-              textAlign: "left",
+              textAlign: "center",
               marginBottom: "0",
               marginLeft: "1%",
               marginTop: "5px"
             }}
           >
-            {customQuestion}
+            input a direct question for other players to guess
+            <br />
+            example: What is your favorite food?
           </p>
           <TextField
             id={"custom-question"}
@@ -66,7 +63,6 @@ export default function PlayerCustomQuestionnaireForm({ playerState }: PlayerCus
             margin="dense"
             value={customQuestion}
             inputProps={{ maxLength: MAX_ANSWER }}
-            // onChange={(e) => onInputChange(e.target.value)}
             onChange={(e) => setCustomQuestion(e.target.value)}
             sx={{
               width: "100%",

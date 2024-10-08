@@ -1,3 +1,4 @@
+import { PlayerState } from "back-end/interfaces/IPlayerState";
 import { IPlayer } from "back-end/interfaces/models/IPlayer";
 
 export function pickOne<T>(arr: Array<T>): T {
@@ -17,6 +18,6 @@ export function valInArr<T extends string, K extends T>(val: T, arr: K[]): boole
   return arr.includes(val as K);
 }
 
-export function getPlayerNamesForState(players: IPlayer[], state: string) {
+export function getPlayerNamesForState(players: IPlayer[], state: PlayerState) {
   return players.filter((p) => p.playerState.state === state).map((p) => p.name);
 }

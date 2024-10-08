@@ -30,7 +30,6 @@ export default function PlayerQuestionnaireForm({ playerState, questions }: Play
     for (let i = 0; i < questions.length; i++) {
       newAnswers[i] = index === i ? newValue : answers[i];
     }
-
     setAnswers(newAnswers);
   };
 

@@ -10,6 +10,7 @@ export interface IGame {
   gameState: IGameState;
   hostSocketId: string;
   playerQuestionnaires: PlayerQuestionnaire[];
+  customPlayerQuestions: string[];
   quizQuestions: IQuizQuestion[];
   previouslyUsedQuestionQuizText: string[];
   currentQuestionIndex: number;

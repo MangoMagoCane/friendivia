@@ -136,7 +136,8 @@ export const hostDb = {
       const [questionnaires, newQuizText] = await utilDb.createQuestionnairesForPlayers(
         players,
         gameData.previouslyUsedQuestionQuizText,
-        gameData.playerQuestionnaires, // if players didn't submit their own questions this prop will be [], otherwise it will be the questionnaires
+        // gameData.playerQuestionnaires, // if players didn't submit their own questions this prop will be [], otherwise it will be the questionnaires
+        gameData.customPlayerQuestions,
         gameData.customMode
       );
       await hostDb.setGameState(gameId, "questionnaire");

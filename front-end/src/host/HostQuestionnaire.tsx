@@ -5,15 +5,21 @@ import HostQuestionnaireView from "./HostQuestionnaireView";
 import { getPlayerNamesForState, pickOneAndInterp } from "../util";
 import { socket } from "../socket";
 import { IPlayer } from "back-end/interfaces/models/IPlayer";
+import { PlayerState } from "back-end/interfaces/IPlayerState";
 
 interface HostQuestionnaireProps {
   playersInGame: IPlayer[];
+  customQuestion?: boolean;
 }
 
-export default function HostQuestionnaire({ playersInGame }: HostQuestionnaireProps) {
+export default function HostQuestionnaire({ playersInGame, customQuestion = false }: HostQuestionnaireProps) {
   const [donePlayers, setDonePlayers] = React.useState<string[]>([]);
   const [waitingPlayers, setWaitingPlayers] = React.useState<string[]>([]);
   const [latestDonePlayer, setLatestDonePlayer] = React.useState<string | undefined>("");
+  const submittedState: PlayerState = customQuestion
+    ? "submitted-custom-questionnaire-waiting"
+    : "submitted-questionnaire-waiting";
+  const waitingState: PlayerState = customQuestion ? "filling-custom-questionnaire" : "filling-questionnaire";
 
   // necessary because accessing donePlayers in onStatusReceived causes a closure error where it always evaluates to donePlayers initial state
   const donePlayersRef = React.useRef<string[]>();
@@ -29,8 +35,8 @@ export default function HostQuestionnaire({ playersInGame }: HostQuestionnairePr
     };
 
     const onPlayersUpdated = (_gameId: number, players: IPlayer[]) => {
-      const updatedDonePlayers = getPlayerNamesForState(players, "submitted-questionnaire-waiting");
-      const updatedWaitingPlayers = getPlayerNamesForState(players, "filling-questionnaire");
+      const updatedDonePlayers = getPlayerNamesForState(players, submittedState);
+      const updatedWaitingPlayers = getPlayerNamesForState(players, waitingState);
       onStatusReceived([updatedDonePlayers, updatedWaitingPlayers]);
     };
 

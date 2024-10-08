@@ -56,8 +56,9 @@ export interface ClientToServerEvents {
   "host-ps-back": (preSettingsId: string, preSettingsData: ISettings) => Promise<void>;
   "host-kick-player": (playerName: string) => Promise<void>;
   "player-submit-join": (name: string, gameId: number) => Promise<void>;
-  "player-load": (playerId: string) => Promise<void>;
   "player-submit-questionnaire": (answers: string[]) => Promise<void>;
+  "player-submit-custom-questionnaire": (question: string) => Promise<void>;
+  "player-load": (playerId: string) => Promise<void>;
   "player-answer-question": (guess: number) => Promise<void>;
   "player-quit": () => Promise<void>;
   "play-again-with-same-players": (gameId: number) => Promise<void>;

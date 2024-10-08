@@ -8,12 +8,13 @@ import {
   PlayerQuestionnaireQuestion,
   IQuestionnaireQuestion
 } from "../interfaces/models/IQuestionnaireQuestion.ts";
+import mongoose from "mongoose";
 
 export const utilDb = {
   createQuestionnairesForPlayers: async (
     players: IPlayer[],
     previouslyUsedQuestionQuizText: string[],
-    customPlayerQuestions: PlayerQuestionnaire[],
+    customPlayerQuestions: string[],
     customMode: string
   ): Promise<[PlayerQuestionnaire[], string[]]> => {
     const totalQuestions = getNumberOfQuestions(players);
@@ -22,10 +23,20 @@ export const utilDb = {
       previouslyUsedQuestionQuizText,
       customMode
     );
-    // const customPlayerQuestionnaires: IQuestionnaireQuestion[] = customPlayerQuestions.map()
+    // const customPlayerQuestionnjaires: IQuestionnaireQuestion[] = customPlayerQuestions.map()
     // const allQuestionsForQuiz = [...customPlayerQuestions, ...questionsForQuiz];
     // const allQuestionsForQuiz = [...customPlayerQuestions, ...questionsForQuiz];
-    const allQuestionsForQuiz = [...questionsForQuiz];
+    const customPlayerQuestionnaires: IQuestionnaireQuestion[] = customPlayerQuestions.map((q) => {
+      return {
+        _id: new mongoose.Types.ObjectId(),
+        text: q,
+        quizText: `How did <PLAYER> answer the question: ${q}`,
+        fakeAnswers: ["I don't know", "N/A", "unsure...", "beats me"],
+        tags: ["custom-player-question"]
+      };
+    });
+    // ! broken fix this stuff for custom player questionnaries
+    const allQuestionsForQuiz = [...customPlayerQuestionnaires, ...questionsForQuiz];
     allQuestionsForQuiz.length = totalQuestions;
 
     console.log("\nALLQUESTIONSFORQUIZ");
